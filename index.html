@@ -151,7 +151,12 @@ h1 em{font-style:normal;color:var(--green)}
 }
 
 </style>
-</head>
+<style id="public-search-fix">
+.public-search-fixed{position:sticky;top:0;z-index:100;background:var(--bg,#fff);padding:10px 16px;border-bottom:1px solid var(--border,#e5e7eb)}
+.public-search-inner{max-width:1200px;margin:0 auto}
+.public-search-fixed input{width:100%;height:46px;box-sizing:border-box;border:1px solid var(--border,#d1d5db);border-radius:12px;padding:0 16px;font-size:15px;outline:none;background:#fff}
+.public-search-fixed input:focus{border-color:var(--green,#00875A);box-shadow:0 0 0 3px rgba(0,135,90,.10)}
+</style></head>
 <body>
 
 <header class="topbar">
@@ -162,33 +167,14 @@ h1 em{font-style:normal;color:var(--green)}
     <a href="#about">About</a>
   </nav>
 </header>
-
-<section class="hero">
-  <div class="hero-inner">
-    <div>
-      <div class="eyebrow"><span></span> LOCAL BUSINESS DISCOVERY</div>
-      <h1>Discover great businesses <em>around you.</em></h1>
-      <p>Explore local businesses, services and offers in one simple place. Find something useful, connect directly and support local businesses.</p>
-      <div class="searchbox">
-        <input id="searchInput" placeholder="Search businesses, services or locations..." oninput="renderAds()">
-        <div class="location">📍 All locations</div>
-        <button class="btn primary" onclick="document.getElementById('ads').scrollIntoView({behavior:'smooth'})">Search</button>
-      </div>
-      <div class="hero-actions">
-        <a class="btn primary" href="#ads">Explore Ads</a>
-      </div>
-    </div>
-    <div class="hero-visual" aria-hidden="true">
-      <div class="orb"></div>
-      <div class="visual-card">
-        <div class="visual-top">%</div>
-        <div class="visual-title">Great offers are waiting.</div>
-        <div class="visual-meta">Discover businesses and connect directly.</div>
-        <span class="visual-tag">FEATURED ADS</span>
-      </div>
-    </div>
+<div class="public-search-fixed">
+  <div class="public-search-inner">
+    <input id="searchInput" type="search" placeholder="Search business name, Ad ID, service or location..." autocomplete="off" oninput="renderAds()">
   </div>
-</section>
+</div>
+
+
+
 
 <section class="section" id="ads">
   <div class="section-head">
@@ -384,7 +370,7 @@ function renderAds(){
   const q=(document.getElementById('searchInput').value||'').trim().toLowerCase();
   const arr=activeAds().filter(a=>{
     const category=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
-    const hay=[a.businessName,a.address,(a.services||[]).join(' '),category].join(' ').toLowerCase();
+    const hay=[a.businessName,a.adId,a.address,(a.services||[]).join(' '),category].join(' ').toLowerCase();
     return (!q||hay.includes(q)) && (selectedCategory==='all'||String(a.categoryId)===String(selectedCategory));
   });
 
