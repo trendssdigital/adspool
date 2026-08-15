@@ -109,6 +109,18 @@ button,input,select,textarea{max-width:100%}
 .publicgrid .ad,
 .publicgrid .ad *{overflow-wrap:anywhere;word-break:break-word}
 
+
+/* Premium banner management */
+.premium-banner-preview{width:100%;aspect-ratio:4.8/1;object-fit:cover;border-radius:12px;background:#f1f3f5;border:1px solid #dfe4e8}
+.banner-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.banner-card{background:#fff;border:1px solid #dfe4e8;border-radius:12px;overflow:hidden}
+.banner-card img{width:100%;aspect-ratio:4.8/1;object-fit:cover;background:#f1f3f5}
+.banner-info{padding:12px}.banner-meta{font-size:11px;color:#6b7280;line-height:1.55;margin-top:5px}
+.banner-actions{display:flex;gap:7px;margin-top:10px}.banner-actions .btn{flex:1}
+.banner-note{font-size:11px;color:#6b7280;line-height:1.5;margin-top:6px}
+@media(max-width:900px){.banner-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.banner-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -135,6 +147,7 @@ button,input,select,textarea{max-width:100%}
     <aside class="sidebar">
       <button class="navbtn active" data-view="dashboard" onclick="showView('dashboard')">▣ &nbsp; Dashboard</button>
       <button class="navbtn" data-view="ads" onclick="showView('ads')">▤ &nbsp; Advertisements</button>
+<button class="navbtn" onclick="showPage('premium-banners')">Premium Banners</button>
       <button class="navbtn" data-view="create" onclick="startCreate()">＋ &nbsp; Create Ad</button>
       <div class="navsection">Views</div>
       <button class="navbtn" data-view="published" onclick="setAdStatusFilter('published')">● &nbsp; Published</button>
@@ -206,7 +219,32 @@ button,input,select,textarea{max-width:100%}
         <div class="publicbar"><input id="publicSearch" class="search" placeholder="Search business, service or location..." oninput="renderPublic()"><div id="categoryChips" class="categorychips"></div></div>
         <div id="publicGrid" class="publicgrid"></div>
       </section>
-    </main>
+    
+<section id="page-premium-banners" class="page" style="display:none">
+  <div class="pagehead">
+    <div><h1>Premium Banners</h1><div class="sub">Upload finished 1920 × 400 creatives, assign a category and schedule the banner.</div></div>
+  </div>
+  <div class="panel" style="margin-bottom:16px">
+    <div class="formgrid">
+      <div><label>Banner Creative</label><input id="premiumImage" type="file" accept="image/jpeg,image/png,image/webp"><div class="banner-note">Recommended: 1920 × 400 px (4.8:1). JPG/WebP preferred. The creative is designed separately; Admin only uploads and schedules it.</div></div>
+      <div><label>Business Name</label><input id="premiumBusiness" placeholder="Business / Brand name"></div>
+      <div><label>Category</label><select id="premiumCategory"></select></div>
+      <div><label>Start Date</label><input id="premiumStart" type="datetime-local"></div>
+      <div><label>Expiry Date</label><input id="premiumEnd" type="datetime-local"></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+      <button class="btn primary" onclick="savePremiumBanner()">Upload & Schedule</button>
+      <button class="btn" onclick="clearPremiumForm()">Clear</button>
+    </div>
+  </div>
+  <div class="pagehead" style="margin-bottom:10px">
+    <div><h2>Uploaded Premium Banners</h2><div class="sub">Active banners rotate automatically on the public site.</div></div>
+    <select id="premiumFilter" onchange="renderPremiumAdmin()"><option value="all">All</option><option value="active">Active</option><option value="scheduled">Scheduled</option><option value="expired">Expired</option></select>
+  </div>
+  <div id="premiumAdminGrid" class="banner-grid"></div>
+</section>
+
+</main>
   </div>
 </div>
 <div id="toast" class="toast"></div>
@@ -450,6 +488,82 @@ setInterval(runExpiryScheduler,30000);
 window.addEventListener('focus',runExpiryScheduler);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)runExpiryScheduler()});
 if(sessionStorage.adspool==='1'){document.getElementById('loginView').style.display='none';document.getElementById('app').style.display='block';load()}else{document.getElementById('loginView').style.display='flex'}
+
+const PREMIUM_BANNER_STORAGE='adspool_premium_banners_v1';
+let premiumBannerData=[];
+function premiumLoad(){
+  try{premiumBannerData=JSON.parse(localStorage.getItem(PREMIUM_BANNER_STORAGE))||[]}catch(e){premiumBannerData=[]}
+  premiumBannerData.forEach(premiumStatus);
+  localStorage.setItem(PREMIUM_BANNER_STORAGE,JSON.stringify(premiumBannerData));
+  premiumCategories();renderPremiumAdmin();
+}
+function premiumStatus(b){
+  const s=Date.parse(b.startAt),e=Date.parse(b.endAt),n=Date.now();
+  if(!Number.isNaN(s)&&!Number.isNaN(e))b.status=n<s?'scheduled':n<=e?'active':'expired';
+}
+function premiumCategories(){
+  const el=document.getElementById('premiumCategory');if(!el)return;
+  const cats=(state.categories||[]).filter(c=>c.active);
+  el.innerHTML='<option value="">Select category</option>'+cats.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+}
+function clearPremiumForm(){
+  ['premiumImage','premiumBusiness','premiumCategory','premiumStart','premiumEnd'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});
+}
+function fileData(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
+async function savePremiumBanner(){
+  const file=document.getElementById('premiumImage')?.files?.[0];
+  const business=document.getElementById('premiumBusiness').value.trim();
+  const cat=document.getElementById('premiumCategory').value;
+  const start=document.getElementById('premiumStart').value;
+  const end=document.getElementById('premiumEnd').value;
+  if(!file||!business||!cat||!start||!end){alert('Please complete all fields and choose a banner image.');return}
+  if(!['image/jpeg','image/png','image/webp'].includes(file.type)){alert('Use JPG, PNG or WebP.');return}
+  if(file.size>2*1024*1024){alert('Keep the banner under 2 MB for this MVP.');return}
+  if(new Date(end)<=new Date(start)){alert('Expiry must be after Start Date.');return}
+  const data=await fileData(file);
+  const b={id:'PB-'+Date.now(),businessName:business,categoryId:cat,imageData:data,startAt:new Date(start).toISOString(),endAt:new Date(end).toISOString(),status:'scheduled',createdAt:new Date().toISOString()};
+  premiumBannerData.unshift(b);
+  localStorage.setItem(PREMIUM_BANNER_STORAGE,JSON.stringify(premiumBannerData));
+  clearPremiumForm();premiumLoad();alert('Premium banner uploaded.');
+}
+function premiumDate(x){const d=new Date(x);return Number.isNaN(d.getTime())?'—':d.toLocaleString()}
+function renderPremiumAdmin(){
+  const grid=document.getElementById('premiumAdminGrid');if(!grid)return;
+  premiumBannerData.forEach(premiumStatus);
+  const filter=document.getElementById('premiumFilter')?.value||'all';
+  const arr=premiumBannerData.filter(b=>filter==='all'||b.status===filter);
+  if(!arr.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><strong>No premium banners yet.</strong>Upload your first finished creative above.</div>';return}
+  grid.innerHTML=arr.map(b=>{
+    const cat=(state.categories||[]).find(c=>String(c.id)===String(b.categoryId));
+    return `<article class="banner-card"><img src="${esc(b.imageData)}" alt="${esc(b.businessName)}"><div class="banner-info"><strong>${esc(b.businessName)}</strong><div class="banner-meta">Category: ${esc(cat?.name||'Unknown')}<br>Start: ${premiumDate(b.startAt)}<br>Expiry: ${premiumDate(b.endAt)}<br>Status: <b>${esc(b.status)}</b></div><div class="banner-actions"><button class="btn" onclick="previewPremium('${esc(b.id)}')">Preview</button><button class="btn" onclick="deletePremium('${esc(b.id)}')">Delete</button></div></div></article>`
+  }).join('');
+}
+function previewPremium(id){
+  const b=premiumBannerData.find(x=>x.id===id);if(!b)return;
+  const cat=(state.categories||[]).find(c=>String(c.id)===String(b.categoryId));
+  const html=`<img class="premium-banner-preview" src="${esc(b.imageData)}" alt="${esc(b.businessName)}"><div style="margin-top:10px;font-size:13px"><b>${esc(b.businessName)}</b><br>${esc(cat?.name||'Unknown')} · ${esc(b.status)}</div>`;
+  if(typeof openModal==='function')openModal('Premium Banner Preview',html);else alert(b.businessName+' — '+(cat?.name||'Unknown'));
+}
+function deletePremium(id){
+  if(!confirm('Delete this premium banner?'))return;
+  premiumBannerData=premiumBannerData.filter(b=>b.id!==id);
+  localStorage.setItem(PREMIUM_BANNER_STORAGE,JSON.stringify(premiumBannerData));renderPremiumAdmin();
+}
+setTimeout(premiumLoad,150);
+window.addEventListener('storage',e=>{if(e.key===PREMIUM_BANNER_STORAGE)premiumLoad()});
+
 </script>
+
+<script id="premium-page-switch">
+document.addEventListener('click',function(e){
+  const btn=e.target.closest('[onclick*="showPage(\'premium-banners\')"]');
+  if(!btn)return;
+  setTimeout(function(){
+    document.querySelectorAll('.page').forEach(p=>{if(p.id==='page-premium-banners')p.style.display='block'});
+    premiumCategories();renderPremiumAdmin();
+  },0);
+});
+</script>
+
 </body>
 </html>
