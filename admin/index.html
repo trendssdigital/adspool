@@ -39,6 +39,76 @@ input,select,textarea{border:1px solid #cfd5dc;border-radius:8px;padding:9px 10p
 .toast{position:fixed;right:18px;bottom:18px;background:#17202a;color:#fff;padding:12px 15px;border-radius:9px;display:none;z-index:100;font-size:13px}.toast.show{display:block}
 @media(max-width:1000px){.cards{grid-template-columns:repeat(3,1fr)}.creategrid{grid-template-columns:1fr}.sticky{position:static}}
 @media(max-width:720px){.sidebar{width:68px;padding:12px 7px}.navbtn{font-size:0;text-align:center}.navbtn::first-letter{font-size:18px}.navsection{display:none}.main{padding:15px}.cards{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.services{grid-template-columns:1fr 1fr}.topbar{padding:0 13px}}
+
+/* ===== Mobile / Tablet Responsive Enhancements ===== */
+html,body{max-width:100%;overflow-x:hidden}
+*{min-width:0}
+img,svg{max-width:100%;height:auto}
+button,input,select,textarea{max-width:100%}
+
+@media (max-width: 900px){
+  .topbar{padding:12px 16px;gap:10px;flex-wrap:wrap}
+  .layout{display:block}
+  .sidebar{
+    width:100%;height:auto;position:relative;display:flex;gap:6px;
+    overflow-x:auto;padding:8px;border-right:0;border-bottom:1px solid #dfe4e8;
+    white-space:nowrap;z-index:5
+  }
+  .sidebar .navsection{display:none}
+  .sidebar .navbtn{flex:0 0 auto}
+  .main{width:100%;padding:20px 16px}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .toolbar{flex-wrap:wrap}
+  .toolbar>*{max-width:100%}
+  .publicgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media (max-width: 640px){
+  body{font-size:14px}
+  .topbar{padding:10px 12px}
+  .topbar .brand{font-size:20px}
+  .topbar .brand small{font-size:9px}
+  .topbar>div:last-child{width:100%;display:flex!important}
+  .topbar>div:last-child .btn{flex:1}
+  .sidebar{padding:7px 8px}
+  .sidebar .navbtn{padding:9px 11px;font-size:12px}
+  .main{padding:16px 12px}
+  h1{font-size:24px;line-height:1.15}
+  h2{font-size:18px}
+  .sub{font-size:12px}
+  .cards{grid-template-columns:1fr 1fr;gap:8px}
+  .card,.panel{padding:12px;border-radius:10px}
+  .toolbar{display:grid;grid-template-columns:1fr;gap:8px}
+  .toolbar .btn,.toolbar input,.toolbar select{width:100%}
+  .search{width:100%}
+  table{min-width:720px}
+  .tablewrap,.table-container{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .publicgrid{grid-template-columns:1fr}
+  .publicbar{display:block}
+  .publicbar input{width:100%;margin-bottom:10px}
+  .categorychips{overflow-x:auto;display:flex;flex-wrap:nowrap;padding-bottom:5px}
+  .categorychips>*{flex:0 0 auto}
+  .formgrid{grid-template-columns:1fr!important}
+  .serviceRow{grid-template-columns:1fr auto!important}
+  .modal{width:calc(100vw - 24px);max-height:92vh}
+  .modal .formgrid{grid-template-columns:1fr!important}
+  .btn{min-height:40px}
+  .preview{overflow:hidden}
+}
+
+@media (max-width: 420px){
+  .cards{grid-template-columns:1fr}
+  .topbar>div:last-child{gap:6px}
+  .topbar>div:last-child .btn{font-size:11px;padding:8px 9px}
+  .main{padding:14px 9px}
+  .panel{padding:10px}
+  .cards .card{min-height:0}
+}
+
+/* Prevent long business names/IDs from breaking the mobile layout */
+.publicgrid .ad,
+.publicgrid .ad *{overflow-wrap:anywhere;word-break:break-word}
+
 </style>
 </head>
 <body>
@@ -47,8 +117,8 @@ input,select,textarea{border:1px solid #cfd5dc;border-radius:8px;padding:9px 10p
     <div class="brand">Adspool <small>MVP</small></div>
     <h1 style="margin-top:20px">Admin Login</h1>
     <p class="sub" style="margin-bottom:10px">Local business advertising control panel</p>
-    <div class="field"><label>Email</label><input id="loginEmail" type="email" value="admin@adspool.local"></div>
-    <div class="field"><label>Password</label><input id="loginPassword" type="password" value="admin123"></div>
+    <div class="field"><label>Email</label><input id="loginEmail" type="email"></div>
+    <div class="field"><label>Password</label><input id="loginPassword" type="password"></div>
     <div id="loginError" class="error"></div>
     <button class="btn primary" style="width:100%" onclick="login()">Sign in</button>
     <div class="hint">Demo credentials: admin@adspool.local / admin123</div>
@@ -203,7 +273,19 @@ function formatDate(v){if(!v)return '-';return new Date(v).toLocaleString('en-IN
 function adNumber(){const n=state.nextId++;return 'ADS-'+String(n).padStart(6,'0');}
 function contrast(hex){hex=hex.replace('#','');const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);const lum=(0.299*r+0.587*g+0.114*b);return lum>155?'#111827':'#ffffff';}
 function showToast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
-function login(){if(document.getElementById('loginEmail').value==='admin@adspool.local'&&document.getElementById('loginPassword').value==='admin123'){sessionStorage.adspool='1';document.getElementById('loginView').style.display='none';document.getElementById('app').style.display='block';load();}else document.getElementById('loginError').textContent='Invalid demo credentials.'}
+function login(){
+  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
+  const password=document.getElementById('loginPassword').value;
+  document.getElementById('loginError').textContent='';
+  if(email==='praveen@adspool.com' && password==='adspool123'){
+    sessionStorage.adspool='1';
+    document.getElementById('loginView').style.display='none';
+    document.getElementById('app').style.display='block';
+    load();
+  }else{
+    document.getElementById('loginError').textContent='Invalid email or password.';
+  }
+}
 function logout(){sessionStorage.removeItem('adspool');location.reload()}
 function enterPublic(){document.getElementById('loginView').style.display='none';document.getElementById('app').style.display='block';load();showView('public')}
 function showView(v){
