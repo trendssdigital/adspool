@@ -136,51 +136,22 @@ h1 em{font-style:normal;color:var(--green)}
   .footer-links{width:100%;flex-wrap:wrap}
 }
 
-/* ===== Adspool Public Responsive Enhancements ===== */
-html,body{max-width:100%;overflow-x:hidden}
-img{max-width:100%;height:auto}
-button,input{max-width:100%}
-@media(max-width:900px){
-  .hero-inner{grid-template-columns:1fr}
-  .hero-visual{display:none}
-  .ads-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .feature-grid{grid-template-columns:repeat(2,1fr);gap:22px}
-  .feature{border-right:0;padding:0}
-}
+/* Premium category banners */
+.premium-wrap{max-width:1250px;margin:28px auto 0;padding:0 5%}
+.premium-label{display:flex;align-items:center;gap:9px;margin-bottom:8px;font-size:12px;color:#6b7280}
+.premium-label span{background:#ffd700;color:#17202a;border-radius:999px;padding:4px 8px;font-weight:850;font-size:10px}
+.premium-label strong{color:#00875a;font-size:13px}
+.premium-label small{margin-left:auto;color:#9aa1aa}
+.premium-banner-btn{display:block;width:100%;padding:0;border:0;background:transparent;border-radius:14px;overflow:hidden;box-shadow:0 8px 24px rgba(23,32,42,.10)}
+.premium-banner-btn img{display:block;width:100%;aspect-ratio:4.8/1;object-fit:cover;background:#eef2f0}
+.premium-dots{display:flex;justify-content:center;gap:5px;margin-top:8px}
+.premium-dots span{width:6px;height:6px;border-radius:50%;background:#cfd5dc}
+.premium-dots span.on{background:#00875a;width:18px;border-radius:6px}
+.modal-banner-image{width:100%;aspect-ratio:4.8/1;object-fit:cover;border-radius:12px;display:block;background:#f1f3f5}
 @media(max-width:700px){
-  .topbar{height:auto;min-height:64px;padding:10px 4%;gap:8px}
-  .brand{font-size:22px}
-  .nav{gap:7px}
-  .nav a:not(.business-link){display:none}
-  .business-link{font-size:11px;padding:8px 10px}
-  .hero{padding:36px 5% 30px}
-  h1{font-size:clamp(34px,10vw,46px);letter-spacing:-1.5px}
-  .hero p{font-size:15px}
-  .searchbox{display:block;padding:7px}
-  .searchbox input{width:100%;padding:11px}
-  .location{height:40px;margin-top:7px;justify-content:center}
-  .searchbox .btn{width:100%;margin-top:7px}
-  .hero-actions{display:grid;grid-template-columns:1fr 1fr}
-  .hero-actions .btn{text-align:center}
-  .section{padding:28px 5%}
-  .section-head{align-items:flex-start}
-  .section-head h2{font-size:21px}
-  .ads-grid{grid-template-columns:1fr}
-  .ad-card{border-radius:13px}
-  .ad .adhead{font-size:21px}
-  .ad .adphone{font-size:19px}
-  .ad-actions{flex-wrap:wrap}
-  .ad-actions .btn{min-height:40px}
-  .feature-grid{grid-template-columns:1fr;gap:18px}
-  .feature{padding:0}
-  .about h2{font-size:24px}
-  .footer-inner{display:block}
-  .footer-links{margin-top:15px;gap:12px;flex-wrap:wrap}
-}
-@media(max-width:420px){
-  .hero-actions{grid-template-columns:1fr}
-  .visual-card{width:90vw}
-  .ad .adhead{font-size:19px}
+  .premium-wrap{margin-top:18px}
+  .premium-banner-btn img{aspect-ratio:2.5/1}
+  .modal-banner-image{aspect-ratio:2/1}
 }
 
 </style>
@@ -193,7 +164,7 @@ button,input{max-width:100%}
     <a href="#ads">Ads</a>
     <a href="#categories">Categories</a>
     <a href="#about">About</a>
-    <a class="btn primary business-link" href="admin/">+ List Your Business</a>
+    
   </nav>
 </header>
 
@@ -210,7 +181,7 @@ button,input{max-width:100%}
       </div>
       <div class="hero-actions">
         <a class="btn primary" href="#ads">Explore Ads</a>
-        <a class="btn gold" href="admin/">List Your Business</a>
+        
       </div>
     </div>
     <div class="hero-visual" aria-hidden="true">
@@ -224,6 +195,9 @@ button,input{max-width:100%}
     </div>
   </div>
 </section>
+
+
+<section id="premiumBannerSection" class="premium-wrap" style="display:none"></section>
 
 <section class="section" id="ads">
   <div class="section-head">
@@ -250,7 +224,7 @@ button,input{max-width:100%}
   <div class="about-inner">
     <h2>One place for local discovery.</h2>
     <p>Adspool gives businesses a simple way to get discovered and gives visitors a simple way to find businesses, services and offers.</p>
-    <a class="btn primary" href="admin/">List Your Business</a>
+    <a class="btn primary" href="#">List Your Business</a>
   </div>
 </section>
 
@@ -259,7 +233,7 @@ button,input{max-width:100%}
     <div><div class="footer-brand">Adspool</div><div class="footer-copy">© 2026 Adspool. All rights reserved.</div></div>
     <div class="footer-links">
       <a href="#about">About</a><a href="#ads">Ads</a><a href="#categories">Categories</a>
-      <a href="admin/">Business / Admin</a>
+      
     </div>
   </div>
 </footer>
@@ -271,163 +245,143 @@ button,input{max-width:100%}
   </div>
 </div>
 
+
 <script>
 const STORAGE='adspool_mvp_v1';
+const BANNER_STORAGE='adspool_premium_banners_v1';
 let state={ads:[],categories:[]};
+let premiumBanners=[];
 let selectedCategory='all';
+let bannerTimer=null;
+let bannerPool=[];
+let bannerIndex=0;
+
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function contrast(hex){hex=(hex||'#fff').replace('#','');const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);return (0.299*r+0.587*g+0.114*b)>155?'#111827':'#fff';}
 
 function load(){
-  try{
-    const x=JSON.parse(localStorage.getItem(STORAGE));
-    if(x){state=x}
-  }catch(e){}
+  try{state=JSON.parse(localStorage.getItem(STORAGE))||state}catch(e){}
+  try{premiumBanners=JSON.parse(localStorage.getItem(BANNER_STORAGE))||[]}catch(e){premiumBanners=[]}
   if(!Array.isArray(state.ads))state.ads=[];
   if(!Array.isArray(state.categories))state.categories=[];
-  state.ads.forEach(refreshStatus);
-  renderCategories();
-  renderAds();
+  state.ads.forEach(refreshAdStatus);
+  premiumBanners.forEach(refreshBannerStatus);
+  renderCategories();renderAds();renderPremiumBanner();openDeepLink();
 }
 
-function refreshStatus(a){
-  if(a.status==='unpublished'||a.status==='draft')return a.status;
-  const start=Date.parse(a.startAt),end=Date.parse(a.endAt),now=Date.now();
-  if(Number.isNaN(start)||Number.isNaN(end))return a.status;
-  if(now<start)a.status='scheduled';
-  else if(now<=end)a.status='published';
-  else a.status='expired';
-  return a.status;
+function refreshAdStatus(a){
+  if(a.status==='unpublished'||a.status==='draft')return;
+  const s=Date.parse(a.startAt),e=Date.parse(a.endAt),n=Date.now();
+  if(!Number.isNaN(s)&&!Number.isNaN(e))a.status=n<s?'scheduled':n<=e?'published':'expired';
 }
-
+function refreshBannerStatus(b){
+  const s=Date.parse(b.startAt),e=Date.parse(b.endAt),n=Date.now();
+  if(!Number.isNaN(s)&&!Number.isNaN(e))b.status=n<s?'scheduled':n<=e?'active':'expired';
+}
 function activeAds(){
-  return state.ads.filter(a=>{
-    refreshStatus(a);
-    return a.status==='published' && new Date(a.startAt)<=new Date() && new Date(a.endAt)>=new Date();
-  });
+  return state.ads.filter(a=>{refreshAdStatus(a);return a.status==='published'&&Date.parse(a.startAt)<=Date.now()&&Date.parse(a.endAt)>=Date.now()});
 }
-
-function esc(s){
-  return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+function activeBanners(){
+  return premiumBanners.filter(b=>{refreshBannerStatus(b);return b.imageData&&b.status==='active'&&Date.parse(b.startAt)<=Date.now()&&Date.parse(b.endAt)>=Date.now()});
 }
-
-function contrast(hex){
-  hex=(hex||'#fff').replace('#','');
-  const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
-  return (0.299*r+0.587*g+0.114*b)>155?'#111827':'#fff';
-}
-
-function getSizing(a){
-  const services=(a.services||[]).filter(Boolean);
-  const chars=services.reduce((n,x)=>n+x.length,0);
-  let serviceSize=15;
-  if(services.length>=4)serviceSize=13;
-  if(services.length>=8)serviceSize=12;
-  if(chars>120)serviceSize=12;
-  let addressSize=13;
-  if((a.address||'').length>90)addressSize=12;
-  let nameSize=24;
-  const name=(a.businessName||'Business').length;
-  if(name>24)nameSize=21;
-  if(name>38)nameSize=18;
-  return {serviceSize,addressSize,nameSize};
-}
-
-function adMarkup(a){
-  const bg=a.backgroundColor||'#fff',fg=a.textColor||contrast(bg),s=getSizing(a);
-  const services=(a.services||[]).filter(Boolean);
-  const serviceHtml=services.length?services.map(esc).join(' <span>•</span> '):'Local business services';
-  return `<div class="ad" style="color:${fg};background:${esc(bg)}">
-    <div class="adhead" style="font-size:${s.nameSize}px">${esc(a.businessName||'Business Name')}</div>
-    <div class="adbody">
-      <div class="servicesline" style="font-size:${s.serviceSize}px">${serviceHtml}</div>
-      <div class="address" style="font-size:${s.addressSize}px">📍 ${esc(a.address||'')}</div>
-    </div>
-    <div class="adphone" style="font-size:22px">${esc(a.phone||'')}</div>
-  </div>`;
-}
+function setCategory(id){selectedCategory=id;renderCategories();renderAds();renderPremiumBanner();}
+function resetFilters(){selectedCategory='all';document.getElementById('searchInput').value='';renderCategories();renderAds();renderPremiumBanner();}
 
 function renderCategories(){
   const cats=state.categories.filter(c=>c.active);
   document.getElementById('categories').innerHTML=
     `<button class="chip ${selectedCategory==='all'?'active':''}" onclick="setCategory('all')">All</button>`+
-    cats.map(c=>`<button class="chip ${String(selectedCategory)===String(c.id)?'active':''}" onclick="setCategory('${c.id}')">${esc(c.name)}</button>`).join('');
+    cats.map(c=>`<button class="chip ${String(selectedCategory)===String(c.id)?'active':''}" onclick="setCategory('${esc(c.id)}')">${esc(c.name)}</button>`).join('');
 }
 
-function setCategory(id){selectedCategory=id;renderCategories();renderAds()}
-
-function resetFilters(){
-  selectedCategory='all';
-  document.getElementById('searchInput').value='';
-  renderCategories();renderAds();
+function adMarkup(a){
+  const bg=a.backgroundColor||'#fff',fg=a.textColor||contrast(bg);
+  const services=(a.services||[]).filter(Boolean);
+  return `<div class="ad" style="color:${fg};background:${esc(bg)}">
+    <div class="adhead">${esc(a.businessName||'Business Name')}</div>
+    <div class="adbody"><div class="servicesline">${services.length?services.map(esc).join(' • '):'Local business services'}</div>
+    <div class="address">📍 ${esc(a.address||'')}</div></div>
+    <div class="adphone">${esc(a.phone||'')}</div>
+  </div>`;
 }
 
-function renderAds(){
-  const q=(document.getElementById('searchInput').value||'').trim().toLowerCase();
-  const arr=activeAds().filter(a=>{
-    const category=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
-    const hay=[a.businessName,a.address,(a.services||[]).join(' '),category].join(' ').toLowerCase();
-    return (!q||hay.includes(q)) && (selectedCategory==='all'||String(a.categoryId)===String(selectedCategory));
-  });
-
-  const grid=document.getElementById('adsGrid');
-  if(!arr.length){
-    grid.innerHTML=`<div class="empty"><strong>No active advertisements found.</strong>New or currently active business ads will appear here.</div>`;
-    return;
-  }
-
-  grid.innerHTML=arr.map(a=>{
-    const cat=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
-    const phone=(a.phone||'').replace(/\s/g,'');
-    const wa=(a.whatsapp||'').replace(/\D/g,'');
-    return `<article class="ad-card">
-      <div class="ad-mini">${adMarkup(a)}</div>
-      <div class="ad-info">
-        <div class="ad-name">${esc(a.businessName)}</div>
-        <div class="ad-category">${esc(cat)}</div>
-        <div class="ad-id">${esc(a.adId||'Adspool Ad')}</div>
-        <div class="ad-actions">
-          <button class="btn primary" onclick="viewAd('${esc(a.id)}')">View Ad</button>
-          <a class="btn" href="tel:${esc(phone)}">Call</a>
-          ${wa?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}">WhatsApp</a>`:''}
-        </div>
-      </div>
-    </article>`;
-  }).join('');
+function renderPremiumBanner(){
+  const wrap=document.getElementById('premiumBannerSection');
+  if(!wrap)return;
+  if(bannerTimer)clearInterval(bannerTimer);
+  bannerPool=activeBanners().filter(b=>selectedCategory==='all'||String(b.categoryId)===String(selectedCategory)).sort(()=>Math.random()-.5);
+  bannerIndex=0;
+  if(!bannerPool.length){wrap.style.display='none';return}
+  wrap.style.display='block';showBanner();
+  if(bannerPool.length>1)bannerTimer=setInterval(()=>{bannerIndex=(bannerIndex+1)%bannerPool.length;showBanner()},6000);
 }
-
-function viewAd(id){
-  const a=activeAds().find(x=>x.id===id);
-  if(!a)return;
-  const cat=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
-  const phone=(a.phone||'').replace(/\s/g,'');
-  const wa=(a.whatsapp||'').replace(/\D/g,'');
-  document.getElementById('modalTitle').textContent=a.businessName||'Advertisement';
-  document.getElementById('modalContent').innerHTML=`
-    ${adMarkup(a)}
-    <div style="margin-top:15px;font-size:13px">
-      <b>Category:</b> ${esc(cat)}<br>
-      <b>Business:</b> ${esc(a.businessName)}<br>
-      <b>Location:</b> ${esc(a.address)}
-    </div>
-    <div class="ad-actions" style="margin-top:15px">
-      <a class="btn primary" href="tel:${esc(phone)}">Call Business</a>
-      ${wa?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}">WhatsApp</a>`:''}
-    </div>
-    <div class="modal-note">Adspool displays advertisements that are currently active in the Adspool system.</div>`;
+function showBanner(){
+  const wrap=document.getElementById('premiumBannerSection');
+  const b=bannerPool[bannerIndex];if(!wrap||!b)return;
+  const cat=state.categories.find(c=>String(c.id)===String(b.categoryId));
+  wrap.innerHTML=`<div class="premium-label"><span>PREMIUM</span><strong>${esc(cat?.name||'Featured')}</strong><small>${bannerIndex+1} / ${bannerPool.length}</small></div>
+  <button class="premium-banner-btn" onclick="viewBanner('${esc(b.id)}')"><img src="${esc(b.imageData)}" alt="${esc(b.businessName||'Premium advertisement')}"></button>
+  <div class="premium-dots">${bannerPool.map((_,i)=>`<span class="${i===bannerIndex?'on':''}"></span>`).join('')}</div>`;
+}
+function viewBanner(id){
+  const b=activeBanners().find(x=>x.id===id);if(!b)return;
+  document.getElementById('modalTitle').textContent=b.businessName||'Premium Advertisement';
+  document.getElementById('modalContent').innerHTML=`<img class="modal-banner-image" src="${esc(b.imageData)}" alt="${esc(b.businessName||'Premium advertisement')}">
+  <div class="ad-actions" style="margin-top:15px"><button class="btn" onclick="shareBanner('${esc(b.id)}')">Share</button></div>`;
   document.getElementById('modalBackdrop').classList.add('show');
 }
 
-function closeModal(){document.getElementById('modalBackdrop').classList.remove('show')}
+function renderAds(){
+  const q=(document.getElementById('searchInput').value||'').toLowerCase().trim();
+  const arr=activeAds().filter(a=>{
+    const cat=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
+    const hay=[a.businessName,a.address,(a.services||[]).join(' '),cat].join(' ').toLowerCase();
+    return (!q||hay.includes(q))&&(selectedCategory==='all'||String(a.categoryId)===String(selectedCategory));
+  });
+  const grid=document.getElementById('adsGrid');
+  if(!arr.length){grid.innerHTML='<div class="empty"><strong>No active advertisements found.</strong>New or currently active business ads will appear here.</div>';return}
+  grid.innerHTML=arr.map(a=>{
+    const phone=(a.phone||'').replace(/\s/g,'');const wa=(a.whatsapp||'').replace(/\D/g,'');
+    return `<article class="ad-card"><div class="ad-mini">${adMarkup(a)}</div><div class="ad-info">
+      <div class="ad-name">${esc(a.businessName)}</div><div class="ad-category">${esc(state.categories.find(c=>c.id===a.categoryId)?.name||'Other')}</div>
+      <div class="ad-actions"><button class="btn primary" onclick="viewAd('${esc(a.id)}')">View Ad</button><a class="btn" href="tel:${esc(phone)}">Call</a><button class="btn" onclick="shareAd('${esc(a.id)}')">Share</button>${wa?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}">WhatsApp</a>`:''}</div>
+    </div></article>`;
+  }).join('');
+}
 
-setInterval(()=>{
-  renderCategories();
-  renderAds();
-},30000);
-
-window.addEventListener('storage',e=>{
-  if(e.key===STORAGE)load();
-});
-
+function viewAd(id,updateUrl=true){
+  const a=activeAds().find(x=>x.id===id);if(!a)return;
+  if(updateUrl){const u=new URL(location.href);u.search='';u.searchParams.set('ad',a.id);history.replaceState({},'',u)}
+  const phone=(a.phone||'').replace(/\s/g,'');const wa=(a.whatsapp||'').replace(/\D/g,'');
+  document.getElementById('modalTitle').textContent=a.businessName||'Advertisement';
+  document.getElementById('modalContent').innerHTML=`${adMarkup(a)}
+    <div style="margin-top:15px;font-size:13px"><b>Category:</b> ${esc(state.categories.find(c=>c.id===a.categoryId)?.name||'Other')}<br><b>Location:</b> ${esc(a.address||'')}</div>
+    <div class="ad-actions" style="margin-top:15px"><a class="btn primary" href="tel:${esc(phone)}">Call Business</a>${wa?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}">WhatsApp</a>`:''}<button class="btn" onclick="shareAd('${esc(a.id)}')">Share</button></div>`;
+  document.getElementById('modalBackdrop').classList.add('show');
+}
+async function shareAd(id){
+  const a=activeAds().find(x=>x.id===id);if(!a)return;
+  const u=new URL(location.href);u.search='';u.searchParams.set('ad',a.id);const url=u.toString();
+  try{if(navigator.share)await navigator.share({title:a.businessName||'Adspool',text:`Check out ${a.businessName||'this business'} on Adspool`,url});else{await navigator.clipboard.writeText(url);alert('Ad link copied.')}}catch(e){}
+}
+async function shareBanner(id){
+  const b=activeBanners().find(x=>x.id===id);if(!b)return;
+  const u=new URL(location.href);u.search='';u.searchParams.set('banner',b.id);
+  try{if(navigator.share)await navigator.share({title:b.businessName||'Adspool Premium Advertisement',text:`Check out ${b.businessName||'this business'} on Adspool`,url:u.toString()});else{await navigator.clipboard.writeText(u.toString());alert('Banner link copied.')}}catch(e){}
+}
+function openDeepLink(){
+  const p=new URLSearchParams(location.search),id=p.get('ad'),banner=p.get('banner');
+  if(id&&activeAds().some(a=>a.id===id))setTimeout(()=>viewAd(id,false),250);
+  else if(banner&&activeBanners().some(b=>b.id===banner))setTimeout(()=>viewBanner(banner),250);
+}
+function closeModal(){
+  document.getElementById('modalBackdrop').classList.remove('show');
+  const u=new URL(location.href);u.search='';history.replaceState({},'',u);
+}
+setInterval(()=>{renderCategories();renderAds();renderPremiumBanner()},30000);
+window.addEventListener('storage',e=>{if(e.key===STORAGE||e.key===BANNER_STORAGE)load()});
 load();
 </script>
+
 </body>
 </html>
