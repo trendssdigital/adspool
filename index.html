@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Adspool — Discover. Connect. Grow.</title>
+<style>
+:root{
+  --green:#00875a;
+  --green-dark:#006d49;
+  --green-soft:#eaf7f2;
+  --gold:#ffd700;
+  --bg:#f5f7f9;
+  --text:#17202a;
+  --muted:#6b7280;
+  --border:#d9dee5;
+  --white:#fff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input{font:inherit}
+button{cursor:pointer}
+a{text-decoration:none;color:inherit}
+.topbar{
+  height:68px;background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 5%;
+  position:sticky;top:0;z-index:30
+}
+.brand{font-size:25px;font-weight:850;color:var(--green);letter-spacing:-.5px}
+.brand small{display:block;font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.2px;margin-top:-3px}
+.nav{display:flex;align-items:center;gap:26px;font-size:14px;color:#4b5563}
+.nav a:hover{color:var(--green)}
+.btn{border:1px solid #cfd5dc;background:#fff;border-radius:8px;padding:10px 15px;font-weight:650}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.btn.primary:hover{background:var(--green-dark)}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#17202a}
+.hero{
+  background:linear-gradient(135deg,#f1fbf7 0%,#fff 58%,#fff8d8 100%);
+  border-bottom:1px solid var(--border);padding:58px 5% 44px
+}
+.hero-inner{max-width:1250px;margin:auto;display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:7px;color:var(--green);font-weight:800;font-size:13px;margin-bottom:12px}
+.eyebrow span{width:8px;height:8px;border-radius:50%;background:var(--gold);display:inline-block}
+h1{font-size:clamp(36px,5vw,62px);line-height:1.02;letter-spacing:-2.2px;margin:0 0 17px}
+h1 em{font-style:normal;color:var(--green)}
+.hero p{font-size:18px;line-height:1.6;color:#5b6470;max-width:620px;margin:0 0 25px}
+.searchbox{
+  background:#fff;border:1px solid var(--border);border-radius:13px;padding:8px;
+  display:flex;gap:8px;box-shadow:0 12px 35px rgba(23,32,42,.08);max-width:720px
+}
+.searchbox input{flex:1;border:0;outline:0;padding:12px 13px;font-size:15px;min-width:0}
+.location{border:1px solid #dfe4e8;background:#fafbfc;border-radius:8px;padding:0 12px;color:#5b6470;display:flex;align-items:center;white-space:nowrap}
+.hero-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.hero-visual{min-height:310px;display:flex;justify-content:center;align-items:center;position:relative}
+.orb{width:min(390px,75vw);height:270px;border-radius:42% 58% 55% 45%;background:var(--gold);position:absolute;right:5%;transform:rotate(-5deg);opacity:.9}
+.visual-card{
+  width:min(330px,80vw);background:#fff;border:1px solid var(--border);border-radius:18px;
+  padding:18px;position:relative;z-index:2;box-shadow:0 18px 45px rgba(23,32,42,.14);transform:rotate(2deg)
+}
+.visual-top{height:120px;border-radius:12px;background:linear-gradient(135deg,#00875a,#65c59f);display:flex;align-items:center;justify-content:center;color:#fff;font-size:54px}
+.visual-title{font-weight:800;font-size:18px;margin-top:15px}
+.visual-meta{font-size:12px;color:var(--muted);margin-top:6px}
+.visual-tag{display:inline-block;background:var(--green-soft);color:var(--green);padding:5px 8px;border-radius:999px;font-size:11px;font-weight:800;margin-top:11px}
+.section{max-width:1250px;margin:auto;padding:38px 5%}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:18px}
+.section-head h2{margin:0;font-size:25px;letter-spacing:-.5px}
+.section-head p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.link{color:var(--green);font-weight:750;font-size:13px}
+.chips{display:flex;gap:8px;overflow:auto;padding:2px 0 12px;margin-bottom:8px}
+.chip{border:1px solid var(--border);background:#fff;padding:8px 13px;border-radius:999px;font-size:12px;white-space:nowrap}
+.chip.active{background:var(--green-soft);color:var(--green);border-color:#b9e4d2;font-weight:800}
+.ads-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.ad-card{background:#fff;border:1px solid var(--border);border-radius:15px;overflow:hidden;box-shadow:0 4px 15px rgba(23,32,42,.04)}
+.ad-mini{padding:13px}
+.ad{
+  width:100%;min-height:235px;border:2px solid currentColor;border-radius:18px;overflow:hidden;
+  display:flex;flex-direction:column;text-align:center;font-family:"Trebuchet MS",system-ui,sans-serif
+}
+.ad .adhead{flex:0 0 auto;padding:13px 10px 9px;border-bottom:2px solid currentColor;font-size:24px;font-weight:800;line-height:1.05;min-height:58px;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere}
+.ad .adbody{flex:1;padding:11px 15px 9px;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.servicesline{font-size:15px;font-weight:650;line-height:1.2;word-break:break-word;overflow-wrap:anywhere}
+.address{font-size:13px;line-height:1.25;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}
+.ad .adphone{flex:0 0 auto;min-height:50px;border-top:2px solid currentColor;padding:7px;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere}
+.ad-info{padding:0 15px 15px}
+.ad-name{font-size:16px;font-weight:800;margin-bottom:4px}
+.ad-category,.ad-id{font-size:11px;color:var(--muted)}
+.ad-actions{display:flex;gap:7px;margin-top:11px}
+.ad-actions .btn{flex:1;text-align:center;padding:8px;font-size:12px}
+.empty{grid-column:1/-1;background:#fff;border:1px dashed var(--border);border-radius:14px;padding:55px 20px;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:var(--text);font-size:16px;margin-bottom:5px}
+.features{background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.feature-grid{max-width:1250px;margin:auto;padding:28px 5%;display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.feature{padding:5px 25px;border-right:1px solid #e8ecef}
+.feature:first-child{padding-left:0}
+.feature:last-child{border-right:0}
+.feature-icon{width:38px;height:38px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;margin-bottom:10px}
+.feature h3{font-size:14px;margin:0 0 5px}
+.feature p{font-size:12px;color:var(--muted);line-height:1.5;margin:0}
+.about{background:#f1f8f5}
+.about-inner{max-width:950px;margin:auto;text-align:center}
+.about h2{font-size:28px;margin:0 0 10px}
+.about p{color:#5b6470;line-height:1.65;margin:0 auto 18px;max-width:760px}
+.footer{background:#006d49;color:#fff;padding:25px 5%}
+.footer-inner{max-width:1250px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.footer-brand{font-weight:800}
+.footer-brand small{display:block;font-size:10px;opacity:.75;margin-top:2px}
+.footer-links{display:flex;gap:18px;font-size:12px;opacity:.92}
+.footer-copy{font-size:11px;opacity:.78}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
+.modal-backdrop.show{display:flex}
+.modal{width:min(560px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:20px;box-shadow:0 25px 70px rgba(0,0,0,.25)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.modal-head h2{margin:0;font-size:20px}
+.close{border:0;background:#f1f3f5;border-radius:50%;width:34px;height:34px;font-size:20px}
+.modal-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:12px}
+@media(max-width:950px){
+  .hero-inner{grid-template-columns:1fr}
+  .hero-visual{display:none}
+  .ads-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .feature-grid{grid-template-columns:repeat(2,1fr);gap:22px}
+  .feature{border-right:0;padding:0}
+}
+@media(max-width:700px){
+  .topbar{height:auto;min-height:64px;padding:11px 5%;gap:10px}
+  .nav a:not(.business-link){display:none}
+  .nav{gap:8px}
+  .business-link{font-size:12px;padding:8px 10px}
+  .hero{padding:40px 5% 34px}
+  .searchbox{display:block}
+  .location{height:42px;margin-top:7px}
+  .searchbox .btn{width:100%;margin-top:7px}
+  .section{padding:30px 5%}
+  .ads-grid{grid-template-columns:1fr}
+  .feature-grid{grid-template-columns:1fr}
+  .footer-links{width:100%;flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="#" class="brand">Adspool<small>Discover. Connect. Grow.</small></a>
+  <nav class="nav">
+    <a href="#ads">Ads</a>
+    <a href="#categories">Categories</a>
+    <a href="#about">About</a>
+    <a class="btn primary business-link" href="admin/">+ List Your Business</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="eyebrow"><span></span> LOCAL BUSINESS DISCOVERY</div>
+      <h1>Discover great businesses <em>around you.</em></h1>
+      <p>Explore local businesses, services and offers in one simple place. Find something useful, connect directly and support local businesses.</p>
+      <div class="searchbox">
+        <input id="searchInput" placeholder="Search businesses, services or locations..." oninput="renderAds()">
+        <div class="location">📍 All locations</div>
+        <button class="btn primary" onclick="document.getElementById('ads').scrollIntoView({behavior:'smooth'})">Search</button>
+      </div>
+      <div class="hero-actions">
+        <a class="btn primary" href="#ads">Explore Ads</a>
+        <a class="btn gold" href="admin/">List Your Business</a>
+      </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="orb"></div>
+      <div class="visual-card">
+        <div class="visual-top">%</div>
+        <div class="visual-title">Great offers are waiting.</div>
+        <div class="visual-meta">Discover businesses and connect directly.</div>
+        <span class="visual-tag">FEATURED ADS</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="ads">
+  <div class="section-head">
+    <div>
+      <h2>Featured Ads</h2>
+      <p>Explore currently active advertisements.</p>
+    </div>
+    <a class="link" href="#ads" onclick="resetFilters();return false">View All Ads →</a>
+  </div>
+  <div id="categories" class="chips"></div>
+  <div id="adsGrid" class="ads-grid"></div>
+</section>
+
+<section class="features">
+  <div class="feature-grid">
+    <div class="feature"><div class="feature-icon">▣</div><h3>Top Businesses</h3><p>Discover useful local businesses and services.</p></div>
+    <div class="feature"><div class="feature-icon">%</div><h3>Great Offers</h3><p>Find promotions and advertisements in one place.</p></div>
+    <div class="feature"><div class="feature-icon">✓</div><h3>Easy to Explore</h3><p>Search by business, category or location.</p></div>
+    <div class="feature"><div class="feature-icon">↗</div><h3>Easy to Connect</h3><p>Call or connect with businesses directly.</p></div>
+  </div>
+</section>
+
+<section class="section about" id="about">
+  <div class="about-inner">
+    <h2>One place for local discovery.</h2>
+    <p>Adspool gives businesses a simple way to get discovered and gives visitors a simple way to find businesses, services and offers.</p>
+    <a class="btn primary" href="admin/">List Your Business</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div><div class="footer-brand">Adspool</div><div class="footer-copy">© 2026 Adspool. All rights reserved.</div></div>
+    <div class="footer-links">
+      <a href="#about">About</a><a href="#ads">Ads</a><a href="#categories">Categories</a>
+      <a href="admin/">Business / Admin</a>
+    </div>
+  </div>
+</footer>
+
+<div id="modalBackdrop" class="modal-backdrop" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head"><h2 id="modalTitle">Advertisement</h2><button class="close" onclick="closeModal()">×</button></div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+const STORAGE='adspool_mvp_v1';
+let state={ads:[],categories:[]};
+let selectedCategory='all';
+
+function load(){
+  try{
+    const x=JSON.parse(localStorage.getItem(STORAGE));
+    if(x){state=x}
+  }catch(e){}
+  if(!Array.isArray(state.ads))state.ads=[];
+  if(!Array.isArray(state.categories))state.categories=[];
+  state.ads.forEach(refreshStatus);
+  renderCategories();
+  renderAds();
+}
+
+function refreshStatus(a){
+  if(a.status==='unpublished'||a.status==='draft')return a.status;
+  const start=Date.parse(a.startAt),end=Date.parse(a.endAt),now=Date.now();
+  if(Number.isNaN(start)||Number.isNaN(end))return a.status;
+  if(now<start)a.status='scheduled';
+  else if(now<=end)a.status='published';
+  else a.status='expired';
+  return a.status;
+}
+
+function activeAds(){
+  return state.ads.filter(a=>{
+    refreshStatus(a);
+    return a.status==='published' && new Date(a.startAt)<=new Date() && new Date(a.endAt)>=new Date();
+  });
+}
+
+function esc(s){
+  return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+function contrast(hex){
+  hex=(hex||'#fff').replace('#','');
+  const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
+  return (0.299*r+0.587*g+0.114*b)>155?'#111827':'#fff';
+}
+
+function getSizing(a){
+  const services=(a.services||[]).filter(Boolean);
+  const chars=services.reduce((n,x)=>n+x.length,0);
+  let serviceSize=15;
+  if(services.length>=4)serviceSize=13;
+  if(services.length>=8)serviceSize=12;
+  if(chars>120)serviceSize=12;
+  let addressSize=13;
+  if((a.address||'').length>90)addressSize=12;
+  let nameSize=24;
+  const name=(a.businessName||'Business').length;
+  if(name>24)nameSize=21;
+  if(name>38)nameSize=18;
+  return {serviceSize,addressSize,nameSize};
+}
+
+function adMarkup(a){
+  const bg=a.backgroundColor||'#fff',fg=a.textColor||contrast(bg),s=getSizing(a);
+  const services=(a.services||[]).filter(Boolean);
+  const serviceHtml=services.length?services.map(esc).join(' <span>•</span> '):'Local business services';
+  return `<div class="ad" style="color:${fg};background:${esc(bg)}">
+    <div class="adhead" style="font-size:${s.nameSize}px">${esc(a.businessName||'Business Name')}</div>
+    <div class="adbody">
+      <div class="servicesline" style="font-size:${s.serviceSize}px">${serviceHtml}</div>
+      <div class="address" style="font-size:${s.addressSize}px">📍 ${esc(a.address||'')}</div>
+    </div>
+    <div class="adphone" style="font-size:22px">${esc(a.phone||'')}</div>
+  </div>`;
+}
+
+function renderCategories(){
+  const cats=state.categories.filter(c=>c.active);
+  document.getElementById('categories').innerHTML=
+    `<button class="chip ${selectedCategory==='all'?'active':''}" onclick="setCategory('all')">All</button>`+
+    cats.map(c=>`<button class="chip ${String(selectedCategory)===String(c.id)?'active':''}" onclick="setCategory('${c.id}')">${esc(c.name)}</button>`).join('');
+}
+
+function setCategory(id){selectedCategory=id;renderCategories();renderAds()}
+
+function resetFilters(){
+  selectedCategory='all';
+  document.getElementById('searchInput').value='';
+  renderCategories();renderAds();
+}
+
+function renderAds(){
+  const q=(document.getElementById('searchInput').value||'').trim().toLowerCase();
+  const arr=activeAds().filter(a=>{
+    const category=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
+    const hay=[a.businessName,a.address,(a.services||[]).join(' '),category].join(' ').toLowerCase();
+    return (!q||hay.includes(q)) && (selectedCategory==='all'||String(a.categoryId)===String(selectedCategory));
+  });
+
+  const grid=document.getElementById('adsGrid');
+  if(!arr.length){
+    grid.innerHTML=`<div class="empty"><strong>No active advertisements found.</strong>New or currently active business ads will appear here.</div>`;
+    return;
+  }
+
+  grid.innerHTML=arr.map(a=>{
+    const cat=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
+    const phone=(a.phone||'').replace(/\s/g,'');
+    const wa=(a.whatsapp||'').replace(/\D/g,'');
+    return `<article class="ad-card">
+      <div class="ad-mini">${adMarkup(a)}</div>
+      <div class="ad-info">
+        <div class="ad-name">${esc(a.businessName)}</div>
+        <div class="ad-category">${esc(cat)}</div>
+        <div class="ad-id">${esc(a.adId||'Adspool Ad')}</div>
+        <div class="ad-actions">
+          <button class="btn primary" onclick="viewAd('${esc(a.id)}')">View Ad</button>
+          <a class="btn" href="tel:${esc(phone)}">Call</a>
+          ${wa?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}">WhatsApp</a>`:''}
+        </div>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+function viewAd(id){
+  const a=activeAds().find(x=>x.id===id);
+  if(!a)return;
+  const cat=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
+  const phone=(a.phone||'').replace(/\s/g,'');
+  const wa=(a.whatsapp||'').replace(/\D/g,'');
+  document.getElementById('modalTitle').textContent=a.businessName||'Advertisement';
+  document.getElementById('modalContent').innerHTML=`
+    ${adMarkup(a)}
+    <div style="margin-top:15px;font-size:13px">
+      <b>Category:</b> ${esc(cat)}<br>
+      <b>Business:</b> ${esc(a.businessName)}<br>
+      <b>Location:</b> ${esc(a.address)}
+    </div>
+    <div class="ad-actions" style="margin-top:15px">
+      <a class="btn primary" href="tel:${esc(phone)}">Call Business</a>
+      ${wa?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}">WhatsApp</a>`:''}
+    </div>
+    <div class="modal-note">Adspool displays advertisements that are currently active in the Adspool system.</div>`;
+  document.getElementById('modalBackdrop').classList.add('show');
+}
+
+function closeModal(){document.getElementById('modalBackdrop').classList.remove('show')}
+
+setInterval(()=>{
+  renderCategories();
+  renderAds();
+},30000);
+
+window.addEventListener('storage',e=>{
+  if(e.key===STORAGE)load();
+});
+
+load();
+</script>
+</body>
+</html>
