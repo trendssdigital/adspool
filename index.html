@@ -153,13 +153,52 @@ function normalize(){state.ads.forEach(a=>refreshStatus(a)); if(!state.nextId) s
 function persist(){localStorage.setItem(STORAGE,JSON.stringify(state));}
 function now(){return new Date();}
 function refreshStatus(a){
+  // Drafts and manually unpublished ads stay that way until an admin action.
   if(a.status==='unpublished'||a.status==='draft') return a.status;
-  const t=Date.now(), s=new Date(a.startAt).getTime(), e=new Date(a.endAt).getTime();
-  if(!s||!e) return a.status;
-  if(t<s) a.status='scheduled'; else if(t<=e) a.status='published'; else {a.status='expired'; a.expiredAt=a.expiredAt||new Date().toISOString();}
+
+  const nowMs=Date.now();
+  const startMs=Date.parse(a.startAt);
+  const endMs=Date.parse(a.endAt);
+  if(Number.isNaN(startMs)||Number.isNaN(endMs)) return a.status;
+
+  // Scheduled: start time is still in the future.
+  if(nowMs < startMs){
+    a.status='scheduled';
+    a.expiredAt=null;
+  // Published: current time is inside the active window.
+  }else if(nowMs <= endMs){
+    a.status='published';
+    a.expiredAt=null;
+  // Expired: end time has passed. This is checked automatically.
+  }else{
+    a.status='expired';
+    a.expiredAt=a.expiredAt||new Date().toISOString();
+  }
   return a.status;
 }
-function refreshAllStatuses(){state.ads.forEach(refreshStatus);persist();}
+function refreshAllStatuses(){
+  let changed=false;
+  state.ads.forEach(a=>{
+    const before=a.status;
+    refreshStatus(a);
+    if(before!==a.status) changed=true;
+  });
+  if(changed) persist();
+  return changed;
+}
+function runExpiryScheduler(){
+  const changed=refreshAllStatuses();
+  // Refresh any visible lists immediately when an ad changes state.
+  const activeView=document.querySelector('.view.active')?.id;
+  if(changed){
+    renderDashboard();
+    if(['ads','published','scheduled','drafts','expired'].includes(activeView)) renderAdsTable(adsPage);
+    if(activeView==='public') renderPublic();
+  }else if(activeView==='public'){
+    // Keep the public page accurate even when an ad expires while it is open.
+    renderPublic();
+  }
+}
 function formatDate(v){if(!v)return '-';return new Date(v).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'});}
 function adNumber(){const n=state.nextId++;return 'ADS-'+String(n).padStart(6,'0');}
 function contrast(hex){hex=hex.replace('#','');const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);const lum=(0.299*r+0.587*g+0.114*b);return lum>155?'#111827':'#ffffff';}
@@ -322,6 +361,12 @@ function renderPublic(){
 function renderAll(){fillCategorySelects();renderSwatches();renderDashboard();renderAdsTable(adsPage);renderCategories();updatePreview();renderPublic();}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 document.getElementById('fCategory').addEventListener('change',updatePreview);
+
+// Automatic scheduling/expiry for the static MVP. GitHub Pages has no server-side
+// cron job, so the browser checks dates on load, focus, visibility change, and every 30 seconds.
+setInterval(runExpiryScheduler,30000);
+window.addEventListener('focus',runExpiryScheduler);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)runExpiryScheduler()});
 if(sessionStorage.adspool==='1'){document.getElementById('loginView').style.display='none';document.getElementById('app').style.display='block';load()}else{document.getElementById('loginView').style.display='flex'}
 </script>
 </body>
