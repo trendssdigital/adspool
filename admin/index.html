@@ -4,191 +4,3186 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Adspool MVP</title>
-<style>
-:root{--green:#00875a;--gold:#ffd700;--bg:#f5f7f9;--text:#17202a;--muted:#6b7280;--border:#d9dee5;--danger:#c0392b}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
-button,input,select,textarea{font:inherit}button{cursor:pointer}
-.app{min-height:100vh}.topbar{height:64px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;z-index:20}
-.brand{font-size:22px;font-weight:800;color:var(--green)}.brand small{font-size:11px;color:var(--muted);font-weight:600;margin-left:6px}
-.layout{display:flex;min-height:calc(100vh - 64px)}.sidebar{width:230px;background:#fff;border-right:1px solid var(--border);padding:18px 12px;flex:none}
-.navbtn{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:9px;padding:11px 12px;margin:3px 0;color:#374151}
-.navbtn.active,.navbtn:hover{background:#eaf7f2;color:var(--green);font-weight:700}.navsection{font-size:11px;text-transform:uppercase;color:#9ca3af;padding:14px 12px 6px}
-.main{padding:24px;flex:1;min-width:0}.view{display:none}.view.active{display:block}
-h1{font-size:26px;margin:0 0 6px}h2{font-size:19px;margin:0 0 14px}.sub{color:var(--muted);margin:0 0 22px}
-.cards{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:12px;margin-bottom:22px}.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px}.card .label{font-size:12px;color:var(--muted)}.card .num{font-size:26px;font-weight:800;margin-top:6px}
-.panel{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:18px}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:15px}
-input,select,textarea{border:1px solid #cfd5dc;border-radius:8px;padding:9px 10px;background:#fff;color:#111827}input:focus,select:focus,textarea:focus{outline:2px solid #cceee2;border-color:var(--green)}
-.search{min-width:260px}.btn{border:1px solid #cfd5dc;background:#fff;border-radius:8px;padding:9px 13px}.btn.primary{background:var(--green);border-color:var(--green);color:#fff}.btn.secondary{background:#eef2f5}.btn.danger{background:#fff1f0;border-color:#f2c5c1;color:var(--danger)}.btn.small{padding:6px 9px;font-size:12px}
-.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:900px}.table th,.table td{padding:11px 10px;border-bottom:1px solid #edf0f2;text-align:left;font-size:13px;vertical-align:middle}.table th{font-size:11px;text-transform:uppercase;color:#6b7280;background:#fafbfc}
-.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:700}.published{background:#e7f7ef;color:#087443}.scheduled{background:#eef3ff;color:#3158b7}.draft{background:#f1f3f5;color:#5d6570}.expired{background:#fff0ee;color:#b83a2c}.unpublished{background:#f5eefa;color:#7745a8}
-.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;font-weight:700;color:#4b5563}.full{grid-column:1/-1}.services{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.servicesDynamic{display:flex;flex-direction:column;gap:8px}.serviceRow{display:flex;gap:8px}.serviceRow input{flex:1;min-width:0}.serviceRemove{width:38px;padding:0}
-.creategrid{display:grid;grid-template-columns:minmax(330px,1fr) minmax(340px,430px);gap:20px;align-items:start}.sticky{position:sticky;top:84px}.previewwrap{display:flex;justify-content:center}
-.ad{width:100%;max-width:430px;min-height:250px;height:auto;border:2px solid currentColor;border-radius:22px;overflow:hidden;display:flex;flex-direction:column;text-align:center;font-family:"Comic Sans MS","Trebuchet MS",system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.06);box-sizing:border-box}
-.ad .adhead{flex:0 0 auto;padding:14px 10px 10px;border-bottom:2px solid currentColor;font-size:27px;font-weight:800;line-height:1.05;min-height:62px;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere;box-sizing:border-box}
-.ad .adbody{flex:1 1 auto;min-height:0;padding:12px 18px 10px;display:flex;flex-direction:column;justify-content:center;gap:12px;overflow:visible;box-sizing:border-box}
-.servicesline{font-size:17px;font-weight:600;line-height:1.2;word-break:break-word;overflow-wrap:anywhere;white-space:normal;overflow:visible;display:block}.address{font-size:16px;font-weight:400;line-height:1.25;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;overflow:visible;display:block}
-.ad .adphone{flex:0 0 auto;height:58px;min-height:58px;box-sizing:border-box;border-top:2px solid currentColor;padding:7px 8px 10px;font-size:28px;font-weight:800;line-height:1;word-break:break-word;overflow-wrap:anywhere;display:flex;align-items:center;justify-content:center}
-.colorrow{display:flex;gap:10px;align-items:center}.swatches{display:flex;gap:7px;flex-wrap:wrap}.swatch{width:28px;height:28px;border-radius:7px;border:2px solid #fff;box-shadow:0 0 0 1px #cfd5dc}.swatch.selected{box-shadow:0 0 0 2px var(--green)}.colorinput{width:44px;height:38px;padding:2px}
-.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}.pagination{display:flex;gap:6px;align-items:center;justify-content:flex-end;margin-top:14px}.pagebtn{min-width:34px;height:34px;border:1px solid var(--border);background:#fff;border-radius:7px}.pagebtn.active{background:var(--green);color:#fff;border-color:var(--green)}
-.empty{padding:35px;text-align:center;color:var(--muted)}.publicbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.categorychips{display:flex;gap:7px;flex-wrap:wrap}.chip{border:1px solid var(--border);background:#fff;padding:7px 11px;border-radius:999px;font-size:12px}.chip.active{background:#eaf7f2;color:var(--green);border-color:#b9e4d2;font-weight:700}
-.publicgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}.publicad{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px}.publicad .mini{margin-bottom:12px}.publicad .mini .ad{max-width:430px;margin:0 auto}.publicmeta{font-size:12px;color:var(--muted);margin:8px 0}.publicactions{display:flex;gap:7px}
-.login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f4fbf8,#f7f8fa)}.loginbox{width:min(390px,92vw);background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:0 12px 40px rgba(0,0,0,.07)}.loginbox h1{margin-bottom:3px}.loginbox .field{margin:14px 0}.hint{font-size:12px;color:var(--muted);margin-top:12px}.error{color:var(--danger);font-size:12px;min-height:16px}
-.toast{position:fixed;right:18px;bottom:18px;background:#17202a;color:#fff;padding:12px 15px;border-radius:9px;display:none;z-index:100;font-size:13px}.toast.show{display:block}
-.banner-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.banner-card{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden}.banner-card img{width:100%;aspect-ratio:4.8/1;object-fit:cover;background:#f1f3f5;display:block}.banner-info{padding:13px}.banner-meta{font-size:12px;color:var(--muted);line-height:1.6;margin-top:6px}.banner-actions{display:flex;gap:8px;margin-top:12px}.banner-actions .btn{flex:1}.banner-note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:6px}.banner-preview{width:100%;aspect-ratio:4.8/1;object-fit:cover;border-radius:10px;background:#f1f3f5}
-@media(max-width:1000px){.cards{grid-template-columns:repeat(3,1fr)}.creategrid{grid-template-columns:1fr}.sticky{position:static}.banner-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:720px){.sidebar{width:68px;padding:12px 7px}.navbtn{font-size:0;text-align:center}.navbtn::first-letter{font-size:18px}.navsection{display:none}.main{padding:15px}.cards{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.services{grid-template-columns:1fr 1fr}.topbar{padding:0 13px}.banner-grid{grid-template-columns:1fr}.search{min-width:0;width:100%}}
 
-.premium-section{margin-top:24px;margin-bottom:26px}
-.premium-banner-wrap{position:relative;width:100%;overflow:hidden;border-radius:16px;background:#eef2f4;border:1px solid var(--border);min-height:110px}
-.premium-banner-img{display:block;width:100%;aspect-ratio:4.8/1;object-fit:cover}
-.premium-banner-label{position:absolute;left:12px;top:12px;background:rgba(0,0,0,.68);color:#fff;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.08em}
-.premium-banner-business{position:absolute;left:14px;bottom:12px;background:rgba(0,0,0,.68);color:#fff;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700}
-.premium-banner-controls{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px}
-.premium-banner-dots{display:flex;gap:5px;flex-wrap:wrap}
-.premium-dot{width:7px;height:7px;border-radius:50%;background:#c9d0d5}
-.premium-dot.active{background:var(--green)}
-.premium-banner-empty{display:none}
-@media(max-width:700px){.premium-banner-wrap{border-radius:12px}.premium-banner-label{font-size:9px}.premium-banner-business{font-size:10px;bottom:8px;left:9px}}
+<style>
+:root{
+  --green:#00875a;
+  --gold:#ffd700;
+  --bg:#f5f7f9;
+  --text:#17202a;
+  --muted:#6b7280;
+  --border:#d9dee5;
+  --danger:#c0392b
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text)
+}
+
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+
+.app{min-height:100vh}
+
+.topbar{
+  height:64px;
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 22px;
+  position:sticky;
+  top:0;
+  z-index:20
+}
+
+.brand{
+  font-size:22px;
+  font-weight:800;
+  color:var(--green)
+}
+
+.brand small{
+  font-size:11px;
+  color:var(--muted);
+  font-weight:600;
+  margin-left:6px
+}
+
+.layout{
+  display:flex;
+  min-height:calc(100vh - 64px)
+}
+
+.sidebar{
+  width:230px;
+  background:#fff;
+  border-right:1px solid var(--border);
+  padding:18px 12px;
+  flex:none
+}
+
+.navbtn{
+  display:block;
+  width:100%;
+  text-align:left;
+  background:transparent;
+  border:0;
+  border-radius:9px;
+  padding:11px 12px;
+  margin:3px 0;
+  color:#374151
+}
+
+.navbtn.active,
+.navbtn:hover{
+  background:#eaf7f2;
+  color:var(--green);
+  font-weight:700
+}
+
+.navsection{
+  font-size:11px;
+  text-transform:uppercase;
+  color:#9ca3af;
+  padding:14px 12px 6px
+}
+
+.main{
+  padding:24px;
+  flex:1;
+  min-width:0
+}
+
+.view{display:none}
+.view.active{display:block}
+
+h1{
+  font-size:26px;
+  margin:0 0 6px
+}
+
+h2{
+  font-size:19px;
+  margin:0 0 14px
+}
+
+.sub{
+  color:var(--muted);
+  margin:0 0 22px
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(120px,1fr));
+  gap:12px;
+  margin-bottom:22px
+}
+
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:16px
+}
+
+.card .label{
+  font-size:12px;
+  color:var(--muted)
+}
+
+.card .num{
+  font-size:26px;
+  font-weight:800;
+  margin-top:6px
+}
+
+.panel{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:18px;
+  margin-bottom:18px
+}
+
+.toolbar{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom:15px
+}
+
+input,
+select,
+textarea{
+  border:1px solid #cfd5dc;
+  border-radius:8px;
+  padding:9px 10px;
+  background:#fff;
+  color:#111827;
+  width:100%
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+  outline:2px solid #cceee2;
+  border-color:var(--green)
+}
+
+.search{min-width:260px}
+
+.btn{
+  border:1px solid #cfd5dc;
+  background:#fff;
+  border-radius:8px;
+  padding:9px 13px
+}
+
+.btn.primary{
+  background:var(--green);
+  border-color:var(--green);
+  color:#fff
+}
+
+.btn.secondary{background:#eef2f5}
+
+.btn.danger{
+  background:#fff1f0;
+  border-color:#f2c5c1;
+  color:var(--danger)
+}
+
+.btn.small{
+  padding:6px 9px;
+  font-size:12px
+}
+
+.tablewrap{overflow:auto}
+
+.table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:900px
+}
+
+.table th,
+.table td{
+  padding:11px 10px;
+  border-bottom:1px solid #edf0f2;
+  text-align:left;
+  font-size:13px;
+  vertical-align:middle
+}
+
+.table th{
+  font-size:11px;
+  text-transform:uppercase;
+  color:#6b7280;
+  background:#fafbfc
+}
+
+.badge{
+  display:inline-flex;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:700
+}
+
+.published{background:#e7f7ef;color:#087443}
+.scheduled{background:#eef3ff;color:#3158b7}
+.draft{background:#f1f3f5;color:#5d6570}
+.expired{background:#fff0ee;color:#b83a2c}
+.unpublished{background:#f5eefa;color:#7745a8}
+
+.formgrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:6px
+}
+
+.field label{
+  font-size:12px;
+  font-weight:700;
+  color:#4b5563
+}
+
+.full{grid-column:1/-1}
+
+.address-grid{
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr;
+  gap:10px
+}
+
+.servicesDynamic{
+  display:flex;
+  flex-direction:column;
+  gap:8px
+}
+
+.serviceRow{
+  display:flex;
+  gap:8px
+}
+
+.serviceRow input{
+  flex:1;
+  min-width:0
+}
+
+.serviceRemove{
+  width:38px;
+  padding:0
+}
+
+.creategrid{
+  display:grid;
+  grid-template-columns:minmax(330px,1fr) minmax(340px,430px);
+  gap:20px;
+  align-items:start
+}
+
+.sticky{
+  position:sticky;
+  top:84px
+}
+
+.previewwrap{
+  display:flex;
+  justify-content:center
+}
+
+.ad{
+  width:100%;
+  max-width:430px;
+  min-height:250px;
+  height:auto;
+  border:2px solid currentColor;
+  border-radius:22px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  text-align:center;
+  font-family:"Comic Sans MS","Trebuchet MS",system-ui,sans-serif;
+  box-shadow:0 6px 20px rgba(0,0,0,.06)
+}
+
+.ad .adhead{
+  flex:0 0 auto;
+  padding:14px 10px 10px;
+  border-bottom:2px solid currentColor;
+  font-size:27px;
+  font-weight:800;
+  line-height:1.05;
+  min-height:62px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow-wrap:anywhere
+}
+
+.ad .adbody{
+  flex:1;
+  padding:12px 18px 10px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:12px
+}
+
+.servicesline{
+  font-size:17px;
+  font-weight:600;
+  line-height:1.2;
+  word-break:break-word
+}
+
+.address{
+  font-size:16px;
+  line-height:1.25;
+  white-space:pre-wrap;
+  word-break:break-word
+}
+
+.ad .adphone{
+  flex:0 0 auto;
+  min-height:58px;
+  border-top:2px solid currentColor;
+  padding:7px 8px 10px;
+  font-size:28px;
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center
+}
+
+.directionBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  margin-top:4px;
+  border:0;
+  border-radius:8px;
+  padding:8px 12px;
+  background:var(--green);
+  color:#fff;
+  font-size:12px;
+  font-weight:700;
+  text-decoration:none
+}
+
+.colorrow{
+  display:flex;
+  gap:10px;
+  align-items:center
+}
+
+.swatches{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap
+}
+
+.swatch{
+  width:28px;
+  height:28px;
+  border-radius:7px;
+  border:2px solid #fff;
+  box-shadow:0 0 0 1px #cfd5dc
+}
+
+.colorinput{
+  width:44px;
+  height:38px;
+  padding:2px
+}
+
+.actions{
+  display:flex;
+  gap:8px;
+  justify-content:flex-end;
+  margin-top:18px;
+  flex-wrap:wrap
+}
+
+.empty{
+  padding:35px;
+  text-align:center;
+  color:var(--muted)
+}
+
+.publicbar{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:18px
+}
+
+.categorychips{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap
+}
+
+.chip{
+  border:1px solid var(--border);
+  background:#fff;
+  padding:7px 11px;
+  border-radius:999px;
+  font-size:12px
+}
+
+.chip.active{
+  background:#eaf7f2;
+  color:var(--green);
+  border-color:#b9e4d2;
+  font-weight:700
+}
+
+.publicgrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:16px
+}
+
+.publicad{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px
+}
+
+.publicmeta{
+  font-size:12px;
+  color:var(--muted);
+  margin:8px 0
+}
+
+.login{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,#f4fbf8,#f7f8fa)
+}
+
+.loginbox{
+  width:min(390px,92vw);
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:28px;
+  box-shadow:0 12px 40px rgba(0,0,0,.07)
+}
+
+.loginbox .field{margin:14px 0}
+
+.error{
+  color:var(--danger);
+  font-size:12px;
+  min-height:16px
+}
+
+.toast{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  background:#17202a;
+  color:#fff;
+  padding:12px 15px;
+  border-radius:9px;
+  display:none;
+  z-index:100;
+  font-size:13px
+}
+
+.toast.show{display:block}
+
+.banner-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px
+}
+
+.banner-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden
+}
+
+.banner-card img{
+  width:100%;
+  aspect-ratio:4.8/1;
+  object-fit:cover;
+  background:#f1f3f5;
+  display:block
+}
+
+.banner-info{padding:13px}
+
+.banner-meta{
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.6;
+  margin-top:6px
+}
+
+.banner-actions{
+  display:flex;
+  gap:8px;
+  margin-top:12px
+}
+
+.banner-actions .btn{flex:1}
+
+.banner-note{
+  font-size:11px;
+  color:var(--muted);
+  line-height:1.5;
+  margin-top:6px
+}
+
+.banner-preview{
+  width:100%;
+  aspect-ratio:4.8/1;
+  object-fit:cover;
+  border-radius:10px;
+  background:#f1f3f5
+}
+
+.premium-section{
+  margin-top:24px;
+  margin-bottom:26px
+}
+
+.premium-banner-wrap{
+  position:relative;
+  width:100%;
+  overflow:hidden;
+  border-radius:16px;
+  background:#eef2f4;
+  border:1px solid var(--border)
+}
+
+.premium-banner-img{
+  display:block;
+  width:100%;
+  aspect-ratio:4.8/1;
+  object-fit:cover
+}
+
+.premium-banner-label{
+  position:absolute;
+  left:12px;
+  top:12px;
+  background:rgba(0,0,0,.68);
+  color:#fff;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:800
+}
+
+.premium-banner-business{
+  position:absolute;
+  left:14px;
+  bottom:12px;
+  background:rgba(0,0,0,.68);
+  color:#fff;
+  padding:7px 10px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:700
+}
+
+@media(max-width:1000px){
+  .cards{grid-template-columns:repeat(3,1fr)}
+  .creategrid{grid-template-columns:1fr}
+  .sticky{position:static}
+  .banner-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:720px){
+
+  .sidebar{
+    width:68px;
+    padding:12px 7px
+  }
+
+  .navbtn{
+    font-size:0;
+    text-align:center
+  }
+
+  .navsection{display:none}
+
+  .main{padding:15px}
+
+  .cards{grid-template-columns:repeat(2,1fr)}
+
+  .formgrid{
+    grid-template-columns:1fr
+  }
+
+  .full{
+    grid-column:auto
+  }
+
+  .address-grid{
+    grid-template-columns:1fr
+  }
+
+  .topbar{
+    padding:0 13px
+  }
+
+  .banner-grid{
+    grid-template-columns:1fr
+  }
+
+  .search{
+    min-width:0;
+    width:100%
+  }
+
+  .ad .adhead{
+    font-size:23px
+  }
+
+  .ad .adphone{
+    font-size:23px
+  }
+}
 </style>
 </head>
+
 <body>
-<div id="loginView" class="login"><div class="loginbox">
-<div class="brand">Adspool <small>ADMIN MVP</small></div><h1 style="margin-top:20px">Admin Login</h1>
-<p class="sub" style="margin-bottom:10px">Local business advertising control panel</p>
-<div class="field"><label>Email</label><input id="loginEmail" type="email" autocomplete="username"></div>
-<div class="field"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password"></div>
-<div id="loginError" class="error"></div><button class="btn primary" style="width:100%" onclick="login()">Sign in</button>
-</div></div>
+
+<!-- LOGIN -->
+
+<div id="loginView" class="login">
+
+<div class="loginbox">
+
+<div class="brand">
+Adspool <small>ADMIN MVP</small>
+</div>
+
+<h1 style="margin-top:20px">Admin Login</h1>
+
+<p class="sub" style="margin-bottom:10px">
+Local business advertising control panel
+</p>
+
+<div class="field">
+<label>Email</label>
+<input id="loginEmail" type="email" autocomplete="username">
+</div>
+
+<div class="field">
+<label>Password</label>
+<input id="loginPassword" type="password" autocomplete="current-password">
+</div>
+
+<div id="loginError" class="error"></div>
+
+<button class="btn primary" style="width:100%" onclick="login()">
+Sign in
+</button>
+
+</div>
+</div>
+
+
+<!-- ADMIN -->
 
 <div id="app" class="app" style="display:none">
-<header class="topbar"><div class="brand">Adspool <small>ADMIN MVP</small></div><div style="display:flex;gap:8px"><button class="btn small" onclick="showView('public')">Public Website</button><button class="btn small" onclick="logout()">Logout</button></div></header>
-<div class="layout"><aside class="sidebar">
-<button class="navbtn active" data-view="dashboard" onclick="showView('dashboard')">▣ &nbsp; Dashboard</button>
-<button class="navbtn" data-view="ads" onclick="showView('ads')">▤ &nbsp; Advertisements</button>
-<button class="navbtn" data-view="create" onclick="startCreate()">＋ &nbsp; Create Ad</button>
-<div class="navsection">Views</div>
-<button class="navbtn" data-view="published" onclick="setAdStatusFilter('published')">● &nbsp; Published</button>
-<button class="navbtn" data-view="scheduled" onclick="setAdStatusFilter('scheduled')">◷ &nbsp; Scheduled</button>
-<button class="navbtn" data-view="drafts" onclick="setAdStatusFilter('draft')">◌ &nbsp; Drafts</button>
-<button class="navbtn" data-view="expired" onclick="setAdStatusFilter('expired')">○ &nbsp; Expired</button>
-<button class="navbtn" data-view="categories" onclick="showView('categories')">☷ &nbsp; Categories</button>
-<button class="navbtn" data-view="premium-banners" onclick="showView('premium-banners')">▣ &nbsp; Premium Banners</button>
-<button class="navbtn" data-view="public" onclick="showView('public')">↗ &nbsp; Public Ads</button>
-</aside>
-<main class="main">
-<section id="dashboard" class="view active"><h1>Dashboard</h1><p class="sub">Manage local business advertisements.</p><div id="dashCards" class="cards"></div><div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h2>Recently created</h2><p class="sub" style="margin:0">Latest advertisements in your system.</p></div><button class="btn primary" onclick="startCreate()">+ Create Advertisement</button></div><div id="recentAds" style="margin-top:12px"></div></div></section>
-<section id="ads" class="view"><h1>Advertisements</h1><p class="sub">Search, filter, edit and publish your ads.</p><div class="panel"><div class="toolbar"><input id="adSearch" class="search" placeholder="Search Ad ID, business, phone..." oninput="renderAdsTable(1)"><select id="adCategoryFilter" onchange="renderAdsTable(1)"></select><select id="adStatusFilter" onchange="renderAdsTable(1)"><option value="all">All statuses</option><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="published">Published</option><option value="expired">Expired</option><option value="unpublished">Unpublished</option></select><select id="adPageSize" onchange="renderAdsTable(1)"><option>10</option><option selected>20</option><option>50</option><option>100</option></select><button class="btn" onclick="clearAdFilters()">Clear</button></div><div id="adsTable"></div></div></section>
-<section id="create" class="view"><h1 id="formTitle">Create Advertisement</h1><p class="sub">Enter the details and watch the advertisement update live.</p><div class="creategrid"><div class="panel"><div class="formgrid">
-<div class="field"><label>Business Name *</label><input id="fBusiness" maxlength="80" oninput="updatePreview()"></div><div class="field"><label>Category *</label><select id="fCategory"></select></div>
-<div class="field full"><label>Services</label><div id="servicesContainer" class="servicesDynamic"></div><button type="button" class="btn small" style="width:max-content;margin-top:8px" onclick="addService()">+ Add Service</button></div>
-<div class="field full"><label>Address *</label><textarea id="fAddress" rows="3" maxlength="250" oninput="updatePreview()"></textarea></div><div class="field"><label>Phone *</label><input id="fPhone" maxlength="30" oninput="updatePreview()"></div><div class="field"><label>WhatsApp (optional)</label><input id="fWhatsapp" maxlength="30"></div>
-<div class="field full"><label>Background Color</label><div class="colorrow"><div id="swatches" class="swatches"></div><input id="fColor" class="colorinput" type="color" value="#ffffff" onchange="setColor(this.value)"><span id="contrastLabel" class="hint"></span></div></div>
-<div class="field"><label>Start Date & Time *</label><input id="fStart" type="datetime-local"></div><div class="field"><label>End Date & Time *</label><input id="fEnd" type="datetime-local"></div>
-</div><div class="actions"><button class="btn" onclick="saveAd('draft')">Save Draft</button><button class="btn primary" onclick="saveAd('publish')">Publish</button></div></div>
-<div class="sticky"><div class="panel"><h2>Live Preview</h2><div class="previewwrap"><div id="adPreview" class="ad"></div></div><div id="previewId" class="hint" style="text-align:center;margin-top:10px"></div></div></div></div></section>
-<section id="categories" class="view"><h1>Categories</h1><p class="sub">Manage the categories available while creating advertisements.</p><div class="panel"><div class="toolbar"><input id="newCategory" placeholder="New category name"><button class="btn primary" onclick="addCategory()">Add Category</button></div><div id="categoryList"></div></div></section>
 
-<section id="premium-banners" class="view">
-<h1>Premium Banners</h1><p class="sub">Upload finished premium creatives and control where and when they appear.</p>
-<div class="panel"><h2>Upload Premium Banner</h2>
-<div class="formgrid">
-<div class="field"><label>Banner Creative *</label><input id="premiumImage" type="file" accept="image/jpeg,image/png,image/webp"><div class="banner-note">Recommended: 1920 × 400 px (4.8:1). Create the artwork separately; this portal is for uploading and scheduling it.</div></div>
-<div class="field"><label>Business / Brand Name *</label><input id="premiumBusiness" maxlength="100" placeholder="Example: ABC Automobiles"></div>
-<div class="field"><label>Category *</label><select id="premiumCategory"></select></div>
-<div class="field"><label>Start Date & Time *</label><input id="premiumStart" type="datetime-local"></div>
-<div class="field"><label>Expiry Date & Time *</label><input id="premiumEnd" type="datetime-local"></div>
-<div class="field full"><label>Preview</label><div id="premiumPreview"><div class="empty" style="border:1px dashed #cfd5dc;border-radius:10px">Choose a banner to preview it here.</div></div></div>
+<header class="topbar">
+
+<div class="brand">
+Adspool <small>ADMIN MVP</small>
 </div>
-<div class="actions"><button class="btn" onclick="clearPremiumForm()">Clear</button><button class="btn primary" onclick="savePremiumBanner()">Upload & Schedule</button></div>
+
+<div style="display:flex;gap:8px">
+<button class="btn small" onclick="showView('public')">
+Public Website
+</button>
+
+<button class="btn small" onclick="logout()">
+Logout
+</button>
 </div>
-<div class="panel"><div class="toolbar"><h2 style="margin:0;flex:1">Uploaded Premium Banners</h2><select id="premiumFilter" onchange="renderPremiumAdmin()"><option value="all">All</option><option value="active">Active</option><option value="scheduled">Scheduled</option><option value="expired">Expired</option></select></div><div id="premiumAdminGrid" class="banner-grid"></div></div>
+
+</header>
+
+
+<div class="layout">
+
+<aside class="sidebar">
+
+<button class="navbtn active" data-view="dashboard"
+onclick="showView('dashboard')">
+▣ Dashboard
+</button>
+
+<button class="navbtn" data-view="ads"
+onclick="showView('ads')">
+▤ Advertisements
+</button>
+
+<button class="navbtn" data-view="create"
+onclick="startCreate()">
+＋ Create Ad
+</button>
+
+<div class="navsection">Views</div>
+
+<button class="navbtn" data-view="published"
+onclick="setAdStatusFilter('published')">
+● Published
+</button>
+
+<button class="navbtn" data-view="scheduled"
+onclick="setAdStatusFilter('scheduled')">
+◷ Scheduled
+</button>
+
+<button class="navbtn" data-view="drafts"
+onclick="setAdStatusFilter('draft')">
+◌ Drafts
+</button>
+
+<button class="navbtn" data-view="expired"
+onclick="setAdStatusFilter('expired')">
+○ Expired
+</button>
+
+<button class="navbtn" data-view="categories"
+onclick="showView('categories')">
+☷ Categories
+</button>
+
+<button class="navbtn" data-view="premium-banners"
+onclick="showView('premium-banners')">
+▣ Premium Banners
+</button>
+
+<button class="navbtn" data-view="public"
+onclick="showView('public')">
+↗ Public Ads
+</button>
+
+</aside>
+
+
+<main class="main">
+
+
+<!-- DASHBOARD -->
+
+<section id="dashboard" class="view active">
+
+<h1>Dashboard</h1>
+
+<p class="sub">
+Manage local business advertisements.
+</p>
+
+<div id="dashCards" class="cards"></div>
+
+<div class="panel">
+
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+
+<div>
+<h2>Recently created</h2>
+<p class="sub" style="margin:0">
+Latest advertisements in your system.
+</p>
+</div>
+
+<button class="btn primary" onclick="startCreate()">
++ Create Advertisement
+</button>
+
+</div>
+
+<div id="recentAds" style="margin-top:12px"></div>
+
+</div>
+
 </section>
 
-<section id="public" class="view"><h1>Public Ads</h1><p class="sub">This is the visitor-facing view. Only currently active advertisements appear.</p><div class="publicbar"><input id="publicSearch" class="search" placeholder="Search business, service or location..." oninput="renderPublic()"><div id="categoryChips" class="categorychips"></div></div><div id="adminPublicPremium" class="premium-section" style="display:none;margin-top:16px">
-<div class="section-head" style="margin-bottom:10px"><div><h2 style="font-size:18px">Premium Banners</h2><p>Active premium banners for the selected category.</p></div></div>
-<div id="adminPublicPremiumWrap" class="premium-banner-wrap"></div></div><div id="publicGrid" class="publicgrid"></div></section>
-</main></div></div><div id="toast" class="toast"></div>
+
+<!-- ADS -->
+
+<section id="ads" class="view">
+
+<h1>Advertisements</h1>
+
+<p class="sub">
+Search, filter, edit and publish your ads.
+</p>
+
+<div class="panel">
+
+<div class="toolbar">
+
+<input id="adSearch"
+class="search"
+placeholder="Search Ad ID, business, phone..."
+oninput="renderAdsTable()">
+
+<select id="adCategoryFilter"
+onchange="renderAdsTable()"></select>
+
+<select id="adStatusFilter"
+onchange="renderAdsTable()">
+
+<option value="all">All statuses</option>
+<option value="draft">Draft</option>
+<option value="scheduled">Scheduled</option>
+<option value="published">Published</option>
+<option value="expired">Expired</option>
+<option value="unpublished">Unpublished</option>
+
+</select>
+
+<button class="btn" onclick="clearAdFilters()">
+Clear
+</button>
+
+</div>
+
+<div id="adsTable"></div>
+
+</div>
+
+</section>
+
+
+<!-- CREATE -->
+
+<section id="create" class="view">
+
+<h1 id="formTitle">
+Create Advertisement
+</h1>
+
+<p class="sub">
+Enter the details and watch the advertisement update live.
+</p>
+
+
+<div class="creategrid">
+
+
+<div class="panel">
+
+<div class="formgrid">
+
+
+<div class="field">
+
+<label>
+Business Name *
+</label>
+
+<input id="fBusiness"
+maxlength="80"
+oninput="updatePreview()">
+
+</div>
+
+
+<div class="field">
+
+<label>
+Category *
+</label>
+
+<select id="fCategory"></select>
+
+</div>
+
+
+<div class="field full">
+
+<label>
+Services
+</label>
+
+<div id="servicesContainer"
+class="servicesDynamic">
+</div>
+
+<button type="button"
+class="btn small"
+style="width:max-content;margin-top:8px"
+onclick="addService()">
+
++ Add Service
+
+</button>
+
+</div>
+
+
+<!-- ADDRESS -->
+
+<div class="field full">
+
+<label>
+Address *
+</label>
+
+<div class="address-grid">
+
+<div class="field">
+
+<label>Address Line</label>
+
+<input id="fAddressLine"
+maxlength="150"
+placeholder="House / Shop / Street"
+oninput="updatePreview()">
+
+</div>
+
+<div class="field">
+
+<label>Area / Locality</label>
+
+<input id="fArea"
+maxlength="80"
+placeholder="Area"
+oninput="updatePreview()">
+
+</div>
+
+<div class="field">
+
+<label>PIN / Area Code</label>
+
+<input id="fPin"
+inputmode="numeric"
+maxlength="6"
+placeholder="560001"
+oninput="this.value=this.value.replace(/\D/g,'').slice(0,6);updatePreview()">
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="field">
+
+<label>City *</label>
+
+<input id="fCity"
+value="Bangalore"
+readonly>
+
+</div>
+
+
+<div class="field">
+
+<label>State *</label>
+
+<input id="fState"
+value="Karnataka"
+readonly>
+
+</div>
+
+
+<div class="field">
+
+<label>
+Phone *
+</label>
+
+<input
+id="fPhone"
+type="tel"
+inputmode="numeric"
+maxlength="10"
+placeholder="10 digit mobile number"
+oninput="this.value=this.value.replace(/\D/g,'').slice(0,10);updatePreview()">
+
+</div>
+
+
+<div class="field">
+
+<label>
+WhatsApp (optional)
+</label>
+
+<input
+id="fWhatsapp"
+type="tel"
+inputmode="numeric"
+maxlength="10"
+placeholder="10 digit WhatsApp number"
+oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
+
+</div>
+
+
+<div class="field full">
+
+<label>
+Background Color
+</label>
+
+<div class="colorrow">
+
+<div id="swatches"
+class="swatches"></div>
+
+<input id="fColor"
+class="colorinput"
+type="color"
+value="#ffffff"
+onchange="setColor(this.value)">
+
+<span id="contrastLabel"
+class="hint">
+</span>
+
+</div>
+
+</div>
+
+
+<div class="field">
+
+<label>
+Start Date & Time *
+</label>
+
+<input id="fStart"
+type="datetime-local">
+
+</div>
+
+
+<div class="field">
+
+<label>
+End Date & Time *
+</label>
+
+<input id="fEnd"
+type="datetime-local">
+
+</div>
+
+
+</div>
+
+
+<div class="actions">
+
+<button class="btn"
+onclick="saveAd('draft')">
+Save Draft
+</button>
+
+<button class="btn primary"
+onclick="saveAd('publish')">
+Publish
+</button>
+
+</div>
+
+</div>
+
+
+<!-- PREVIEW -->
+
+<div class="sticky">
+
+<div class="panel">
+
+<h2>Live Preview</h2>
+
+<div class="previewwrap">
+
+<div id="adPreview"
+class="ad">
+</div>
+
+</div>
+
+<div id="previewId"
+class="hint"
+style="text-align:center;margin-top:10px">
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- CATEGORIES -->
+
+<section id="categories" class="view">
+
+<h1>Categories</h1>
+
+<p class="sub">
+Manage the categories available while creating advertisements.
+</p>
+
+<div class="panel">
+
+<div class="toolbar">
+
+<input id="newCategory"
+placeholder="New category name">
+
+<button class="btn primary"
+onclick="addCategory()">
+Add Category
+</button>
+
+</div>
+
+<div id="categoryList"></div>
+
+</div>
+
+</section>
+
+
+<!-- PREMIUM BANNERS -->
+
+<section id="premium-banners" class="view">
+
+<h1>Premium Banners</h1>
+
+<p class="sub">
+Upload finished premium creatives and control where and when they appear.
+</p>
+
+
+<div class="panel">
+
+<h2>Upload Premium Banner</h2>
+
+<div class="formgrid">
+
+
+<div class="field">
+
+<label>
+Banner Creative *
+</label>
+
+<input id="premiumImage"
+type="file"
+accept="image/jpeg,image/png,image/webp">
+
+<div class="banner-note">
+
+Recommended:
+<strong>1920 × 400 px</strong> (4.8:1).
+
+Create the artwork separately; this portal is only for uploading and scheduling it.
+
+</div>
+
+</div>
+
+
+<div class="field">
+
+<label>
+Business / Brand Name *
+</label>
+
+<input id="premiumBusiness"
+maxlength="100"
+placeholder="Example: ABC Automobiles">
+
+</div>
+
+
+<div class="field">
+
+<label>
+Category *
+</label>
+
+<select id="premiumCategory"></select>
+
+</div>
+
+
+<div class="field">
+
+<label>
+Start Date & Time *
+</label>
+
+<input id="premiumStart"
+type="datetime-local">
+
+</div>
+
+
+<div class="field">
+
+<label>
+Expiry Date & Time *
+</label>
+
+<input id="premiumEnd"
+type="datetime-local">
+
+</div>
+
+
+<div class="field full">
+
+<label>Preview</label>
+
+<div id="premiumPreview">
+
+<div class="empty"
+style="border:1px dashed #cfd5dc;border-radius:10px">
+
+Choose a banner to preview it here.
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="actions">
+
+<button class="btn"
+onclick="clearPremiumForm()">
+Clear
+</button>
+
+<button class="btn primary"
+onclick="savePremiumBanner()">
+Upload & Schedule
+</button>
+
+</div>
+
+</div>
+
+
+<div class="panel">
+
+<div class="toolbar">
+
+<h2 style="margin:0;flex:1">
+Uploaded Premium Banners
+</h2>
+
+<select id="premiumFilter"
+onchange="renderPremiumAdmin()">
+
+<option value="all">All</option>
+<option value="active">Active</option>
+<option value="scheduled">Scheduled</option>
+<option value="expired">Expired</option>
+
+</select>
+
+</div>
+
+<div id="premiumAdminGrid"
+class="banner-grid">
+</div>
+
+</div>
+
+</section>
+
+
+<!-- PUBLIC -->
+
+<section id="public" class="view">
+
+<h1>Public Ads</h1>
+
+<p class="sub">
+Visitor-facing view.
+</p>
+
+<div class="publicbar">
+
+<input
+id="publicSearch"
+class="search"
+placeholder="Search business, service or location..."
+oninput="renderPublic()">
+
+<div id="categoryChips"
+class="categorychips">
+</div>
+
+</div>
+
+
+<div id="adminPublicPremium"
+class="premium-section"
+style="display:none">
+
+<div style="margin-bottom:10px">
+
+<h2 style="font-size:18px">
+Premium Banners
+</h2>
+
+</div>
+
+<div id="adminPublicPremiumWrap"
+class="premium-banner-wrap">
+</div>
+
+</div>
+
+
+<div id="publicGrid"
+class="publicgrid">
+</div>
+
+</section>
+
+
+</main>
+</div>
+</div>
+
+
+<div id="toast" class="toast"></div>
+
 
 <script>
-const STORAGE='adspool_mvp_v1', PREMIUM_STORAGE='adspool_premium_banners_v1';
-const defaultCategories=['Automobile','Lawyers','Doctors & Clinics','Salons & Beauty','Restaurants & Food','Shops & Retail','Real Estate','Education & Training','Hotels & Travel','Home Services','Finance & Insurance','IT & Digital Services','Construction','Interior Design','Electrical & Plumbing','Health & Fitness','Wedding & Events','Manufacturers','Professional Services','Other'];
-const swatches=['#ffffff','#f2f4f7','#dff3ff','#e4f7e8','#fff6bf','#ffe6c7','#ffe1ea','#173a67','#155b3a','#4b2a72','#7c1d1d','#111111'];
-let state={ads:[],categories:defaultCategories.map((name,i)=>({id:i+1,name,active:true})),nextId:1}, premiumBanners=[],editingId=null,adsPage=1,publicCategory='all';
 
-function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-function load(){try{const x=JSON.parse(localStorage.getItem(STORAGE));if(x)state=x}catch(e){}try{premiumBanners=JSON.parse(localStorage.getItem(PREMIUM_STORAGE))||[]}catch(e){premiumBanners=[]}normalize();premiumBanners.forEach(refreshPremiumStatus);renderAll();premiumCategories();renderPremiumAdmin()}
-function normalize(){(state.ads||[]).forEach(refreshStatus);if(!state.nextId)state.nextId=1}
-function persist(){localStorage.setItem(STORAGE,JSON.stringify(state))}
-function contrast(hex){hex=hex.replace('#','');const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);return(.299*r+.587*g+.114*b)>155?'#111827':'#fff'}
-function refreshStatus(a){if(a.status==='unpublished'||a.status==='draft')return;const s=Date.parse(a.startAt),e=Date.parse(a.endAt),n=Date.now();if(Number.isNaN(s)||Number.isNaN(e))return;a.status=n<s?'scheduled':n<=e?'published':'expired'}
-function refreshPremiumStatus(b){const s=Date.parse(b.startAt),e=Date.parse(b.endAt),n=Date.now();b.status=Number.isNaN(s)||Number.isNaN(e)?b.status:n<s?'scheduled':n<=e?'active':'expired'}
-function showToast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
-function login(){if(document.getElementById('loginEmail').value.trim()==='praveen@adspool.com'&&document.getElementById('loginPassword').value==='adspool123'){sessionStorage.adspool='1';document.getElementById('loginView').style.display='none';document.getElementById('app').style.display='block';load()}else document.getElementById('loginError').textContent='Invalid admin credentials.'}
-function logout(){sessionStorage.removeItem('adspool');document.getElementById('loginEmail').value='';document.getElementById('loginPassword').value='';document.getElementById('loginError').textContent='';document.getElementById('app').style.display='none';document.getElementById('loginView').style.display='flex';}
-function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById(v).classList.add('active');document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.view===v));if(v==='dashboard')renderDashboard();if(['ads','published','scheduled','drafts','expired'].includes(v))renderAdsTable(1);if(v==='categories')renderCategories();if(v==='public')renderPublic();if(v==='premium-banners'){premiumCategories();setPremiumDefaultDates();renderPremiumAdmin()}}
-function startCreate(){editingId=null;clearForm();document.getElementById('formTitle').textContent='Create Advertisement';showView('create')}
-function clearForm(){['fBusiness','fAddress','fPhone','fWhatsapp'].forEach(id=>document.getElementById(id).value='');document.getElementById('servicesContainer').innerHTML='';addService();addService();addService();document.getElementById('fColor').value='#ffffff';setColor('#ffffff');const d=new Date(),e=new Date(Date.now()+30*86400000);document.getElementById('fStart').value=toLocalInput(d);document.getElementById('fEnd').value=toLocalInput(e);updatePreview()}
-function toLocalInput(d){const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);return x.toISOString().slice(0,16)}
-function fillCategorySelects(){const active=state.categories.filter(c=>c.active);document.getElementById('fCategory').innerHTML=active.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');document.getElementById('adCategoryFilter').innerHTML='<option value="all">All categories</option>'+state.categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}
-function premiumCategories(){const e=document.getElementById('premiumCategory');if(!e)return;e.innerHTML='<option value="">Select category</option>'+state.categories.filter(c=>c.active).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}
-function getFormServices(){return[...document.querySelectorAll('#servicesContainer .serviceInput')].map(x=>x.value.trim()).filter(Boolean)}
-function addService(value=''){const box=document.getElementById('servicesContainer'),row=document.createElement('div');row.className='serviceRow';const input=document.createElement('input');input.className='serviceInput';input.placeholder='Service';input.value=value;input.oninput=updatePreview;const remove=document.createElement('button');remove.className='btn serviceRemove';remove.textContent='×';remove.onclick=()=>{row.remove();updatePreview()};row.append(input,remove);box.append(row)}
-function adMarkup(a){const bg=a.backgroundColor||'#fff',fg=a.textColor||contrast(bg);return`<div class="ad" style="color:${fg};background:${esc(bg)}"><div class="adhead">${esc(a.businessName||'Business Name')}</div><div class="adbody"><div class="servicesline">${(a.services||[]).map(esc).join(' • ')}</div><div class="address">📍 ${esc(a.address||'')}</div></div><div class="adphone">${esc(a.phone||'')}</div></div>`}
-function updatePreview(){const bg=document.getElementById('fColor').value,fg=contrast(bg);document.getElementById('contrastLabel').textContent='Automatic text: '+(fg==='#fff'?'White':'Black');document.getElementById('adPreview').innerHTML=adMarkup({businessName:document.getElementById('fBusiness').value||'Business Name',services:getFormServices(),address:document.getElementById('fAddress').value||'Address',phone:document.getElementById('fPhone').value||'+91 9001009001',backgroundColor:bg,textColor:fg})}
-function setColor(c){document.getElementById('fColor').value=c;updatePreview()}
-function renderSwatches(){document.getElementById('swatches').innerHTML=swatches.map(c=>`<button class="swatch" style="background:${c}" onclick="setColor('${c}')"></button>`).join('')}
-function saveAd(mode){const b=document.getElementById('fBusiness').value.trim(),cat=document.getElementById('fCategory').value,address=document.getElementById('fAddress').value.trim(),phone=document.getElementById('fPhone').value.trim(),s=document.getElementById('fStart').value,e=document.getElementById('fEnd').value;if(!b||!cat||!address||!phone||!s||!e||new Date(e)<=new Date(s)){showToast('Please complete the required fields and schedule.');return}const data={businessName:b,categoryId:Number(cat),services:getFormServices(),address,phone,whatsapp:document.getElementById('fWhatsapp').value.trim(),backgroundColor:document.getElementById('fColor').value,textColor:contrast(document.getElementById('fColor').value),startAt:new Date(s).toISOString(),endAt:new Date(e).toISOString()};if(editingId)Object.assign(state.ads.find(a=>a.id===editingId),data);else state.ads.unshift({id:crypto.randomUUID(),adId:'ADS-'+String(state.nextId++).padStart(6,'0'),...data,status:mode==='draft'?'draft':'published',createdAt:new Date().toISOString()});persist();renderAll();showView('ads')}
-function setAdStatusFilter(s){document.getElementById('adStatusFilter').value=s;showView('ads');renderAdsTable(1)}
-function renderAdsTable(){refreshStatuses();const q=(document.getElementById('adSearch')?.value||'').toLowerCase(),cat=document.getElementById('adCategoryFilter')?.value||'all',st=document.getElementById('adStatusFilter')?.value||'all',arr=state.ads.filter(a=>(!q||(a.adId+' '+a.businessName+' '+a.phone).toLowerCase().includes(q))&&(cat==='all'||String(a.categoryId)===cat)&&(st==='all'||a.status===st));document.getElementById('adsTable').innerHTML=arr.length?`<div class="tablewrap"><table class="table"><thead><tr><th>Ad ID</th><th>Business</th><th>Category</th><th>Start</th><th>End</th><th>Status</th><th>Actions</th></tr></thead><tbody>${arr.map(a=>`<tr><td>${a.adId}</td><td>${esc(a.businessName)}</td><td>${esc(state.categories.find(c=>c.id===a.categoryId)?.name||'Other')}</td><td>${new Date(a.startAt).toLocaleString()}</td><td>${new Date(a.endAt).toLocaleString()}</td><td><span class="badge ${a.status}">${a.status}</span></td><td><button class="btn small danger" onclick="deleteAd('${a.id}')">Delete</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No advertisements found.</div>'}
-function refreshStatuses(){state.ads.forEach(refreshStatus);persist()}
-function deleteAd(id){if(confirm('Delete this advertisement?')){state.ads=state.ads.filter(a=>a.id!==id);persist();renderAll()}}
-function renderDashboard(){refreshStatuses();const c={published:0,scheduled:0,draft:0,expired:0};state.ads.forEach(a=>c[a.status]=(c[a.status]||0)+1);document.getElementById('dashCards').innerHTML=[['Total Ads',state.ads.length],['Published',c.published],['Scheduled',c.scheduled],['Drafts',c.draft],['Expired',c.expired]].map(x=>`<div class="card"><div class="label">${x[0]}</div><div class="num">${x[1]}</div></div>`).join('');document.getElementById('recentAds').innerHTML='<div class="empty">'+(state.ads.length?'Advertisements are available under Advertisements.':'No ads yet.')+'</div>'}
-function renderCategories(){document.getElementById('categoryList').innerHTML=state.categories.map(c=>`<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #edf0f2"><b>${esc(c.name)}</b><button class="btn small" onclick="toggleCategory(${c.id})">${c.active?'Deactivate':'Activate'}</button></div>`).join('')}
-function addCategory(){const n=document.getElementById('newCategory').value.trim();if(!n)return;state.categories.push({id:Date.now(),name:n,active:true});document.getElementById('newCategory').value='';persist();fillCategorySelects();premiumCategories();renderCategories()}
-function toggleCategory(id){const c=state.categories.find(x=>x.id===id);if(c)c.active=!c.active;persist();fillCategorySelects();premiumCategories();renderCategories()}
-function publicActive(){refreshStatuses();return state.ads.filter(a=>a.status==='published')}
+const STORAGE='adspool_mvp_v1';
+
+const PREMIUM_STORAGE='adspool_premium_banners_v1';
+
+const defaultCategories=[
+'Automobile',
+'Lawyers',
+'Doctors & Clinics',
+'Salons & Beauty',
+'Restaurants & Food',
+'Shops & Retail',
+'Real Estate',
+'Education & Training',
+'Hotels & Travel',
+'Home Services',
+'Finance & Insurance',
+'IT & Digital Services',
+'Construction',
+'Interior Design',
+'Electrical & Plumbing',
+'Health & Fitness',
+'Wedding & Events',
+'Manufacturers',
+'Professional Services',
+'Other'
+];
+
+const swatches=[
+'#ffffff',
+'#f2f4f7',
+'#dff3ff',
+'#e4f7e8',
+'#fff6bf',
+'#ffe6c7',
+'#ffe1ea',
+'#173a67',
+'#155b3a',
+'#4b2a72',
+'#7c1d1d',
+'#111111'
+];
+
+let state={
+ads:[],
+categories:defaultCategories.map((name,i)=>({
+id:i+1,
+name,
+active:true
+})),
+nextId:1
+};
+
+let premiumBanners=[];
+let editingId=null;
+let publicCategory='all';
+
+
+function esc(s){
+return String(s??'').replace(/[&<>"']/g,m=>({
+'&':'&amp;',
+'<':'&lt;',
+'>':'&gt;',
+'"':'&quot;',
+"'":'&#039;'
+}[m]))
+}
+
+
+function load(){
+
+try{
+
+const x=JSON.parse(localStorage.getItem(STORAGE));
+
+if(x)state=x;
+
+}catch(e){}
+
+try{
+
+premiumBanners=
+JSON.parse(localStorage.getItem(PREMIUM_STORAGE))||[];
+
+}catch(e){
+
+premiumBanners=[];
+
+}
+
+normalize();
+
+premiumBanners.forEach(refreshPremiumStatus);
+
+renderAll();
+
+premiumCategories();
+
+renderPremiumAdmin();
+
+}
+
+
+function normalize(){
+
+(state.ads||[]).forEach(refreshStatus);
+
+if(!state.nextId)state.nextId=1;
+
+}
+
+
+function persist(){
+
+localStorage.setItem(
+STORAGE,
+JSON.stringify(state)
+);
+
+}
+
+
+function contrast(hex){
+
+hex=hex.replace('#','');
+
+const r=parseInt(hex.slice(0,2),16);
+const g=parseInt(hex.slice(2,4),16);
+const b=parseInt(hex.slice(4,6),16);
+
+return(.299*r+.587*g+.114*b)>155
+?'#111827'
+:'#fff';
+
+}
+
+
+function refreshStatus(a){
+
+if(a.status==='unpublished'||a.status==='draft')
+return;
+
+const s=Date.parse(a.startAt);
+const e=Date.parse(a.endAt);
+const n=Date.now();
+
+if(Number.isNaN(s)||Number.isNaN(e))
+return;
+
+a.status=n<s
+?'scheduled'
+:n<=e
+?'published'
+:'expired';
+
+}
+
+
+function refreshPremiumStatus(b){
+
+const s=Date.parse(b.startAt);
+const e=Date.parse(b.endAt);
+const n=Date.now();
+
+b.status=
+Number.isNaN(s)||Number.isNaN(e)
+?b.status
+:n<s
+?'scheduled'
+:n<=e
+?'active'
+:'expired';
+
+}
+
+
+function showToast(t){
+
+const e=document.getElementById('toast');
+
+e.textContent=t;
+
+e.classList.add('show');
+
+setTimeout(()=>{
+e.classList.remove('show')
+},2200);
+
+}
+
+
+/* LOGIN */
+
+function login(){
+
+const email=
+document.getElementById('loginEmail')
+.value.trim();
+
+const password=
+document.getElementById('loginPassword')
+.value;
+
+if(
+email==='praveen@adspool.com' &&
+password==='adspool123'
+){
+
+sessionStorage.adspool='1';
+
+document.getElementById('loginView')
+.style.display='none';
+
+document.getElementById('app')
+.style.display='block';
+
+load();
+
+}else{
+
+document.getElementById('loginError')
+.textContent='Invalid admin credentials.';
+
+}
+
+}
+
+
+function logout(){
+
+sessionStorage.removeItem('adspool');
+
+document.getElementById('loginEmail').value='';
+document.getElementById('loginPassword').value='';
+document.getElementById('loginError').textContent='';
+
+document.getElementById('app')
+.style.display='none';
+
+document.getElementById('loginView')
+.style.display='flex';
+
+}
+
+
+/* NAVIGATION */
+
+function showView(v){
+
+document
+.querySelectorAll('.view')
+.forEach(x=>x.classList.remove('active'));
+
+document.getElementById(v)
+.classList.add('active');
+
+document
+.querySelectorAll('.navbtn')
+.forEach(x=>
+x.classList.toggle(
+'active',
+x.dataset.view===v
+));
+
+if(v==='dashboard')
+renderDashboard();
+
+if(v==='ads')
+renderAdsTable();
+
+if(['published','scheduled','drafts','expired'].includes(v))
+renderAdsTable();
+
+if(v==='categories')
+renderCategories();
+
+if(v==='public')
+renderPublic();
+
+if(v==='premium-banners'){
+
+premiumCategories();
+
+setPremiumDefaultDates();
+
+renderPremiumAdmin();
+
+}
+
+}
+
+
+/* CREATE */
+
+function startCreate(){
+
+editingId=null;
+
+clearForm();
+
+document.getElementById('formTitle')
+.textContent='Create Advertisement';
+
+showView('create');
+
+}
+
+
+function clearForm(){
+
+[
+'fBusiness',
+'fAddressLine',
+'fArea',
+'fPin',
+'fPhone',
+'fWhatsapp'
+].forEach(id=>
+document.getElementById(id).value=''
+);
+
+document.getElementById('fCity').value='Bangalore';
+document.getElementById('fState').value='Karnataka';
+
+document.getElementById('servicesContainer')
+.innerHTML='';
+
+addService();
+addService();
+addService();
+
+document.getElementById('fColor')
+.value='#ffffff';
+
+setColor('#ffffff');
+
+const d=new Date();
+
+const e=new Date(
+Date.now()+30*86400000
+);
+
+document.getElementById('fStart')
+.value=toLocalInput(d);
+
+document.getElementById('fEnd')
+.value=toLocalInput(e);
+
+updatePreview();
+
+}
+
+
+function toLocalInput(d){
+
+const x=
+new Date(
+d.getTime()-
+d.getTimezoneOffset()*60000
+);
+
+return x.toISOString().slice(0,16);
+
+}
+
+
+function fillCategorySelects(){
+
+const active=
+state.categories.filter(c=>c.active);
+
+document.getElementById('fCategory')
+.innerHTML=
+active.map(c=>
+`<option value="${c.id}">
+${esc(c.name)}
+</option>`
+).join('');
+
+document.getElementById('adCategoryFilter')
+.innerHTML=
+'<option value="all">All categories</option>'+
+state.categories.map(c=>
+`<option value="${c.id}">
+${esc(c.name)}
+</option>`
+).join('');
+
+}
+
+
+function premiumCategories(){
+
+const e=
+document.getElementById('premiumCategory');
+
+if(!e)return;
+
+e.innerHTML=
+'<option value="">Select category</option>'+
+state.categories
+.filter(c=>c.active)
+.map(c=>
+`<option value="${c.id}">
+${esc(c.name)}
+</option>`
+).join('');
+
+}
+
+
+function getFormServices(){
+
+return[
+...document.querySelectorAll(
+'#servicesContainer .serviceInput'
+)
+]
+.map(x=>x.value.trim())
+.filter(Boolean);
+
+}
+
+
+function addService(value=''){
+
+const box=
+document.getElementById('servicesContainer');
+
+const row=document.createElement('div');
+
+row.className='serviceRow';
+
+const input=document.createElement('input');
+
+input.className='serviceInput';
+
+input.placeholder='Service';
+
+input.value=value;
+
+input.oninput=updatePreview;
+
+const remove=document.createElement('button');
+
+remove.className='btn serviceRemove';
+
+remove.textContent='×';
+
+remove.onclick=()=>{
+
+row.remove();
+
+updatePreview();
+
+};
+
+row.append(input,remove);
+
+box.append(row);
+
+}
+
+
+/* ADDRESS */
+
+function getAddressData(){
+
+return{
+
+addressLine:
+document.getElementById('fAddressLine').value.trim(),
+
+area:
+document.getElementById('fArea').value.trim(),
+
+city:
+document.getElementById('fCity').value.trim(),
+
+state:
+document.getElementById('fState').value.trim(),
+
+pin:
+document.getElementById('fPin').value.trim()
+
+};
+
+}
+
+
+function buildAddress(a){
+
+return[
+a.addressLine,
+a.area,
+a.city,
+a.state,
+a.pin
+]
+.filter(Boolean)
+.join(', ');
+
+}
+
+
+function mapsUrl(address){
+
+return'https://www.google.com/maps/search/?api=1&query='+
+encodeURIComponent(address);
+
+}
+
+
+/* AD MARKUP */
+
+function adMarkup(a){
+
+const bg=a.backgroundColor||'#fff';
+
+const fg=a.textColor||contrast(bg);
+
+const address=buildAddress(a);
+
+return`
+
+<div
+class="ad"
+style="color:${fg};background:${esc(bg)}"
+>
+
+<div class="adhead">
+
+${esc(a.businessName||'Business Name')}
+
+</div>
+
+<div class="adbody">
+
+<div class="servicesline">
+
+${(a.services||[])
+.map(esc)
+.join(' • ')}
+
+</div>
+
+<div class="address">
+
+📍 ${esc(address||'Address')}
+
+</div>
+
+${
+address
+?
+`<a
+class="directionBtn"
+href="${mapsUrl(address)}"
+target="_blank"
+rel="noopener"
+>
+📍 Share Directions
+</a>`
+:''
+}
+
+</div>
+
+<div class="adphone">
+
+${esc(a.phone||'')}
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+/* PREVIEW */
+
+function updatePreview(){
+
+const bg=
+document.getElementById('fColor').value;
+
+const fg=contrast(bg);
+
+document.getElementById('contrastLabel')
+.textContent=
+'Automatic text: '+
+(fg==='#fff'?'White':'Black');
+
+const a={
+businessName:
+document.getElementById('fBusiness').value||
+'Business Name',
+
+services:getFormServices(),
+
+addressLine:
+document.getElementById('fAddressLine').value||
+'Address',
+
+area:
+document.getElementById('fArea').value,
+
+city:
+document.getElementById('fCity').value,
+
+state:
+document.getElementById('fState').value,
+
+pin:
+document.getElementById('fPin').value,
+
+phone:
+document.getElementById('fPhone').value||
+'+91 9001009001',
+
+backgroundColor:bg,
+textColor:fg
+};
+
+document.getElementById('adPreview')
+.innerHTML=adMarkup(a);
+
+}
+
+
+function setColor(c){
+
+document.getElementById('fColor').value=c;
+
+updatePreview();
+
+}
+
+
+function renderSwatches(){
+
+document.getElementById('swatches')
+.innerHTML=
+swatches.map(c=>
+`<button
+class="swatch"
+style="background:${c}"
+onclick="setColor('${c}')">
+</button>`
+).join('');
+
+}
+
+
+/* SAVE AD */
+
+function saveAd(mode){
+
+const business=
+document.getElementById('fBusiness')
+.value.trim();
+
+const cat=
+document.getElementById('fCategory')
+.value;
+
+const address=
+getAddressData();
+
+const phone=
+document.getElementById('fPhone')
+.value.trim();
+
+const s=
+document.getElementById('fStart')
+.value;
+
+const e=
+document.getElementById('fEnd')
+.value;
+
+
+if(
+!business||
+!cat||
+!address.addressLine||
+!address.area||
+!address.pin||
+address.pin.length!==6||
+!phone||
+phone.length!==10||
+!s||
+!e||
+new Date(e)<=new Date(s)
+){
+
+showToast(
+'Please complete all required fields correctly.'
+);
+
+return;
+
+}
+
+
+const data={
+
+businessName:business,
+
+categoryId:Number(cat),
+
+services:getFormServices(),
+
+addressLine:address.addressLine,
+
+area:address.area,
+
+city:address.city,
+
+state:address.state,
+
+pin:address.pin,
+
+phone:phone,
+
+whatsapp:
+document.getElementById('fWhatsapp')
+.value.trim(),
+
+backgroundColor:
+document.getElementById('fColor').value,
+
+textColor:
+contrast(
+document.getElementById('fColor').value
+),
+
+startAt:new Date(s).toISOString(),
+
+endAt:new Date(e).toISOString()
+
+};
+
+
+if(editingId){
+
+Object.assign(
+state.ads.find(a=>a.id===editingId),
+data
+);
+
+}else{
+
+state.ads.unshift({
+
+id:crypto.randomUUID(),
+
+adId:
+'ADS-'+
+String(state.nextId++)
+.padStart(6,'0'),
+
+...data,
+
+status:
+mode==='draft'
+?'draft'
+:'published',
+
+createdAt:
+new Date().toISOString()
+
+});
+
+}
+
+
+persist();
+
+renderAll();
+
+showView('ads');
+
+showToast(
+mode==='draft'
+?'Draft saved.'
+:'Advertisement published.'
+);
+
+}
+
+
+/* ADS */
+
+function setAdStatusFilter(s){
+
+document.getElementById('adStatusFilter')
+.value=s;
+
+showView('ads');
+
+renderAdsTable();
+
+}
+
+
+function renderAdsTable(){
+
+refreshStatuses();
+
+const q=
+(document.getElementById('adSearch')?.value||'')
+.toLowerCase();
+
+const cat=
+document.getElementById('adCategoryFilter')?.value||
+'all';
+
+const st=
+document.getElementById('adStatusFilter')?.value||
+'all';
+
+const arr=
+state.ads.filter(a=>
+
+(
+!q ||
+(
+a.adId+' '+
+a.businessName+' '+
+a.phone
+)
+.toLowerCase()
+.includes(q)
+)
+
+&&
+
+(
+cat==='all'||
+String(a.categoryId)===cat
+)
+
+&&
+
+(
+st==='all'||
+a.status===st
+)
+
+);
+
+
+document.getElementById('adsTable')
+.innerHTML=
+
+arr.length
+
+?
+
+`<div class="tablewrap">
+
+<table class="table">
+
+<thead>
+
+<tr>
+
+<th>Ad ID</th>
+<th>Business</th>
+<th>Category</th>
+<th>Start</th>
+<th>End</th>
+<th>Status</th>
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+${arr.map(a=>`
+
+<tr>
+
+<td>${esc(a.adId)}</td>
+
+<td>${esc(a.businessName)}</td>
+
+<td>
+${esc(
+state.categories.find(
+c=>c.id===a.categoryId
+)?.name||'Other'
+)}
+</td>
+
+<td>
+${new Date(a.startAt).toLocaleString()}
+</td>
+
+<td>
+${new Date(a.endAt).toLocaleString()}
+</td>
+
+<td>
+<span class="badge ${a.status}">
+${a.status}
+</span>
+</td>
+
+<td>
+
+<button
+class="btn small danger"
+onclick="deleteAd('${a.id}')"
+>
+Delete
+</button>
+
+</td>
+
+</tr>
+
+`).join('')}
+
+</tbody>
+
+</table>
+
+</div>`
+
+:
+
+'<div class="empty">No advertisements found.</div>';
+
+}
+
+
+function clearAdFilters(){
+
+document.getElementById('adSearch').value='';
+
+document.getElementById('adCategoryFilter').value='all';
+
+document.getElementById('adStatusFilter').value='all';
+
+renderAdsTable();
+
+}
+
+
+function refreshStatuses(){
+
+state.ads.forEach(refreshStatus);
+
+persist();
+
+}
+
+
+function deleteAd(id){
+
+if(
+confirm(
+'Delete this advertisement?'
+)
+){
+
+state.ads=
+state.ads.filter(a=>a.id!==id);
+
+persist();
+
+renderAll();
+
+}
+
+}
+
+
+/* DASHBOARD */
+
+function renderDashboard(){
+
+refreshStatuses();
+
+const c={
+published:0,
+scheduled:0,
+draft:0,
+expired:0
+};
+
+state.ads.forEach(a=>
+c[a.status]=(c[a.status]||0)+1
+);
+
+document.getElementById('dashCards')
+.innerHTML=
+
+[
+['Total Ads',state.ads.length],
+['Published',c.published],
+['Scheduled',c.scheduled],
+['Drafts',c.draft],
+['Expired',c.expired]
+]
+.map(x=>
+`
+<div class="card">
+
+<div class="label">
+${x[0]}
+</div>
+
+<div class="num">
+${x[1]}
+</div>
+
+</div>
+`
+).join('');
+
+document.getElementById('recentAds')
+.innerHTML=
+'<div class="empty">'+
+(
+state.ads.length
+?'Advertisements are available under Advertisements.'
+:'No ads yet.'
+)+
+'</div>';
+
+}
+
+
+/* CATEGORIES */
+
+function renderCategories(){
+
+document.getElementById('categoryList')
+.innerHTML=
+state.categories.map(c=>
+`
+
+<div
+style="
+display:flex;
+justify-content:space-between;
+padding:12px 0;
+border-bottom:1px solid #edf0f2
+">
+
+<b>${esc(c.name)}</b>
+
+<button
+class="btn small"
+onclick="toggleCategory(${c.id})">
+
+${c.active?'Deactivate':'Activate'}
+
+</button>
+
+</div>
+
+`
+).join('');
+
+}
+
+
+function addCategory(){
+
+const n=
+document.getElementById('newCategory')
+.value.trim();
+
+if(!n)return;
+
+state.categories.push({
+
+id:Date.now(),
+name:n,
+active:true
+
+});
+
+document.getElementById('newCategory')
+.value='';
+
+persist();
+
+fillCategorySelects();
+
+premiumCategories();
+
+renderCategories();
+
+}
+
+
+function toggleCategory(id){
+
+const c=
+state.categories.find(x=>x.id===id);
+
+if(c)c.active=!c.active;
+
+persist();
+
+fillCategorySelects();
+
+premiumCategories();
+
+renderCategories();
+
+}
+
+
+/* PUBLIC */
+
+function publicActive(){
+
+refreshStatuses();
+
+return state.ads.filter(
+a=>a.status==='published'
+);
+
+}
+
+
 function renderPublic(){
-  const arr=publicActive();
-  const q=(document.getElementById('publicSearch')?.value||'').toLowerCase();
-  const cats=[{id:'all',name:'All Categories'},...state.categories.filter(c=>c.active)];
-  document.getElementById('categoryChips').innerHTML=cats.map(c=>`<button class="chip ${publicCategory===String(c.id)?'active':''}" onclick="publicCategory='${String(c.id).replace(/'/g,"\\'")}';renderPublic()">${esc(c.name)}</button>`).join('');
-  const filtered=arr.filter(a=>(publicCategory==='all'||String(a.categoryId)===publicCategory)&&(!q||(a.businessName+' '+(a.services||[]).join(' ')+' '+a.address).toLowerCase().includes(q)));
-  document.getElementById('publicGrid').innerHTML=filtered.length?filtered.map(a=>`<div class="publicad"><div class="mini">${adMarkup(a)}</div><div class="publicmeta">${esc(a.businessName)}</div></div>`).join(''):'<div class="empty">No active advertisements found.</div>';
+
+const arr=publicActive();
+
+const q=
+(document.getElementById('publicSearch')?.value||'')
+.toLowerCase();
+
+const cats=[
+{id:'all',name:'All Categories'},
+...state.categories.filter(c=>c.active)
+];
+
+
+document.getElementById('categoryChips')
+.innerHTML=
+
+cats.map(c=>
+
+`<button
+class="chip ${
+publicCategory===String(c.id)
+?'active':''
+}"
+onclick="
+publicCategory='${String(c.id)}';
+renderPublic()
+">
+
+${esc(c.name)}
+
+</button>`
+
+).join('');
+
+
+const filtered=
+arr.filter(a=>
+
+(
+publicCategory==='all'||
+String(a.categoryId)===publicCategory
+)
+
+&&
+
+(
+!q||
+(
+a.businessName+' '+
+(a.services||[]).join(' ')+' '+
+buildAddress(a)
+)
+.toLowerCase()
+.includes(q)
+)
+
+);
+
+
+document.getElementById('publicGrid')
+.innerHTML=
+
+filtered.length
+
+?
+
+filtered.map(a=>
+
+`
+
+<div class="publicad">
+
+<div class="mini">
+
+${adMarkup(a)}
+
+</div>
+
+<div class="publicmeta">
+
+<strong>
+${esc(a.businessName)}
+</strong>
+
+</div>
+
+</div>
+
+`
+).join('')
+
+:
+
+'<div class="empty">No active advertisements found.</div>';
+
+
+renderAdminPublicPremium();
+
 }
 
-function fileData(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
+
+/* PREMIUM */
+
+function fileData(file){
+
+return new Promise((res,rej)=>{
+
+const r=new FileReader();
+
+r.onload=()=>res(r.result);
+
+r.onerror=rej;
+
+r.readAsDataURL(file);
+
+});
+
+}
+
+
 function setPremiumDefaultDates(){
-  const s=document.getElementById('premiumStart'),e=document.getElementById('premiumEnd');
-  if(!s||!e)return;
-  const now=new Date(),end=new Date(Date.now()+30*86400000);
-  if(!s.value)s.value=toLocalInput(now);
-  if(!e.value)e.value=toLocalInput(end);
+
+const s=
+document.getElementById('premiumStart');
+
+const e=
+document.getElementById('premiumEnd');
+
+if(!s||!e)return;
+
+const now=new Date();
+
+const end=
+new Date(
+Date.now()+30*86400000
+);
+
+if(!s.value)
+s.value=toLocalInput(now);
+
+if(!e.value)
+e.value=toLocalInput(end);
+
 }
+
+
 function clearPremiumForm(){
-  ['premiumImage','premiumBusiness','premiumCategory'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('premiumPreview').innerHTML='<div class="empty" style="border:1px dashed #cfd5dc;border-radius:10px">Choose a banner to preview it here.</div>';
-  setPremiumDefaultDates();
+
+[
+'premiumImage',
+'premiumBusiness',
+'premiumCategory'
+]
+.forEach(id=>
+document.getElementById(id).value=''
+);
+
+document.getElementById('premiumPreview')
+.innerHTML=
+
+`
+<div
+class="empty"
+style="border:1px dashed #cfd5dc;border-radius:10px"
+>
+Choose a banner to preview it here.
+</div>
+`;
+
+setPremiumDefaultDates();
+
 }
-document.getElementById('premiumImage').addEventListener('change',function(){const f=this.files[0];if(!f)return;const r=new FileReader();r.onload=()=>document.getElementById('premiumPreview').innerHTML=`<img class="banner-preview" src="${r.result}" alt="Premium banner preview">`;r.readAsDataURL(f)})
-async function savePremiumBanner(){const f=document.getElementById('premiumImage').files[0],name=document.getElementById('premiumBusiness').value.trim(),cat=document.getElementById('premiumCategory').value,s=document.getElementById('premiumStart').value,e=document.getElementById('premiumEnd').value;if(!f||!name||!cat||!s||!e){showToast('Complete all premium banner fields.');return}if(!['image/jpeg','image/png','image/webp'].includes(f.type)){showToast('Use JPG, PNG or WebP.');return}if(f.size>2*1024*1024){showToast('Keep banner below 2 MB.');return}if(new Date(e)<=new Date(s)){showToast('Expiry must be after start.');return}const imageData=await fileData(f);premiumBanners.unshift({id:'PB-'+Date.now(),businessName:name,categoryId:cat,imageData,startAt:new Date(s).toISOString(),endAt:new Date(e).toISOString(),status:'scheduled'});localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));clearPremiumForm();renderPremiumAdmin();showToast('Premium banner uploaded successfully.')}
-function renderPremiumAdmin(){premiumBanners.forEach(refreshPremiumStatus);localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));const filter=document.getElementById('premiumFilter').value,arr=premiumBanners.filter(b=>filter==='all'||b.status===filter);document.getElementById('premiumAdminGrid').innerHTML=arr.length?arr.map(b=>{const c=state.categories.find(x=>String(x.id)===String(b.categoryId));return`<article class="banner-card"><img src="${esc(b.imageData)}" alt="${esc(b.businessName)}"><div class="banner-info"><b>${esc(b.businessName)}</b><div class="banner-meta">Category: ${esc(c?.name||'Unknown')}<br>Start: ${new Date(b.startAt).toLocaleString()}<br>Expiry: ${new Date(b.endAt).toLocaleString()}<br>Status: <b>${b.status}</b></div><div class="banner-actions"><button class="btn small" onclick="previewBanner('${b.id}')">Preview</button><button class="btn small danger" onclick="deleteBanner('${b.id}')">Delete</button></div></div></article>`}).join(''):'<div class="empty" style="grid-column:1/-1">No premium banners uploaded.</div>'}
-function previewBanner(id){const b=premiumBanners.find(x=>x.id===id);if(!b)return;document.getElementById('premiumPreview').innerHTML=`<img class="banner-preview" src="${esc(b.imageData)}" alt="${esc(b.businessName)}">`;showView('premium-banners')}
-function deleteBanner(id){if(confirm('Delete this premium banner?')){premiumBanners=premiumBanners.filter(b=>b.id!==id);localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));renderPremiumAdmin()}}
+
+
+document
+.getElementById('premiumImage')
+.addEventListener(
+'change',
+function(){
+
+const f=this.files[0];
+
+if(!f)return;
+
+const r=new FileReader();
+
+r.onload=()=>{
+
+document.getElementById(
+'premiumPreview'
+).innerHTML=
+
+`
+<img
+class="banner-preview"
+src="${r.result}"
+alt="Premium banner preview"
+>
+`;
+
+};
+
+r.readAsDataURL(f);
+
+}
+);
+
+
+async function savePremiumBanner(){
+
+const f=
+document.getElementById('premiumImage')
+.files[0];
+
+const name=
+document.getElementById('premiumBusiness')
+.value.trim();
+
+const cat=
+document.getElementById('premiumCategory')
+.value;
+
+const s=
+document.getElementById('premiumStart')
+.value;
+
+const e=
+document.getElementById('premiumEnd')
+.value;
+
+
+if(!f||!name||!cat||!s||!e){
+
+showToast(
+'Complete all premium banner fields.'
+);
+
+return;
+
+}
+
+
+if(
+![
+'image/jpeg',
+'image/png',
+'image/webp'
+].includes(f.type)
+){
+
+showToast(
+'Use JPG, PNG or WebP.'
+);
+
+return;
+
+}
+
+
+if(f.size>2*1024*1024){
+
+showToast(
+'Keep banner below 2 MB.'
+);
+
+return;
+
+}
+
+
+if(new Date(e)<=new Date(s)){
+
+showToast(
+'Expiry must be after start.'
+);
+
+return;
+
+}
+
+
+const imageData=
+await fileData(f);
+
+
+premiumBanners.unshift({
+
+id:'PB-'+Date.now(),
+
+businessName:name,
+
+categoryId:cat,
+
+imageData,
+
+startAt:
+new Date(s).toISOString(),
+
+endAt:
+new Date(e).toISOString(),
+
+status:'scheduled'
+
+});
+
+
+localStorage.setItem(
+PREMIUM_STORAGE,
+JSON.stringify(premiumBanners)
+);
+
+clearPremiumForm();
+
+renderPremiumAdmin();
+
+showToast(
+'Premium banner uploaded successfully.'
+);
+
+}
+
+
+function renderPremiumAdmin(){
+
+premiumBanners.forEach(
+refreshPremiumStatus
+);
+
+localStorage.setItem(
+PREMIUM_STORAGE,
+JSON.stringify(premiumBanners)
+);
+
+const filter=
+document.getElementById(
+'premiumFilter'
+).value;
+
+const arr=
+premiumBanners.filter(
+b=>filter==='all'||b.status===filter
+);
+
+
+document.getElementById(
+'premiumAdminGrid'
+).innerHTML=
+
+arr.length
+
+?
+
+arr.map(b=>{
+
+const c=
+state.categories.find(
+x=>String(x.id)===String(b.categoryId)
+);
+
+return`
+
+<article class="banner-card">
+
+<img
+src="${esc(b.imageData)}"
+alt="${esc(b.businessName)}"
+>
+
+<div class="banner-info">
+
+<b>
+${esc(b.businessName)}
+</b>
+
+<div class="banner-meta">
+
+Category:
+${esc(c?.name||'Unknown')}
+
+<br>
+
+Start:
+${new Date(b.startAt).toLocaleString()}
+
+<br>
+
+Expiry:
+${new Date(b.endAt).toLocaleString()}
+
+<br>
+
+Status:
+<b>${b.status}</b>
+
+</div>
+
+<div class="banner-actions">
+
+<button
+class="btn small"
+onclick="previewBanner('${b.id}')"
+>
+Preview
+</button>
+
+<button
+class="btn small danger"
+onclick="deleteBanner('${b.id}')"
+>
+Delete
+</button>
+
+</div>
+
+</div>
+
+</article>
+
+`;
+
+}).join('')
+
+:
+
+'<div class="empty" style="grid-column:1/-1">No premium banners uploaded.</div>';
+
+}
+
+
+function previewBanner(id){
+
+const b=
+premiumBanners.find(
+x=>x.id===id
+);
+
+if(!b)return;
+
+document.getElementById(
+'premiumPreview'
+).innerHTML=
+
+`
+<img
+class="banner-preview"
+src="${esc(b.imageData)}"
+alt="${esc(b.businessName)}"
+>
+`;
+
+showView('premium-banners');
+
+}
+
+
+function deleteBanner(id){
+
+if(
+confirm(
+'Delete this premium banner?'
+)
+){
+
+premiumBanners=
+premiumBanners.filter(
+b=>b.id!==id
+);
+
+localStorage.setItem(
+PREMIUM_STORAGE,
+JSON.stringify(premiumBanners)
+);
+
+renderPremiumAdmin();
+
+}
+
+}
+
+
+/* PREMIUM PUBLIC DISPLAY */
+
 function renderAdminPublicPremium(){
-  const section=document.getElementById('adminPublicPremium'),wrap=document.getElementById('adminPublicPremiumWrap');
-  if(!section||!wrap)return;
-  try{premiumBanners=JSON.parse(localStorage.getItem(PREMIUM_STORAGE))||[]}catch(e){premiumBanners=[]}
-  premiumBanners.forEach(refreshPremiumStatus);
-  const arr=premiumBanners.filter(b=>b.status==='active'&&(publicCategory==='all'||String(b.categoryId)===String(publicCategory)));
-  if(!arr.length){section.style.display='none';wrap.innerHTML='';return}
-  const b=arr[0];
-  const cat=state.categories.find(c=>String(c.id)===String(b.categoryId))?.name||'Other';
-  wrap.innerHTML=`<img class="premium-banner-img" src="${esc(b.imageData)}" alt="${esc(b.businessName)}"><span class="premium-banner-label">PREMIUM</span><span class="premium-banner-business">${esc(b.businessName)} · ${esc(cat)}</span>`;
-  section.style.display='block';
+
+const section=
+document.getElementById(
+'adminPublicPremium'
+);
+
+const wrap=
+document.getElementById(
+'adminPublicPremiumWrap'
+);
+
+if(!section||!wrap)return;
+
+try{
+
+premiumBanners=
+JSON.parse(
+localStorage.getItem(
+PREMIUM_STORAGE
+)
+)||[];
+
+}catch(e){
+
+premiumBanners=[];
+
 }
-function renderAll(){fillCategorySelects();renderSwatches();renderDashboard();renderAdsTable();renderCategories();updatePreview();setPremiumDefaultDates()}
-document.getElementById('fCategory').addEventListener('change',updatePreview);
-setInterval(()=>{refreshStatuses();premiumBanners.forEach(refreshPremiumStatus);localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));renderDashboard();if(document.getElementById('premium-banners').classList.contains('active'))renderPremiumAdmin()},30000);
-document.getElementById('loginEmail').value='';document.getElementById('loginPassword').value='';document.getElementById('loginView').style.display='flex';document.getElementById('app').style.display='none';
+
+premiumBanners.forEach(
+refreshPremiumStatus
+);
+
+
+const arr=
+premiumBanners.filter(
+b=>
+
+b.status==='active'&&
+
+(
+publicCategory==='all'||
+String(b.categoryId)===String(publicCategory)
+)
+
+);
+
+
+if(!arr.length){
+
+section.style.display='none';
+
+wrap.innerHTML='';
+
+return;
+
+}
+
+
+/* RANDOM BANNER */
+
+const b=
+arr[
+Math.floor(
+Math.random()*arr.length
+)
+];
+
+
+const cat=
+state.categories.find(
+c=>String(c.id)===String(b.categoryId)
+)?.name||'Other';
+
+
+wrap.innerHTML=
+
+`
+<img
+class="premium-banner-img"
+src="${esc(b.imageData)}"
+alt="${esc(b.businessName)}"
+>
+
+<span class="premium-banner-label">
+PREMIUM
+</span>
+
+<span class="premium-banner-business">
+${esc(b.businessName)} · ${esc(cat)}
+</span>
+`;
+
+section.style.display='block';
+
+}
+
+
+/* RENDER ALL */
+
+function renderAll(){
+
+fillCategorySelects();
+
+renderSwatches();
+
+renderDashboard();
+
+renderAdsTable();
+
+renderCategories();
+
+updatePreview();
+
+setPremiumDefaultDates();
+
+}
+
+
+document
+.getElementById('fCategory')
+.addEventListener(
+'change',
+updatePreview
+);
+
+
+setInterval(()=>{
+
+refreshStatuses();
+
+premiumBanners.forEach(
+refreshPremiumStatus
+);
+
+localStorage.setItem(
+PREMIUM_STORAGE,
+JSON.stringify(premiumBanners)
+);
+
+renderDashboard();
+
+if(
+document
+.getElementById('premium-banners')
+.classList.contains('active')
+){
+
+renderPremiumAdmin();
+
+}
+
+},30000);
+
+
+/* INITIAL LOGIN */
+
+document.getElementById('loginEmail').value='';
+
+document.getElementById('loginPassword').value='';
+
+document.getElementById('loginView')
+.style.display='flex';
+
+document.getElementById('app')
+.style.display='none';
+
 </script>
-</body></html>
+
+</body>
+</html>
