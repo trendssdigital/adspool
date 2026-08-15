@@ -26,544 +26,169 @@ input,select,textarea{border:1px solid #cfd5dc;border-radius:8px;padding:9px 10p
 .ad{width:100%;max-width:430px;min-height:250px;height:auto;border:2px solid currentColor;border-radius:22px;overflow:hidden;display:flex;flex-direction:column;text-align:center;font-family:"Comic Sans MS","Trebuchet MS",system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.06);box-sizing:border-box}
 .ad .adhead{flex:0 0 auto;padding:14px 10px 10px;border-bottom:2px solid currentColor;font-size:27px;font-weight:800;line-height:1.05;min-height:62px;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere;box-sizing:border-box}
 .ad .adbody{flex:1 1 auto;min-height:0;padding:12px 18px 10px;display:flex;flex-direction:column;justify-content:center;gap:12px;overflow:visible;box-sizing:border-box}
-.servicesline{font-size:17px;font-weight:600;line-height:1.2;word-break:break-word;overflow-wrap:anywhere;white-space:normal;overflow:visible;display:block}
-.address{font-size:16px;font-weight:400;line-height:1.25;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;overflow:visible;display:block}
+.servicesline{font-size:17px;font-weight:600;line-height:1.2;word-break:break-word;overflow-wrap:anywhere;white-space:normal;overflow:visible;display:block}.address{font-size:16px;font-weight:400;line-height:1.25;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;overflow:visible;display:block}
 .ad .adphone{flex:0 0 auto;height:58px;min-height:58px;box-sizing:border-box;border-top:2px solid currentColor;padding:7px 8px 10px;font-size:28px;font-weight:800;line-height:1;word-break:break-word;overflow-wrap:anywhere;display:flex;align-items:center;justify-content:center}
 .colorrow{display:flex;gap:10px;align-items:center}.swatches{display:flex;gap:7px;flex-wrap:wrap}.swatch{width:28px;height:28px;border-radius:7px;border:2px solid #fff;box-shadow:0 0 0 1px #cfd5dc}.swatch.selected{box-shadow:0 0 0 2px var(--green)}.colorinput{width:44px;height:38px;padding:2px}
-.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
-.pagination{display:flex;gap:6px;align-items:center;justify-content:flex-end;margin-top:14px}.pagebtn{min-width:34px;height:34px;border:1px solid var(--border);background:#fff;border-radius:7px}.pagebtn.active{background:var(--green);color:#fff;border-color:var(--green)}
-.empty{padding:35px;text-align:center;color:var(--muted)}
-.publicbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.categorychips{display:flex;gap:7px;flex-wrap:wrap}.chip{border:1px solid var(--border);background:#fff;padding:7px 11px;border-radius:999px;font-size:12px}.chip.active{background:#eaf7f2;color:var(--green);border-color:#b9e4d2;font-weight:700}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}.pagination{display:flex;gap:6px;align-items:center;justify-content:flex-end;margin-top:14px}.pagebtn{min-width:34px;height:34px;border:1px solid var(--border);background:#fff;border-radius:7px}.pagebtn.active{background:var(--green);color:#fff;border-color:var(--green)}
+.empty{padding:35px;text-align:center;color:var(--muted)}.publicbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.categorychips{display:flex;gap:7px;flex-wrap:wrap}.chip{border:1px solid var(--border);background:#fff;padding:7px 11px;border-radius:999px;font-size:12px}.chip.active{background:#eaf7f2;color:var(--green);border-color:#b9e4d2;font-weight:700}
 .publicgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}.publicad{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px}.publicad .mini{margin-bottom:12px}.publicad .mini .ad{max-width:430px;margin:0 auto}.publicmeta{font-size:12px;color:var(--muted);margin:8px 0}.publicactions{display:flex;gap:7px}
 .login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f4fbf8,#f7f8fa)}.loginbox{width:min(390px,92vw);background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:0 12px 40px rgba(0,0,0,.07)}.loginbox h1{margin-bottom:3px}.loginbox .field{margin:14px 0}.hint{font-size:12px;color:var(--muted);margin-top:12px}.error{color:var(--danger);font-size:12px;min-height:16px}
 .toast{position:fixed;right:18px;bottom:18px;background:#17202a;color:#fff;padding:12px 15px;border-radius:9px;display:none;z-index:100;font-size:13px}.toast.show{display:block}
-@media(max-width:1000px){.cards{grid-template-columns:repeat(3,1fr)}.creategrid{grid-template-columns:1fr}.sticky{position:static}}
-@media(max-width:720px){.sidebar{width:68px;padding:12px 7px}.navbtn{font-size:0;text-align:center}.navbtn::first-letter{font-size:18px}.navsection{display:none}.main{padding:15px}.cards{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.services{grid-template-columns:1fr 1fr}.topbar{padding:0 13px}}
+.banner-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.banner-card{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden}.banner-card img{width:100%;aspect-ratio:4.8/1;object-fit:cover;background:#f1f3f5;display:block}.banner-info{padding:13px}.banner-meta{font-size:12px;color:var(--muted);line-height:1.6;margin-top:6px}.banner-actions{display:flex;gap:8px;margin-top:12px}.banner-actions .btn{flex:1}.banner-note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:6px}.banner-preview{width:100%;aspect-ratio:4.8/1;object-fit:cover;border-radius:10px;background:#f1f3f5}
+@media(max-width:1000px){.cards{grid-template-columns:repeat(3,1fr)}.creategrid{grid-template-columns:1fr}.sticky{position:static}.banner-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.sidebar{width:68px;padding:12px 7px}.navbtn{font-size:0;text-align:center}.navbtn::first-letter{font-size:18px}.navsection{display:none}.main{padding:15px}.cards{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.services{grid-template-columns:1fr 1fr}.topbar{padding:0 13px}.banner-grid{grid-template-columns:1fr}.search{min-width:0;width:100%}}
 
-/* ===== Mobile / Tablet Responsive Enhancements ===== */
-html,body{max-width:100%;overflow-x:hidden}
-*{min-width:0}
-img,svg{max-width:100%;height:auto}
-button,input,select,textarea{max-width:100%}
-
-@media (max-width: 900px){
-  .topbar{padding:12px 16px;gap:10px;flex-wrap:wrap}
-  .layout{display:block}
-  .sidebar{
-    width:100%;height:auto;position:relative;display:flex;gap:6px;
-    overflow-x:auto;padding:8px;border-right:0;border-bottom:1px solid #dfe4e8;
-    white-space:nowrap;z-index:5
-  }
-  .sidebar .navsection{display:none}
-  .sidebar .navbtn{flex:0 0 auto}
-  .main{width:100%;padding:20px 16px}
-  .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .toolbar{flex-wrap:wrap}
-  .toolbar>*{max-width:100%}
-  .publicgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-
-@media (max-width: 640px){
-  body{font-size:14px}
-  .topbar{padding:10px 12px}
-  .topbar .brand{font-size:20px}
-  .topbar .brand small{font-size:9px}
-  .topbar>div:last-child{width:100%;display:flex!important}
-  .topbar>div:last-child .btn{flex:1}
-  .sidebar{padding:7px 8px}
-  .sidebar .navbtn{padding:9px 11px;font-size:12px}
-  .main{padding:16px 12px}
-  h1{font-size:24px;line-height:1.15}
-  h2{font-size:18px}
-  .sub{font-size:12px}
-  .cards{grid-template-columns:1fr 1fr;gap:8px}
-  .card,.panel{padding:12px;border-radius:10px}
-  .toolbar{display:grid;grid-template-columns:1fr;gap:8px}
-  .toolbar .btn,.toolbar input,.toolbar select{width:100%}
-  .search{width:100%}
-  table{min-width:720px}
-  .tablewrap,.table-container{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .publicgrid{grid-template-columns:1fr}
-  .publicbar{display:block}
-  .publicbar input{width:100%;margin-bottom:10px}
-  .categorychips{overflow-x:auto;display:flex;flex-wrap:nowrap;padding-bottom:5px}
-  .categorychips>*{flex:0 0 auto}
-  .formgrid{grid-template-columns:1fr!important}
-  .serviceRow{grid-template-columns:1fr auto!important}
-  .modal{width:calc(100vw - 24px);max-height:92vh}
-  .modal .formgrid{grid-template-columns:1fr!important}
-  .btn{min-height:40px}
-  .preview{overflow:hidden}
-}
-
-@media (max-width: 420px){
-  .cards{grid-template-columns:1fr}
-  .topbar>div:last-child{gap:6px}
-  .topbar>div:last-child .btn{font-size:11px;padding:8px 9px}
-  .main{padding:14px 9px}
-  .panel{padding:10px}
-  .cards .card{min-height:0}
-}
-
-/* Prevent long business names/IDs from breaking the mobile layout */
-.publicgrid .ad,
-.publicgrid .ad *{overflow-wrap:anywhere;word-break:break-word}
-
-
-/* Premium banner management */
-.premium-banner-preview{width:100%;aspect-ratio:4.8/1;object-fit:cover;border-radius:12px;background:#f1f3f5;border:1px solid #dfe4e8}
-.banner-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.banner-card{background:#fff;border:1px solid #dfe4e8;border-radius:12px;overflow:hidden}
-.banner-card img{width:100%;aspect-ratio:4.8/1;object-fit:cover;background:#f1f3f5}
-.banner-info{padding:12px}.banner-meta{font-size:11px;color:#6b7280;line-height:1.55;margin-top:5px}
-.banner-actions{display:flex;gap:7px;margin-top:10px}.banner-actions .btn{flex:1}
-.banner-note{font-size:11px;color:#6b7280;line-height:1.5;margin-top:6px}
-@media(max-width:900px){.banner-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:640px){.banner-grid{grid-template-columns:1fr}}
-
+.premium-section{margin-top:24px;margin-bottom:26px}
+.premium-banner-wrap{position:relative;width:100%;overflow:hidden;border-radius:16px;background:#eef2f4;border:1px solid var(--border);min-height:110px}
+.premium-banner-img{display:block;width:100%;aspect-ratio:4.8/1;object-fit:cover}
+.premium-banner-label{position:absolute;left:12px;top:12px;background:rgba(0,0,0,.68);color:#fff;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.08em}
+.premium-banner-business{position:absolute;left:14px;bottom:12px;background:rgba(0,0,0,.68);color:#fff;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700}
+.premium-banner-controls{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px}
+.premium-banner-dots{display:flex;gap:5px;flex-wrap:wrap}
+.premium-dot{width:7px;height:7px;border-radius:50%;background:#c9d0d5}
+.premium-dot.active{background:var(--green)}
+.premium-banner-empty{display:none}
+@media(max-width:700px){.premium-banner-wrap{border-radius:12px}.premium-banner-label{font-size:9px}.premium-banner-business{font-size:10px;bottom:8px;left:9px}}
 </style>
 </head>
 <body>
-<div id="loginView" class="login">
-  <div class="loginbox">
-    <div class="brand">Adspool <small>MVP</small></div>
-    <h1 style="margin-top:20px">Admin Login</h1>
-    <p class="sub" style="margin-bottom:10px">Local business advertising control panel</p>
-    <div class="field"><label>Email</label><input id="loginEmail" type="email"></div>
-    <div class="field"><label>Password</label><input id="loginPassword" type="password"></div>
-    <div id="loginError" class="error"></div>
-    <button class="btn primary" style="width:100%" onclick="login()">Sign in</button>
-    <div class="hint">Demo credentials: admin@adspool.local / admin123</div>
-    <button class="btn" style="width:100%;margin-top:10px" onclick="enterPublic()">View Public Ads</button>
-  </div>
-</div>
+<div id="loginView" class="login"><div class="loginbox">
+<div class="brand">Adspool <small>ADMIN MVP</small></div><h1 style="margin-top:20px">Admin Login</h1>
+<p class="sub" style="margin-bottom:10px">Local business advertising control panel</p>
+<div class="field"><label>Email</label><input id="loginEmail" type="email" autocomplete="username"></div>
+<div class="field"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password"></div>
+<div id="loginError" class="error"></div><button class="btn primary" style="width:100%" onclick="login()">Sign in</button>
+</div></div>
 
 <div id="app" class="app" style="display:none">
-  <header class="topbar">
-    <div class="brand">Adspool <small>ADMIN MVP</small></div>
-    <div style="display:flex;gap:8px"><button class="btn small" onclick="showView('public')">Public Website</button><button class="btn small" onclick="logout()">Logout</button></div>
-  </header>
-  <div class="layout">
-    <aside class="sidebar">
-      <button class="navbtn active" data-view="dashboard" onclick="showView('dashboard')">▣ &nbsp; Dashboard</button>
-      <button class="navbtn" data-view="ads" onclick="showView('ads')">▤ &nbsp; Advertisements</button>
-<button class="navbtn" onclick="showPage('premium-banners')">Premium Banners</button>
-      <button class="navbtn" data-view="create" onclick="startCreate()">＋ &nbsp; Create Ad</button>
-      <div class="navsection">Views</div>
-      <button class="navbtn" data-view="published" onclick="setAdStatusFilter('published')">● &nbsp; Published</button>
-      <button class="navbtn" data-view="scheduled" onclick="setAdStatusFilter('scheduled')">◷ &nbsp; Scheduled</button>
-      <button class="navbtn" data-view="drafts" onclick="setAdStatusFilter('draft')">◌ &nbsp; Drafts</button>
-      <button class="navbtn" data-view="expired" onclick="setAdStatusFilter('expired')">○ &nbsp; Expired</button>
-      <button class="navbtn" data-view="categories" onclick="showView('categories')">☷ &nbsp; Categories</button>
-      <button class="navbtn" data-view="public" onclick="showView('public')">↗ &nbsp; Public Ads</button>
-    </aside>
+<header class="topbar"><div class="brand">Adspool <small>ADMIN MVP</small></div><div style="display:flex;gap:8px"><button class="btn small" onclick="showView('public')">Public Website</button><button class="btn small" onclick="logout()">Logout</button></div></header>
+<div class="layout"><aside class="sidebar">
+<button class="navbtn active" data-view="dashboard" onclick="showView('dashboard')">▣ &nbsp; Dashboard</button>
+<button class="navbtn" data-view="ads" onclick="showView('ads')">▤ &nbsp; Advertisements</button>
+<button class="navbtn" data-view="create" onclick="startCreate()">＋ &nbsp; Create Ad</button>
+<div class="navsection">Views</div>
+<button class="navbtn" data-view="published" onclick="setAdStatusFilter('published')">● &nbsp; Published</button>
+<button class="navbtn" data-view="scheduled" onclick="setAdStatusFilter('scheduled')">◷ &nbsp; Scheduled</button>
+<button class="navbtn" data-view="drafts" onclick="setAdStatusFilter('draft')">◌ &nbsp; Drafts</button>
+<button class="navbtn" data-view="expired" onclick="setAdStatusFilter('expired')">○ &nbsp; Expired</button>
+<button class="navbtn" data-view="categories" onclick="showView('categories')">☷ &nbsp; Categories</button>
+<button class="navbtn" data-view="premium-banners" onclick="showView('premium-banners')">▣ &nbsp; Premium Banners</button>
+<button class="navbtn" data-view="public" onclick="showView('public')">↗ &nbsp; Public Ads</button>
+</aside>
+<main class="main">
+<section id="dashboard" class="view active"><h1>Dashboard</h1><p class="sub">Manage local business advertisements.</p><div id="dashCards" class="cards"></div><div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h2>Recently created</h2><p class="sub" style="margin:0">Latest advertisements in your system.</p></div><button class="btn primary" onclick="startCreate()">+ Create Advertisement</button></div><div id="recentAds" style="margin-top:12px"></div></div></section>
+<section id="ads" class="view"><h1>Advertisements</h1><p class="sub">Search, filter, edit and publish your ads.</p><div class="panel"><div class="toolbar"><input id="adSearch" class="search" placeholder="Search Ad ID, business, phone..." oninput="renderAdsTable(1)"><select id="adCategoryFilter" onchange="renderAdsTable(1)"></select><select id="adStatusFilter" onchange="renderAdsTable(1)"><option value="all">All statuses</option><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="published">Published</option><option value="expired">Expired</option><option value="unpublished">Unpublished</option></select><select id="adPageSize" onchange="renderAdsTable(1)"><option>10</option><option selected>20</option><option>50</option><option>100</option></select><button class="btn" onclick="clearAdFilters()">Clear</button></div><div id="adsTable"></div></div></section>
+<section id="create" class="view"><h1 id="formTitle">Create Advertisement</h1><p class="sub">Enter the details and watch the advertisement update live.</p><div class="creategrid"><div class="panel"><div class="formgrid">
+<div class="field"><label>Business Name *</label><input id="fBusiness" maxlength="80" oninput="updatePreview()"></div><div class="field"><label>Category *</label><select id="fCategory"></select></div>
+<div class="field full"><label>Services</label><div id="servicesContainer" class="servicesDynamic"></div><button type="button" class="btn small" style="width:max-content;margin-top:8px" onclick="addService()">+ Add Service</button></div>
+<div class="field full"><label>Address *</label><textarea id="fAddress" rows="3" maxlength="250" oninput="updatePreview()"></textarea></div><div class="field"><label>Phone *</label><input id="fPhone" maxlength="30" oninput="updatePreview()"></div><div class="field"><label>WhatsApp (optional)</label><input id="fWhatsapp" maxlength="30"></div>
+<div class="field full"><label>Background Color</label><div class="colorrow"><div id="swatches" class="swatches"></div><input id="fColor" class="colorinput" type="color" value="#ffffff" onchange="setColor(this.value)"><span id="contrastLabel" class="hint"></span></div></div>
+<div class="field"><label>Start Date & Time *</label><input id="fStart" type="datetime-local"></div><div class="field"><label>End Date & Time *</label><input id="fEnd" type="datetime-local"></div>
+</div><div class="actions"><button class="btn" onclick="saveAd('draft')">Save Draft</button><button class="btn primary" onclick="saveAd('publish')">Publish</button></div></div>
+<div class="sticky"><div class="panel"><h2>Live Preview</h2><div class="previewwrap"><div id="adPreview" class="ad"></div></div><div id="previewId" class="hint" style="text-align:center;margin-top:10px"></div></div></div></div></section>
+<section id="categories" class="view"><h1>Categories</h1><p class="sub">Manage the categories available while creating advertisements.</p><div class="panel"><div class="toolbar"><input id="newCategory" placeholder="New category name"><button class="btn primary" onclick="addCategory()">Add Category</button></div><div id="categoryList"></div></div></section>
 
-    <main class="main">
-      <section id="dashboard" class="view active">
-        <h1>Dashboard</h1><p class="sub">Manage local business advertisements.</p>
-        <div id="dashCards" class="cards"></div>
-        <div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h2>Recently created</h2><p class="sub" style="margin:0">Latest advertisements in your system.</p></div><button class="btn primary" onclick="startCreate()">+ Create Advertisement</button></div><div id="recentAds" style="margin-top:12px"></div></div>
-      </section>
-
-      <section id="ads" class="view">
-        <h1>Advertisements</h1><p class="sub">Search, filter, edit and publish your ads.</p>
-        <div class="panel">
-          <div class="toolbar">
-            <input id="adSearch" class="search" placeholder="Search Ad ID, business, phone..." oninput="renderAdsTable(1)">
-            <select id="adCategoryFilter" onchange="renderAdsTable(1)"></select>
-            <select id="adStatusFilter" onchange="renderAdsTable(1)">
-              <option value="all">All statuses</option><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="published">Published</option><option value="expired">Expired</option><option value="unpublished">Unpublished</option>
-            </select>
-            <select id="adPageSize" onchange="renderAdsTable(1)"><option>10</option><option selected>20</option><option>50</option><option>100</option></select>
-            <button class="btn" onclick="clearAdFilters()">Clear</button>
-          </div>
-          <div id="adsTable"></div>
-        </div>
-      </section>
-
-      <section id="create" class="view">
-        <h1 id="formTitle">Create Advertisement</h1><p class="sub">Enter the details and watch the advertisement update live.</p>
-        <div class="creategrid">
-          <div class="panel">
-            <div class="formgrid">
-              <div class="field"><label>Business Name *</label><input id="fBusiness" maxlength="80" oninput="updatePreview()"></div>
-              <div class="field"><label>Category *</label><select id="fCategory"></select></div>
-              <div class="field full"><label>Services</label><div id="servicesContainer" class="servicesDynamic"></div><button type="button" class="btn small" style="width:max-content;margin-top:8px" onclick="addService()">+ Add Service</button><div class="hint">Add as many services as needed. The preview automatically adjusts the text size and wraps the content.</div></div>
-              <div class="field full"><label>Address *</label><textarea id="fAddress" rows="3" maxlength="250" oninput="updatePreview()"></textarea></div>
-              <div class="field"><label>Phone *</label><input id="fPhone" maxlength="30" oninput="updatePreview()"></div>
-              <div class="field"><label>WhatsApp (optional)</label><input id="fWhatsapp" maxlength="30"></div>
-              <div class="field full"><label>Background Color</label>
-                <div class="colorrow"><div id="swatches" class="swatches"></div><input id="fColor" class="colorinput" type="color" value="#ffffff" onchange="setColor(this.value)"><span id="contrastLabel" class="hint"></span></div>
-              </div>
-              <div class="field"><label>Start Date & Time *</label><input id="fStart" type="datetime-local"></div>
-              <div class="field"><label>End Date & Time *</label><input id="fEnd" type="datetime-local"></div>
-            </div>
-            <div class="actions">
-              <button class="btn" onclick="saveAd('draft')">Save Draft</button>
-              <button class="btn primary" onclick="saveAd('publish')">Publish</button>
-            </div>
-          </div>
-          <div class="sticky">
-            <div class="panel"><h2>Live Preview</h2><div class="previewwrap"><div id="adPreview" class="ad"></div></div><div id="previewId" class="hint" style="text-align:center;margin-top:10px"></div></div>
-          </div>
-        </div>
-      </section>
-
-      <section id="categories" class="view">
-        <h1>Categories</h1><p class="sub">Manage the categories available while creating advertisements.</p>
-        <div class="panel"><div class="toolbar"><input id="newCategory" placeholder="New category name"><button class="btn primary" onclick="addCategory()">Add Category</button></div><div id="categoryList"></div></div>
-      </section>
-
-      <section id="public" class="view">
-        <h1>Public Ads</h1><p class="sub">This is the visitor-facing view. Only currently active advertisements appear.</p>
-        <div class="publicbar"><input id="publicSearch" class="search" placeholder="Search business, service or location..." oninput="renderPublic()"><div id="categoryChips" class="categorychips"></div></div>
-        <div id="publicGrid" class="publicgrid"></div>
-      </section>
-    
-<section id="page-premium-banners" class="page" style="display:none">
-  <div class="pagehead">
-    <div><h1>Premium Banners</h1><div class="sub">Upload finished 1920 × 400 creatives, assign a category and schedule the banner.</div></div>
-  </div>
-  <div class="panel" style="margin-bottom:16px">
-    <div class="formgrid">
-      <div><label>Banner Creative</label><input id="premiumImage" type="file" accept="image/jpeg,image/png,image/webp"><div class="banner-note">Recommended: 1920 × 400 px (4.8:1). JPG/WebP preferred. The creative is designed separately; Admin only uploads and schedules it.</div></div>
-      <div><label>Business Name</label><input id="premiumBusiness" placeholder="Business / Brand name"></div>
-      <div><label>Category</label><select id="premiumCategory"></select></div>
-      <div><label>Start Date</label><input id="premiumStart" type="datetime-local"></div>
-      <div><label>Expiry Date</label><input id="premiumEnd" type="datetime-local"></div>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
-      <button class="btn primary" onclick="savePremiumBanner()">Upload & Schedule</button>
-      <button class="btn" onclick="clearPremiumForm()">Clear</button>
-    </div>
-  </div>
-  <div class="pagehead" style="margin-bottom:10px">
-    <div><h2>Uploaded Premium Banners</h2><div class="sub">Active banners rotate automatically on the public site.</div></div>
-    <select id="premiumFilter" onchange="renderPremiumAdmin()"><option value="all">All</option><option value="active">Active</option><option value="scheduled">Scheduled</option><option value="expired">Expired</option></select>
-  </div>
-  <div id="premiumAdminGrid" class="banner-grid"></div>
+<section id="premium-banners" class="view">
+<h1>Premium Banners</h1><p class="sub">Upload finished premium creatives and control where and when they appear.</p>
+<div class="panel"><h2>Upload Premium Banner</h2>
+<div class="formgrid">
+<div class="field"><label>Banner Creative *</label><input id="premiumImage" type="file" accept="image/jpeg,image/png,image/webp"><div class="banner-note">Recommended: 1920 × 400 px (4.8:1). Create the artwork separately; this portal is for uploading and scheduling it.</div></div>
+<div class="field"><label>Business / Brand Name *</label><input id="premiumBusiness" maxlength="100" placeholder="Example: ABC Automobiles"></div>
+<div class="field"><label>Category *</label><select id="premiumCategory"></select></div>
+<div class="field"><label>Start Date & Time *</label><input id="premiumStart" type="datetime-local"></div>
+<div class="field"><label>Expiry Date & Time *</label><input id="premiumEnd" type="datetime-local"></div>
+<div class="field full"><label>Preview</label><div id="premiumPreview"><div class="empty" style="border:1px dashed #cfd5dc;border-radius:10px">Choose a banner to preview it here.</div></div></div>
+</div>
+<div class="actions"><button class="btn" onclick="clearPremiumForm()">Clear</button><button class="btn primary" onclick="savePremiumBanner()">Upload & Schedule</button></div>
+</div>
+<div class="panel"><div class="toolbar"><h2 style="margin:0;flex:1">Uploaded Premium Banners</h2><select id="premiumFilter" onchange="renderPremiumAdmin()"><option value="all">All</option><option value="active">Active</option><option value="scheduled">Scheduled</option><option value="expired">Expired</option></select></div><div id="premiumAdminGrid" class="banner-grid"></div></div>
 </section>
 
-</main>
-  </div>
-</div>
-<div id="toast" class="toast"></div>
+<section id="public" class="view"><h1>Public Ads</h1><p class="sub">This is the visitor-facing view. Only currently active advertisements appear.</p><div class="publicbar"><input id="publicSearch" class="search" placeholder="Search business, service or location..." oninput="renderPublic()"><div id="categoryChips" class="categorychips"></div></div><div id="adminPublicPremium" class="premium-section" style="display:none;margin-top:16px">
+<div class="section-head" style="margin-bottom:10px"><div><h2 style="font-size:18px">Premium Banners</h2><p>Active premium banners for the selected category.</p></div></div>
+<div id="adminPublicPremiumWrap" class="premium-banner-wrap"></div></div><div id="publicGrid" class="publicgrid"></div></section>
+</main></div></div><div id="toast" class="toast"></div>
 
 <script>
-const STORAGE='adspool_mvp_v1';
+const STORAGE='adspool_mvp_v1', PREMIUM_STORAGE='adspool_premium_banners_v1';
 const defaultCategories=['Automobile','Lawyers','Doctors & Clinics','Salons & Beauty','Restaurants & Food','Shops & Retail','Real Estate','Education & Training','Hotels & Travel','Home Services','Finance & Insurance','IT & Digital Services','Construction','Interior Design','Electrical & Plumbing','Health & Fitness','Wedding & Events','Manufacturers','Professional Services','Other'];
 const swatches=['#ffffff','#f2f4f7','#dff3ff','#e4f7e8','#fff6bf','#ffe6c7','#ffe1ea','#173a67','#155b3a','#4b2a72','#7c1d1d','#111111'];
-let state={ads:[],categories:defaultCategories.map((name,i)=>({id:i+1,name,active:true})),nextId:1};
-let editingId=null, adsPage=1, publicCategory='all';
+let state={ads:[],categories:defaultCategories.map((name,i)=>({id:i+1,name,active:true})),nextId:1}, premiumBanners=[],editingId=null,adsPage=1,publicCategory='all';
 
-function load(){try{const x=JSON.parse(localStorage.getItem(STORAGE));if(x){state=x;}}catch(e){} normalize(); renderAll();}
-function normalize(){state.ads.forEach(a=>refreshStatus(a)); if(!state.nextId) state.nextId=(state.ads.reduce((m,a)=>Math.max(m,parseInt(String(a.adId||'').replace(/\D/g,''))||0),0)+1);}
-function persist(){localStorage.setItem(STORAGE,JSON.stringify(state));}
-function now(){return new Date();}
-function refreshStatus(a){
-  // Drafts and manually unpublished ads stay that way until an admin action.
-  if(a.status==='unpublished'||a.status==='draft') return a.status;
-
-  const nowMs=Date.now();
-  const startMs=Date.parse(a.startAt);
-  const endMs=Date.parse(a.endAt);
-  if(Number.isNaN(startMs)||Number.isNaN(endMs)) return a.status;
-
-  // Scheduled: start time is still in the future.
-  if(nowMs < startMs){
-    a.status='scheduled';
-    a.expiredAt=null;
-  // Published: current time is inside the active window.
-  }else if(nowMs <= endMs){
-    a.status='published';
-    a.expiredAt=null;
-  // Expired: end time has passed. This is checked automatically.
-  }else{
-    a.status='expired';
-    a.expiredAt=a.expiredAt||new Date().toISOString();
-  }
-  return a.status;
-}
-function refreshAllStatuses(){
-  let changed=false;
-  state.ads.forEach(a=>{
-    const before=a.status;
-    refreshStatus(a);
-    if(before!==a.status) changed=true;
-  });
-  if(changed) persist();
-  return changed;
-}
-function runExpiryScheduler(){
-  const changed=refreshAllStatuses();
-  // Refresh any visible lists immediately when an ad changes state.
-  const activeView=document.querySelector('.view.active')?.id;
-  if(changed){
-    renderDashboard();
-    if(['ads','published','scheduled','drafts','expired'].includes(activeView)) renderAdsTable(adsPage);
-    if(activeView==='public') renderPublic();
-  }else if(activeView==='public'){
-    // Keep the public page accurate even when an ad expires while it is open.
-    renderPublic();
-  }
-}
-function formatDate(v){if(!v)return '-';return new Date(v).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'});}
-function adNumber(){const n=state.nextId++;return 'ADS-'+String(n).padStart(6,'0');}
-function contrast(hex){hex=hex.replace('#','');const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);const lum=(0.299*r+0.587*g+0.114*b);return lum>155?'#111827':'#ffffff';}
-function showToast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
-function login(){
-  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
-  const password=document.getElementById('loginPassword').value;
-  document.getElementById('loginError').textContent='';
-  if(email==='praveen@adspool.com' && password==='adspool123'){
-    sessionStorage.adspool='1';
-    document.getElementById('loginView').style.display='none';
-    document.getElementById('app').style.display='block';
-    load();
-  }else{
-    document.getElementById('loginError').textContent='Invalid email or password.';
-  }
-}
-function logout(){sessionStorage.removeItem('adspool');location.reload()}
-function enterPublic(){document.getElementById('loginView').style.display='none';document.getElementById('app').style.display='block';load();showView('public')}
-function showView(v){
-  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById(v).classList.add('active');
-  document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
-  if(v==='dashboard')renderDashboard();if(v==='ads'||v==='published'||v==='scheduled'||v==='drafts'||v==='expired')renderAdsTable(1);if(v==='categories')renderCategories();if(v==='public')renderPublic();
-}
-function startCreate(){editingId=null;clearForm();document.getElementById('formTitle').textContent='Create Advertisement';document.getElementById('previewId').textContent='New advertisement — Ad ID generated when saved';showView('create');}
-function clearForm(){
-  ['fBusiness','fAddress','fPhone','fWhatsapp'].forEach(id=>document.getElementById(id).value=''); document.getElementById('servicesContainer').innerHTML=''; addService(); addService(); addService();
-  document.getElementById('fCategory').value=state.categories.find(c=>c.active)?.id||'';
-  document.getElementById('fColor').value='#ffffff';setColor('#ffffff');
-  const d=new Date(), end=new Date(Date.now()+30*86400000);document.getElementById('fStart').value=toLocalInput(d);document.getElementById('fEnd').value=toLocalInput(end);updatePreview();
-}
-function toLocalInput(d){const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);return x.toISOString().slice(0,16)}
-function fillCategorySelects(){const active=state.categories.filter(c=>c.active);document.getElementById('fCategory').innerHTML=active.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');document.getElementById('adCategoryFilter').innerHTML='<option value="all">All categories</option>'+state.categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');}
-function getFormServices(){return [...document.querySelectorAll('#servicesContainer .serviceInput')].map(x=>x.value.trim()).filter(Boolean)}
-function addService(value=''){
-  const box=document.getElementById('servicesContainer'); if(!box)return;
-  const count=box.querySelectorAll('.serviceRow').length;
-  if(count>=15){showToast('Maximum 15 services for this MVP.');return}
-  const row=document.createElement('div'); row.className='serviceRow';
-  const input=document.createElement('input'); input.className='serviceInput'; input.maxLength=70; input.placeholder='Service '+(count+1); input.value=value; input.oninput=updatePreview;
-  const remove=document.createElement('button'); remove.type='button'; remove.className='btn serviceRemove'; remove.textContent='×'; remove.title='Remove service'; remove.onclick=()=>{row.remove();renumberServices();updateServiceRemoveButtons();updatePreview()};
-  row.append(input,remove); box.appendChild(row); updateServiceRemoveButtons(); updatePreview();
-}
-function renumberServices(){document.querySelectorAll('#servicesContainer .serviceInput').forEach((x,i)=>x.placeholder='Service '+(i+1))}
-function updateServiceRemoveButtons(){const rows=document.querySelectorAll('#servicesContainer .serviceRow');document.querySelectorAll('#servicesContainer .serviceRemove').forEach(b=>b.disabled=rows.length<=1)}
-function renderServiceInputs(values=[]){
-  const box=document.getElementById('servicesContainer'); box.innerHTML='';
-  (values.length?values:['','','']).forEach(v=>addService(v));
-}
-function getAdSizing(ad){
-  const services=(ad.services||[]).filter(Boolean);
-  const chars=services.reduce((n,x)=>n+x.length,0);
-  const name=(ad.businessName||'Business Name').length;
-  const phone=(ad.phone||'').length;
-  const address=(ad.address||'').length;
-
-  let serviceSize=17;
-  if(services.length>=4) serviceSize=15;
-  if(services.length>=6) serviceSize=13;
-  if(services.length>=9) serviceSize=12;
-  if(services.length>=12) serviceSize=11;
-  if(chars>90) serviceSize=Math.min(serviceSize,13);
-  if(chars>130) serviceSize=Math.min(serviceSize,12);
-  if(chars>180) serviceSize=Math.min(serviceSize,11);
-
-  let addressSize=16;
-  if(address>75) addressSize=14;
-  if(address>115) addressSize=13;
-  if(address>160) addressSize=12;
-
-  let nameSize=27;
-  if(name>24) nameSize=23;
-  if(name>34) nameSize=20;
-  if(name>48) nameSize=18;
-
-  let phoneSize=28;
-  if(phone>12) phoneSize=24;
-  if(phone>15) phoneSize=21;
-  if(phone>18) phoneSize=18;
-
-  // Header grows only when the business name wraps.
-  const nameLines=Math.max(1,Math.ceil(name/26));
-  const headerHeight=Math.max(62,Math.ceil(nameLines*nameSize*1.05+24));
-
-  // The middle section owns services + address. The phone is never included
-  // in this calculation because it is a fixed footer.
-  const serviceCharsPerLine=Math.max(20,Math.floor(390/(serviceSize*0.56)));
-  const serviceLines=services.length
-    ? Math.max(1,Math.ceil(chars/serviceCharsPerLine))
-    : 1;
-
-  const addressCharsPerLine=Math.max(24,Math.floor(390/(addressSize*0.55)));
-  const addressLines=Math.max(1,Math.ceil(address/addressCharsPerLine));
-
-  const bodyHeight=Math.max(
-    110,
-    Math.ceil(
-      serviceLines*serviceSize*1.2 +
-      addressLines*addressSize*1.25 +
-      24
-    )
-  );
-
-  // Fixed footer: phone always sits at the bottom.
-  const footerHeight=58;
-
-  return {
-    serviceSize,addressSize,nameSize,phoneSize,
-    minHeight:Math.ceil(headerHeight+bodyHeight+footerHeight)
-  };
-}
-function adMarkup(ad){
-  const bg=ad.backgroundColor||'#ffffff',fg=ad.textColor||contrast(bg),s=getAdSizing(ad);
-  const services=(ad.services||[]).filter(Boolean);
-  const serviceHtml=services.length?services.map(esc).join(' <span class="bullet">•</span> '):'Service-1 <span class="bullet">•</span> Service-2 <span class="bullet">•</span> Service-3';
-  return `<div class="ad" style="color:${fg};background:${bg};min-height:${s.minHeight}px">
-    <div class="adhead" style="font-size:${s.nameSize}px">${esc(ad.businessName||'Business Name')}</div>
-    <div class="adbody"><div class="servicesline" style="font-size:${s.serviceSize}px">${serviceHtml}</div><div class="address" style="font-size:${s.addressSize}px">${esc(ad.address||'')}</div></div>
-    <div class="adphone" style="font-size:${s.phoneSize}px">${esc(ad.phone||'')}</div>
-  </div>`;
-}
-function updatePreview(){
-  const bg=document.getElementById('fColor').value||'#fff',fg=contrast(bg);
-  document.getElementById('contrastLabel').textContent='Automatic text: '+(fg==='#ffffff'?'White':'Black');
-  const ad={businessName:document.getElementById('fBusiness').value.trim()||'Business Name',services:getFormServices(),address:document.getElementById('fAddress').value.trim()||'12, 3rd Block, Jayanagar 5th Block, Bangalore-34',phone:document.getElementById('fPhone').value.trim()||'+91 9001009001',backgroundColor:bg,textColor:fg};
-  document.getElementById('adPreview').innerHTML=adMarkup(ad);
-  document.getElementById('adPreview').style.background='transparent';
-}
-function setColor(c){document.getElementById('fColor').value=c;document.querySelectorAll('.swatch').forEach(s=>s.classList.toggle('selected',s.dataset.color.toLowerCase()===c.toLowerCase()));updatePreview();}
-function renderSwatches(){document.getElementById('swatches').innerHTML=swatches.map(c=>`<button class="swatch" title="${c}" data-color="${c}" style="background:${c}" onclick="setColor('${c}')"></button>`).join('');}
-function validateForm(){
-  const b=document.getElementById('fBusiness').value.trim(),cat=document.getElementById('fCategory').value,address=document.getElementById('fAddress').value.trim(),phone=document.getElementById('fPhone').value.trim(),s=document.getElementById('fStart').value,e=document.getElementById('fEnd').value;
-  if(!b||!cat||!address||!phone||!s||!e){showToast('Please fill all required fields.');return false}
-  if(new Date(e)<=new Date(s)){showToast('End date/time must be after start date/time.');return false}
-  return true;
-}
-function saveAd(mode){
-  if(!validateForm())return;
-  const data={businessName:document.getElementById('fBusiness').value.trim(),categoryId:Number(document.getElementById('fCategory').value),services:getFormServices(),address:document.getElementById('fAddress').value.trim(),phone:document.getElementById('fPhone').value.trim(),whatsapp:document.getElementById('fWhatsapp').value.trim(),backgroundColor:document.getElementById('fColor').value,textColor:contrast(document.getElementById('fColor').value),startAt:new Date(document.getElementById('fStart').value).toISOString(),endAt:new Date(document.getElementById('fEnd').value).toISOString(),updatedAt:new Date().toISOString()};
-  if(editingId){const a=state.ads.find(x=>x.id===editingId);Object.assign(a,data);if(mode==='publish'&&a.status!=='unpublished')a.status='published';else if(mode==='draft')a.status='draft';refreshStatus(a);showToast('Advertisement updated.');}
-  else {const a={id:crypto.randomUUID(),adId:adNumber(),...data,createdAt:new Date().toISOString(),publishedAt:null,unpublishedAt:null,expiredAt:null,status:'draft'};if(mode==='publish'){a.publishedAt=new Date().toISOString();a.status='published';refreshStatus(a)}state.ads.unshift(a);showToast('Advertisement '+a.adId+' saved.');}
-  persist();renderAll();showView('ads');
-}
-function editAd(id){const a=state.ads.find(x=>x.id===id);if(!a)return;editingId=id;document.getElementById('formTitle').textContent='Edit Advertisement — '+a.adId;document.getElementById('fBusiness').value=a.businessName;document.getElementById('fCategory').value=a.categoryId;renderServiceInputs(a.services||[]);document.getElementById('fAddress').value=a.address;document.getElementById('fPhone').value=a.phone;document.getElementById('fWhatsapp').value=a.whatsapp||'';document.getElementById('fColor').value=a.backgroundColor;document.getElementById('fStart').value=toLocalInput(new Date(a.startAt));document.getElementById('fEnd').value=toLocalInput(new Date(a.endAt));setColor(a.backgroundColor);document.getElementById('previewId').textContent=a.adId;showView('create');}
-function duplicateAd(id){const a=state.ads.find(x=>x.id===id);if(!a)return;const copy={...a,id:crypto.randomUUID(),adId:adNumber(),status:'draft',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),publishedAt:null,unpublishedAt:null,expiredAt:null};state.ads.unshift(copy);persist();renderAll();showToast('Duplicated as '+copy.adId+' (Draft)');}
-function publishAd(id){const a=state.ads.find(x=>x.id===id);if(!a)return;if(new Date(a.endAt)<=new Date(a.startAt)){showToast('Invalid schedule. Edit the ad.');return}a.status='published';a.publishedAt=a.publishedAt||new Date().toISOString();refreshStatus(a);persist();renderAll();showToast(a.status==='scheduled'?'Advertisement scheduled.':'Advertisement published.');}
-function unpublishAd(id){const a=state.ads.find(x=>x.id===id);if(!a)return;a.status='unpublished';a.unpublishedAt=new Date().toISOString();persist();renderAll();showToast('Advertisement unpublished.');}
-function deleteAd(id){const a=state.ads.find(x=>x.id===id);if(!a)return;if(confirm('Delete '+a.adId+' permanently?')){state.ads=state.ads.filter(x=>x.id!==id);persist();renderAll();showToast('Advertisement deleted.');}}
-function setAdStatusFilter(s){document.getElementById('adStatusFilter').value=s;showView('ads');renderAdsTable(1)}
-function renderAdsTable(page=adsPage){
-  refreshAllStatuses();adsPage=page;
-  const q=(document.getElementById('adSearch')?.value||'').toLowerCase(),cat=document.getElementById('adCategoryFilter')?.value||'all',status=document.getElementById('adStatusFilter')?.value||'all',size=Number(document.getElementById('adPageSize')?.value||20);
-  let arr=state.ads.filter(a=>{const text=(a.adId+' '+a.businessName+' '+a.phone).toLowerCase();return(!q||text.includes(q))&&(cat==='all'||String(a.categoryId)===cat)&&(status==='all'||a.status===status)});
-  const pages=Math.max(1,Math.ceil(arr.length/size));if(page>pages)page=pages;adsPage=page;const slice=arr.slice((page-1)*size,page*size);
-  if(!slice.length){document.getElementById('adsTable').innerHTML='<div class="empty">No advertisements found.</div>';return}
-  const rows=slice.map(a=>{const c=state.categories.find(x=>x.id===a.categoryId)?.name||'Other';return `<tr><td><b>${a.adId}</b></td><td>${esc(a.businessName)}</td><td>${esc(c)}</td><td>${formatDate(a.startAt)}</td><td>${formatDate(a.endAt)}</td><td><span class="badge ${a.status}">${a.status}</span></td><td><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn small" onclick="editAd('${a.id}')">Edit</button>${a.status==='published'||a.status==='scheduled'?`<button class="btn small" onclick="unpublishAd('${a.id}')">Unpublish</button>`:''}${a.status==='draft'||a.status==='unpublished'?`<button class="btn small primary" onclick="publishAd('${a.id}')">Publish</button>`:''}<button class="btn small" onclick="duplicateAd('${a.id}')">Duplicate</button><button class="btn small danger" onclick="deleteAd('${a.id}')">Delete</button></div></td></tr>`}).join('');
-  document.getElementById('adsTable').innerHTML=`<div class="tablewrap"><table class="table"><thead><tr><th>Ad ID</th><th>Business</th><th>Category</th><th>Start</th><th>End</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:12px;color:#6b7280"><span>Showing ${arr.length?((page-1)*size+1):0}–${Math.min(page*size,arr.length)} of ${arr.length}</span><div class="pagination">${Array.from({length:pages},(_,i)=>`<button class="pagebtn ${i+1===page?'active':''}" onclick="renderAdsTable(${i+1})">${i+1}</button>`).join('')}</div></div>`;
-}
-function clearAdFilters(){document.getElementById('adSearch').value='';document.getElementById('adCategoryFilter').value='all';document.getElementById('adStatusFilter').value='all';renderAdsTable(1)}
-function renderDashboard(){refreshAllStatuses();const counts={published:0,scheduled:0,draft:0,expired:0,unpublished:0};state.ads.forEach(a=>counts[a.status]=(counts[a.status]||0)+1);document.getElementById('dashCards').innerHTML=[['Total Ads',state.ads.length],['Published',counts.published],['Scheduled',counts.scheduled],['Drafts',counts.draft],['Expired',counts.expired]].map(x=>`<div class="card"><div class="label">${x[0]}</div><div class="num">${x[1]}</div></div>`).join('');const recent=state.ads.slice(0,8);document.getElementById('recentAds').innerHTML=recent.length?`<div class="tablewrap"><table class="table"><thead><tr><th>Ad ID</th><th>Business</th><th>Status</th><th>Created</th></tr></thead><tbody>${recent.map(a=>`<tr><td>${a.adId}</td><td>${esc(a.businessName)}</td><td><span class="badge ${a.status}">${a.status}</span></td><td>${formatDate(a.createdAt)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No ads yet. Create your first advertisement.</div>'}
-function renderCategories(){document.getElementById('categoryList').innerHTML=state.categories.map(c=>{const n=state.ads.filter(a=>a.categoryId===c.id).length;return `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #edf0f2"><div><b>${esc(c.name)}</b><span class="hint" style="margin-left:8px">${n} ads</span></div><button class="btn small" onclick="toggleCategory(${c.id})">${c.active?'Deactivate':'Activate'}</button></div>`}).join('')}
-function addCategory(){const name=document.getElementById('newCategory').value.trim();if(!name)return;if(state.categories.some(c=>c.name.toLowerCase()===name.toLowerCase())){showToast('Category already exists.');return}state.categories.push({id:Date.now(),name,active:true});document.getElementById('newCategory').value='';persist();fillCategorySelects();renderCategories();showToast('Category added.')}
-function toggleCategory(id){const c=state.categories.find(x=>x.id===id);if(c){c.active=!c.active;persist();fillCategorySelects();renderCategories();}}
-function publicActive(){refreshAllStatuses();return state.ads.filter(a=>a.status==='published'&&new Date(a.startAt)<=new Date()&&new Date(a.endAt)>=new Date())}
-function renderPublic(){
-  const q=(document.getElementById('publicSearch')?.value||'').toLowerCase();
-  const arr=publicActive().filter(a=>{const c=state.categories.find(x=>x.id===a.categoryId)?.name||'';const hay=(a.businessName+' '+a.address+' '+a.services.join(' ')+' '+c).toLowerCase();return(!q||hay.includes(q))&&(publicCategory==='all'||a.categoryId===Number(publicCategory))});
-  const chips=[`<button class="chip ${publicCategory==='all'?'active':''}" onclick="publicCategory='all';renderPublic()">All</button>`].concat(state.categories.filter(c=>c.active).map(c=>`<button class="chip ${publicCategory===String(c.id)||publicCategory===c.id?'active':''}" onclick="publicCategory='${c.id}';renderPublic()">${esc(c.name)}</button>`));
-  document.getElementById('categoryChips').innerHTML=chips.join('');
-  document.getElementById('publicGrid').innerHTML=arr.length?arr.map(a=>`<div class="publicad"><div class="mini">${adMarkup(a)}</div><div class="publicmeta"><b>${a.adId}</b> · ${esc(state.categories.find(c=>c.id===a.categoryId)?.name||'Other')}</div><div class="publicmeta">Valid until ${formatDate(a.endAt)}</div><div class="publicactions"><a class="btn small" href="tel:${esc(a.phone.replace(/\s/g,''))}">Call</a>${a.whatsapp?`<a class="btn small" target="_blank" href="https://wa.me/${encodeURIComponent(a.whatsapp.replace(/\D/g,''))}">WhatsApp</a>`:''}</div></div>`).join(''):'<div class="empty" style="grid-column:1/-1">No active advertisements found.</div>';
-}
-function renderAll(){fillCategorySelects();renderSwatches();renderDashboard();renderAdsTable(adsPage);renderCategories();updatePreview();renderPublic();}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-document.getElementById('fCategory').addEventListener('change',updatePreview);
-
-// Automatic scheduling/expiry for the static MVP. GitHub Pages has no server-side
-// cron job, so the browser checks dates on load, focus, visibility change, and every 30 seconds.
-setInterval(runExpiryScheduler,30000);
-window.addEventListener('focus',runExpiryScheduler);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)runExpiryScheduler()});
-if(sessionStorage.adspool==='1'){document.getElementById('loginView').style.display='none';document.getElementById('app').style.display='block';load()}else{document.getElementById('loginView').style.display='flex'}
-
-const PREMIUM_BANNER_STORAGE='adspool_premium_banners_v1';
-let premiumBannerData=[];
-function premiumLoad(){
-  try{premiumBannerData=JSON.parse(localStorage.getItem(PREMIUM_BANNER_STORAGE))||[]}catch(e){premiumBannerData=[]}
-  premiumBannerData.forEach(premiumStatus);
-  localStorage.setItem(PREMIUM_BANNER_STORAGE,JSON.stringify(premiumBannerData));
-  premiumCategories();renderPremiumAdmin();
+function load(){try{const x=JSON.parse(localStorage.getItem(STORAGE));if(x)state=x}catch(e){}try{premiumBanners=JSON.parse(localStorage.getItem(PREMIUM_STORAGE))||[]}catch(e){premiumBanners=[]}normalize();premiumBanners.forEach(refreshPremiumStatus);renderAll();premiumCategories();renderPremiumAdmin()}
+function normalize(){(state.ads||[]).forEach(refreshStatus);if(!state.nextId)state.nextId=1}
+function persist(){localStorage.setItem(STORAGE,JSON.stringify(state))}
+function contrast(hex){hex=hex.replace('#','');const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);return(.299*r+.587*g+.114*b)>155?'#111827':'#fff'}
+function refreshStatus(a){if(a.status==='unpublished'||a.status==='draft')return;const s=Date.parse(a.startAt),e=Date.parse(a.endAt),n=Date.now();if(Number.isNaN(s)||Number.isNaN(e))return;a.status=n<s?'scheduled':n<=e?'published':'expired'}
+function refreshPremiumStatus(b){const s=Date.parse(b.startAt),e=Date.parse(b.endAt),n=Date.now();b.status=Number.isNaN(s)||Number.isNaN(e)?b.status:n<s?'scheduled':n<=e?'active':'expired'}
+function showToast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
+function login(){if(document.getElementById('loginEmail').value.trim()==='praveen@adspool.com'&&document.getElementById('loginPassword').value==='adspool123'){sessionStorage.adspool='1';document.getElementById('loginView').style.display='none';document.getElementById('app').style.display='block';load()}else document.getElementById('loginError').textContent='Invalid admin credentials.'}
+function logout(){sessionStorage.removeItem('adspool');document.getElementById('loginEmail').value='';document.getElementById('loginPassword').value='';document.getElementById('loginError').textContent='';document.getElementById('app').style.display='none';document.getElementById('loginView').style.display='flex';}
+function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById(v).classList.add('active');document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.view===v));if(v==='dashboard')renderDashboard();if(['ads','published','scheduled','drafts','expired'].includes(v))renderAdsTable(1);if(v==='categories')renderCategories();if(v==='public')renderPublic();if(v==='premium-banners'){premiumCategories();setPremiumDefaultDates();renderPremiumAdmin()}}
+function startCreate(){editingId=null;clearForm();document.getElementById('formTitle').textContent='Create Advertisement';showView('create')}
+function clearForm(){['fBusiness','fAddress','fPhone','fWhatsapp'].forEach(id=>document.getElementById(id).value='');document.getElementById('servicesContainer').innerHTML='';addService();addService();addService();document.getElementById('fColor').value='#ffffff';setColor('#ffffff');const d=new Date(),e=new Date(Date.now()+30*86400000);document.getElementById('fStart').value=toLocalInput(d);document.getElementById('fEnd').value=toLocalInput(e);updatePreview()}
+function toLocalInput(d){const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);return x.toISOString().slice(0,16)}
+function fillCategorySelects(){const active=state.categories.filter(c=>c.active);document.getElementById('fCategory').innerHTML=active.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');document.getElementById('adCategoryFilter').innerHTML='<option value="all">All categories</option>'+state.categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}
+function premiumCategories(){const e=document.getElementById('premiumCategory');if(!e)return;e.innerHTML='<option value="">Select category</option>'+state.categories.filter(c=>c.active).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}
+function getFormServices(){return[...document.querySelectorAll('#servicesContainer .serviceInput')].map(x=>x.value.trim()).filter(Boolean)}
+function addService(value=''){const box=document.getElementById('servicesContainer'),row=document.createElement('div');row.className='serviceRow';const input=document.createElement('input');input.className='serviceInput';input.placeholder='Service';input.value=value;input.oninput=updatePreview;const remove=document.createElement('button');remove.className='btn serviceRemove';remove.textContent='×';remove.onclick=()=>{row.remove();updatePreview()};row.append(input,remove);box.append(row)}
+function adMarkup(a){const bg=a.backgroundColor||'#fff',fg=a.textColor||contrast(bg);return`<div class="ad" style="color:${fg};background:${esc(bg)}"><div class="adhead">${esc(a.businessName||'Business Name')}</div><div class="adbody"><div class="servicesline">${(a.services||[]).map(esc).join(' • ')}</div><div class="address">📍 ${esc(a.address||'')}</div></div><div class="adphone">${esc(a.phone||'')}</div></div>`}
+function updatePreview(){const bg=document.getElementById('fColor').value,fg=contrast(bg);document.getElementById('contrastLabel').textContent='Automatic text: '+(fg==='#fff'?'White':'Black');document.getElementById('adPreview').innerHTML=adMarkup({businessName:document.getElementById('fBusiness').value||'Business Name',services:getFormServices(),address:document.getElementById('fAddress').value||'Address',phone:document.getElementById('fPhone').value||'+91 9001009001',backgroundColor:bg,textColor:fg})}
+function setColor(c){document.getElementById('fColor').value=c;updatePreview()}
+function renderSwatches(){document.getElementById('swatches').innerHTML=swatches.map(c=>`<button class="swatch" style="background:${c}" onclick="setColor('${c}')"></button>`).join('')}
+function saveAd(mode){const b=document.getElementById('fBusiness').value.trim(),cat=document.getElementById('fCategory').value,address=document.getElementById('fAddress').value.trim(),phone=document.getElementById('fPhone').value.trim(),s=document.getElementById('fStart').value,e=document.getElementById('fEnd').value;if(!b||!cat||!address||!phone||!s||!e||new Date(e)<=new Date(s)){showToast('Please complete the required fields and schedule.');return}const data={businessName:b,categoryId:Number(cat),services:getFormServices(),address,phone,whatsapp:document.getElementById('fWhatsapp').value.trim(),backgroundColor:document.getElementById('fColor').value,textColor:contrast(document.getElementById('fColor').value),startAt:new Date(s).toISOString(),endAt:new Date(e).toISOString()};if(editingId)Object.assign(state.ads.find(a=>a.id===editingId),data);else state.ads.unshift({id:crypto.randomUUID(),adId:'ADS-'+String(state.nextId++).padStart(6,'0'),...data,status:mode==='draft'?'draft':'published',createdAt:new Date().toISOString()});persist();renderAll();showView('ads')}
+function setAdStatusFilter(s){document.getElementById('adStatusFilter').value=s;showView('ads');renderAdsTable(1)}
+function renderAdsTable(){refreshStatuses();const q=(document.getElementById('adSearch')?.value||'').toLowerCase(),cat=document.getElementById('adCategoryFilter')?.value||'all',st=document.getElementById('adStatusFilter')?.value||'all',arr=state.ads.filter(a=>(!q||(a.adId+' '+a.businessName+' '+a.phone).toLowerCase().includes(q))&&(cat==='all'||String(a.categoryId)===cat)&&(st==='all'||a.status===st));document.getElementById('adsTable').innerHTML=arr.length?`<div class="tablewrap"><table class="table"><thead><tr><th>Ad ID</th><th>Business</th><th>Category</th><th>Start</th><th>End</th><th>Status</th><th>Actions</th></tr></thead><tbody>${arr.map(a=>`<tr><td>${a.adId}</td><td>${esc(a.businessName)}</td><td>${esc(state.categories.find(c=>c.id===a.categoryId)?.name||'Other')}</td><td>${new Date(a.startAt).toLocaleString()}</td><td>${new Date(a.endAt).toLocaleString()}</td><td><span class="badge ${a.status}">${a.status}</span></td><td><button class="btn small danger" onclick="deleteAd('${a.id}')">Delete</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No advertisements found.</div>'}
+function refreshStatuses(){state.ads.forEach(refreshStatus);persist()}
+function deleteAd(id){if(confirm('Delete this advertisement?')){state.ads=state.ads.filter(a=>a.id!==id);persist();renderAll()}}
+function renderDashboard(){refreshStatuses();const c={published:0,scheduled:0,draft:0,expired:0};state.ads.forEach(a=>c[a.status]=(c[a.status]||0)+1);document.getElementById('dashCards').innerHTML=[['Total Ads',state.ads.length],['Published',c.published],['Scheduled',c.scheduled],['Drafts',c.draft],['Expired',c.expired]].map(x=>`<div class="card"><div class="label">${x[0]}</div><div class="num">${x[1]}</div></div>`).join('');document.getElementById('recentAds').innerHTML='<div class="empty">'+(state.ads.length?'Advertisements are available under Advertisements.':'No ads yet.')+'</div>'}
+function renderCategories(){document.getElementById('categoryList').innerHTML=state.categories.map(c=>`<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #edf0f2"><b>${esc(c.name)}</b><button class="btn small" onclick="toggleCategory(${c.id})">${c.active?'Deactivate':'Activate'}</button></div>`).join('')}
+function addCategory(){const n=document.getElementById('newCategory').value.trim();if(!n)return;state.categories.push({id:Date.now(),name:n,active:true});document.getElementById('newCategory').value='';persist();fillCategorySelects();premiumCategories();renderCategories()}
+function toggleCategory(id){const c=state.categories.find(x=>x.id===id);if(c)c.active=!c.active;persist();fillCategorySelects();premiumCategories();renderCategories()}
+function publicActive(){refreshStatuses();return state.ads.filter(a=>a.status==='published')}
+function renderPublic(){
+  const arr=publicActive();
+  const q=(document.getElementById('publicSearch')?.value||'').toLowerCase();
+  const cats=[{id:'all',name:'All Categories'},...state.categories.filter(c=>c.active)];
+  document.getElementById('categoryChips').innerHTML=cats.map(c=>`<button class="chip ${publicCategory===String(c.id)?'active':''}" onclick="publicCategory='${String(c.id).replace(/'/g,"\\'")}';renderPublic()">${esc(c.name)}</button>`).join('');
+  const filtered=arr.filter(a=>(publicCategory==='all'||String(a.categoryId)===publicCategory)&&(!q||(a.businessName+' '+(a.services||[]).join(' ')+' '+a.address).toLowerCase().includes(q)));
+  document.getElementById('publicGrid').innerHTML=filtered.length?filtered.map(a=>`<div class="publicad"><div class="mini">${adMarkup(a)}</div><div class="publicmeta">${esc(a.businessName)}</div></div>`).join(''):'<div class="empty">No active advertisements found.</div>';
 }
-function premiumStatus(b){
-  const s=Date.parse(b.startAt),e=Date.parse(b.endAt),n=Date.now();
-  if(!Number.isNaN(s)&&!Number.isNaN(e))b.status=n<s?'scheduled':n<=e?'active':'expired';
-}
-function premiumCategories(){
-  const el=document.getElementById('premiumCategory');if(!el)return;
-  const cats=(state.categories||[]).filter(c=>c.active);
-  el.innerHTML='<option value="">Select category</option>'+cats.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+
+function fileData(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
+function setPremiumDefaultDates(){
+  const s=document.getElementById('premiumStart'),e=document.getElementById('premiumEnd');
+  if(!s||!e)return;
+  const now=new Date(),end=new Date(Date.now()+30*86400000);
+  if(!s.value)s.value=toLocalInput(now);
+  if(!e.value)e.value=toLocalInput(end);
 }
 function clearPremiumForm(){
-  ['premiumImage','premiumBusiness','premiumCategory','premiumStart','premiumEnd'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});
+  ['premiumImage','premiumBusiness','premiumCategory'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('premiumPreview').innerHTML='<div class="empty" style="border:1px dashed #cfd5dc;border-radius:10px">Choose a banner to preview it here.</div>';
+  setPremiumDefaultDates();
 }
-function fileData(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
-async function savePremiumBanner(){
-  const file=document.getElementById('premiumImage')?.files?.[0];
-  const business=document.getElementById('premiumBusiness').value.trim();
-  const cat=document.getElementById('premiumCategory').value;
-  const start=document.getElementById('premiumStart').value;
-  const end=document.getElementById('premiumEnd').value;
-  if(!file||!business||!cat||!start||!end){alert('Please complete all fields and choose a banner image.');return}
-  if(!['image/jpeg','image/png','image/webp'].includes(file.type)){alert('Use JPG, PNG or WebP.');return}
-  if(file.size>2*1024*1024){alert('Keep the banner under 2 MB for this MVP.');return}
-  if(new Date(end)<=new Date(start)){alert('Expiry must be after Start Date.');return}
-  const data=await fileData(file);
-  const b={id:'PB-'+Date.now(),businessName:business,categoryId:cat,imageData:data,startAt:new Date(start).toISOString(),endAt:new Date(end).toISOString(),status:'scheduled',createdAt:new Date().toISOString()};
-  premiumBannerData.unshift(b);
-  localStorage.setItem(PREMIUM_BANNER_STORAGE,JSON.stringify(premiumBannerData));
-  clearPremiumForm();premiumLoad();alert('Premium banner uploaded.');
+document.getElementById('premiumImage').addEventListener('change',function(){const f=this.files[0];if(!f)return;const r=new FileReader();r.onload=()=>document.getElementById('premiumPreview').innerHTML=`<img class="banner-preview" src="${r.result}" alt="Premium banner preview">`;r.readAsDataURL(f)})
+async function savePremiumBanner(){const f=document.getElementById('premiumImage').files[0],name=document.getElementById('premiumBusiness').value.trim(),cat=document.getElementById('premiumCategory').value,s=document.getElementById('premiumStart').value,e=document.getElementById('premiumEnd').value;if(!f||!name||!cat||!s||!e){showToast('Complete all premium banner fields.');return}if(!['image/jpeg','image/png','image/webp'].includes(f.type)){showToast('Use JPG, PNG or WebP.');return}if(f.size>2*1024*1024){showToast('Keep banner below 2 MB.');return}if(new Date(e)<=new Date(s)){showToast('Expiry must be after start.');return}const imageData=await fileData(f);premiumBanners.unshift({id:'PB-'+Date.now(),businessName:name,categoryId:cat,imageData,startAt:new Date(s).toISOString(),endAt:new Date(e).toISOString(),status:'scheduled'});localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));clearPremiumForm();renderPremiumAdmin();showToast('Premium banner uploaded successfully.')}
+function renderPremiumAdmin(){premiumBanners.forEach(refreshPremiumStatus);localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));const filter=document.getElementById('premiumFilter').value,arr=premiumBanners.filter(b=>filter==='all'||b.status===filter);document.getElementById('premiumAdminGrid').innerHTML=arr.length?arr.map(b=>{const c=state.categories.find(x=>String(x.id)===String(b.categoryId));return`<article class="banner-card"><img src="${esc(b.imageData)}" alt="${esc(b.businessName)}"><div class="banner-info"><b>${esc(b.businessName)}</b><div class="banner-meta">Category: ${esc(c?.name||'Unknown')}<br>Start: ${new Date(b.startAt).toLocaleString()}<br>Expiry: ${new Date(b.endAt).toLocaleString()}<br>Status: <b>${b.status}</b></div><div class="banner-actions"><button class="btn small" onclick="previewBanner('${b.id}')">Preview</button><button class="btn small danger" onclick="deleteBanner('${b.id}')">Delete</button></div></div></article>`}).join(''):'<div class="empty" style="grid-column:1/-1">No premium banners uploaded.</div>'}
+function previewBanner(id){const b=premiumBanners.find(x=>x.id===id);if(!b)return;document.getElementById('premiumPreview').innerHTML=`<img class="banner-preview" src="${esc(b.imageData)}" alt="${esc(b.businessName)}">`;showView('premium-banners')}
+function deleteBanner(id){if(confirm('Delete this premium banner?')){premiumBanners=premiumBanners.filter(b=>b.id!==id);localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));renderPremiumAdmin()}}
+function renderAdminPublicPremium(){
+  const section=document.getElementById('adminPublicPremium'),wrap=document.getElementById('adminPublicPremiumWrap');
+  if(!section||!wrap)return;
+  try{premiumBanners=JSON.parse(localStorage.getItem(PREMIUM_STORAGE))||[]}catch(e){premiumBanners=[]}
+  premiumBanners.forEach(refreshPremiumStatus);
+  const arr=premiumBanners.filter(b=>b.status==='active'&&(publicCategory==='all'||String(b.categoryId)===String(publicCategory)));
+  if(!arr.length){section.style.display='none';wrap.innerHTML='';return}
+  const b=arr[0];
+  const cat=state.categories.find(c=>String(c.id)===String(b.categoryId))?.name||'Other';
+  wrap.innerHTML=`<img class="premium-banner-img" src="${esc(b.imageData)}" alt="${esc(b.businessName)}"><span class="premium-banner-label">PREMIUM</span><span class="premium-banner-business">${esc(b.businessName)} · ${esc(cat)}</span>`;
+  section.style.display='block';
 }
-function premiumDate(x){const d=new Date(x);return Number.isNaN(d.getTime())?'—':d.toLocaleString()}
-function renderPremiumAdmin(){
-  const grid=document.getElementById('premiumAdminGrid');if(!grid)return;
-  premiumBannerData.forEach(premiumStatus);
-  const filter=document.getElementById('premiumFilter')?.value||'all';
-  const arr=premiumBannerData.filter(b=>filter==='all'||b.status===filter);
-  if(!arr.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><strong>No premium banners yet.</strong>Upload your first finished creative above.</div>';return}
-  grid.innerHTML=arr.map(b=>{
-    const cat=(state.categories||[]).find(c=>String(c.id)===String(b.categoryId));
-    return `<article class="banner-card"><img src="${esc(b.imageData)}" alt="${esc(b.businessName)}"><div class="banner-info"><strong>${esc(b.businessName)}</strong><div class="banner-meta">Category: ${esc(cat?.name||'Unknown')}<br>Start: ${premiumDate(b.startAt)}<br>Expiry: ${premiumDate(b.endAt)}<br>Status: <b>${esc(b.status)}</b></div><div class="banner-actions"><button class="btn" onclick="previewPremium('${esc(b.id)}')">Preview</button><button class="btn" onclick="deletePremium('${esc(b.id)}')">Delete</button></div></div></article>`
-  }).join('');
-}
-function previewPremium(id){
-  const b=premiumBannerData.find(x=>x.id===id);if(!b)return;
-  const cat=(state.categories||[]).find(c=>String(c.id)===String(b.categoryId));
-  const html=`<img class="premium-banner-preview" src="${esc(b.imageData)}" alt="${esc(b.businessName)}"><div style="margin-top:10px;font-size:13px"><b>${esc(b.businessName)}</b><br>${esc(cat?.name||'Unknown')} · ${esc(b.status)}</div>`;
-  if(typeof openModal==='function')openModal('Premium Banner Preview',html);else alert(b.businessName+' — '+(cat?.name||'Unknown'));
-}
-function deletePremium(id){
-  if(!confirm('Delete this premium banner?'))return;
-  premiumBannerData=premiumBannerData.filter(b=>b.id!==id);
-  localStorage.setItem(PREMIUM_BANNER_STORAGE,JSON.stringify(premiumBannerData));renderPremiumAdmin();
-}
-setTimeout(premiumLoad,150);
-window.addEventListener('storage',e=>{if(e.key===PREMIUM_BANNER_STORAGE)premiumLoad()});
-
+function renderAll(){fillCategorySelects();renderSwatches();renderDashboard();renderAdsTable();renderCategories();updatePreview();setPremiumDefaultDates()}
+document.getElementById('fCategory').addEventListener('change',updatePreview);
+setInterval(()=>{refreshStatuses();premiumBanners.forEach(refreshPremiumStatus);localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));renderDashboard();if(document.getElementById('premium-banners').classList.contains('active'))renderPremiumAdmin()},30000);
+document.getElementById('loginEmail').value='';document.getElementById('loginPassword').value='';document.getElementById('loginView').style.display='flex';document.getElementById('app').style.display='none';
 </script>
-
-<script id="premium-page-switch">
-document.addEventListener('click',function(e){
-  const btn=e.target.closest('[onclick*="showPage(\'premium-banners\')"]');
-  if(!btn)return;
-  setTimeout(function(){
-    document.querySelectorAll('.page').forEach(p=>{if(p.id==='page-premium-banners')p.style.display='block'});
-    premiumCategories();renderPremiumAdmin();
-  },0);
-});
-</script>
-
-</body>
-</html>
+</body></html>
