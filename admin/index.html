@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Adspool MVP</title>
+<style>
+:root{--green:#00875a;--gold:#ffd700;--bg:#f5f7f9;--text:#17202a;--muted:#6b7280;--border:#d9dee5;--danger:#c0392b}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+.app{min-height:100vh}.topbar{height:64px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;z-index:20}
+.brand{font-size:22px;font-weight:800;color:var(--green)}.brand small{font-size:11px;color:var(--muted);font-weight:600;margin-left:6px}
+.layout{display:flex;min-height:calc(100vh - 64px)}.sidebar{width:230px;background:#fff;border-right:1px solid var(--border);padding:18px 12px;flex:none}
+.navbtn{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:9px;padding:11px 12px;margin:3px 0;color:#374151}
+.navbtn.active,.navbtn:hover{background:#eaf7f2;color:var(--green);font-weight:700}.navsection{font-size:11px;text-transform:uppercase;color:#9ca3af;padding:14px 12px 6px}
+.main{padding:24px;flex:1;min-width:0}.view{display:none}.view.active{display:block}
+h1{font-size:26px;margin:0 0 6px}h2{font-size:19px;margin:0 0 14px}.sub{color:var(--muted);margin:0 0 22px}
+.cards{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:12px;margin-bottom:22px}.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px}.card .label{font-size:12px;color:var(--muted)}.card .num{font-size:26px;font-weight:800;margin-top:6px}
+.panel{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:18px}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:15px}
+input,select,textarea{border:1px solid #cfd5dc;border-radius:8px;padding:9px 10px;background:#fff;color:#111827}input:focus,select:focus,textarea:focus{outline:2px solid #cceee2;border-color:var(--green)}
+.search{min-width:260px}.btn{border:1px solid #cfd5dc;background:#fff;border-radius:8px;padding:9px 13px}.btn.primary{background:var(--green);border-color:var(--green);color:#fff}.btn.secondary{background:#eef2f5}.btn.danger{background:#fff1f0;border-color:#f2c5c1;color:var(--danger)}.btn.small{padding:6px 9px;font-size:12px}
+.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:900px}.table th,.table td{padding:11px 10px;border-bottom:1px solid #edf0f2;text-align:left;font-size:13px;vertical-align:middle}.table th{font-size:11px;text-transform:uppercase;color:#6b7280;background:#fafbfc}
+.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:700}.published{background:#e7f7ef;color:#087443}.scheduled{background:#eef3ff;color:#3158b7}.draft{background:#f1f3f5;color:#5d6570}.expired{background:#fff0ee;color:#b83a2c}.unpublished{background:#f5eefa;color:#7745a8}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;font-weight:700;color:#4b5563}.full{grid-column:1/-1}.services{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.servicesDynamic{display:flex;flex-direction:column;gap:8px}.serviceRow{display:flex;gap:8px}.serviceRow input{flex:1;min-width:0}.serviceRemove{width:38px;padding:0}
+.creategrid{display:grid;grid-template-columns:minmax(330px,1fr) minmax(340px,430px);gap:20px;align-items:start}.sticky{position:sticky;top:84px}.previewwrap{display:flex;justify-content:center}
+.ad{width:100%;max-width:430px;min-height:250px;height:auto;border:2px solid currentColor;border-radius:22px;overflow:hidden;display:flex;flex-direction:column;text-align:center;font-family:"Comic Sans MS","Trebuchet MS",system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.06);box-sizing:border-box}
+.ad .adhead{flex:0 0 auto;padding:14px 10px 10px;border-bottom:2px solid currentColor;font-size:27px;font-weight:800;line-height:1.05;min-height:62px;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere;box-sizing:border-box}
+.ad .adbody{flex:1 1 auto;min-height:0;padding:12px 18px 10px;display:flex;flex-direction:column;justify-content:center;gap:12px;overflow:visible;box-sizing:border-box}
+.servicesline{font-size:17px;font-weight:600;line-height:1.2;word-break:break-word;overflow-wrap:anywhere;white-space:normal;overflow:visible;display:block}
+.address{font-size:16px;font-weight:400;line-height:1.25;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;overflow:visible;display:block}
+.ad .adphone{flex:0 0 auto;height:58px;min-height:58px;box-sizing:border-box;border-top:2px solid currentColor;padding:7px 8px 10px;font-size:28px;font-weight:800;line-height:1;word-break:break-word;overflow-wrap:anywhere;display:flex;align-items:center;justify-content:center}
+.colorrow{display:flex;gap:10px;align-items:center}.swatches{display:flex;gap:7px;flex-wrap:wrap}.swatch{width:28px;height:28px;border-radius:7px;border:2px solid #fff;box-shadow:0 0 0 1px #cfd5dc}.swatch.selected{box-shadow:0 0 0 2px var(--green)}.colorinput{width:44px;height:38px;padding:2px}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+.pagination{display:flex;gap:6px;align-items:center;justify-content:flex-end;margin-top:14px}.pagebtn{min-width:34px;height:34px;border:1px solid var(--border);background:#fff;border-radius:7px}.pagebtn.active{background:var(--green);color:#fff;border-color:var(--green)}
+.empty{padding:35px;text-align:center;color:var(--muted)}
+.publicbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.categorychips{display:flex;gap:7px;flex-wrap:wrap}.chip{border:1px solid var(--border);background:#fff;padding:7px 11px;border-radius:999px;font-size:12px}.chip.active{background:#eaf7f2;color:var(--green);border-color:#b9e4d2;font-weight:700}
+.publicgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}.publicad{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px}.publicad .mini{margin-bottom:12px}.publicad .mini .ad{max-width:430px;margin:0 auto}.publicmeta{font-size:12px;color:var(--muted);margin:8px 0}.publicactions{display:flex;gap:7px}
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f4fbf8,#f7f8fa)}.loginbox{width:min(390px,92vw);background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:0 12px 40px rgba(0,0,0,.07)}.loginbox h1{margin-bottom:3px}.loginbox .field{margin:14px 0}.hint{font-size:12px;color:var(--muted);margin-top:12px}.error{color:var(--danger);font-size:12px;min-height:16px}
+.toast{position:fixed;right:18px;bottom:18px;background:#17202a;color:#fff;padding:12px 15px;border-radius:9px;display:none;z-index:100;font-size:13px}.toast.show{display:block}
+@media(max-width:1000px){.cards{grid-template-columns:repeat(3,1fr)}.creategrid{grid-template-columns:1fr}.sticky{position:static}}
+@media(max-width:720px){.sidebar{width:68px;padding:12px 7px}.navbtn{font-size:0;text-align:center}.navbtn::first-letter{font-size:18px}.navsection{display:none}.main{padding:15px}.cards{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.services{grid-template-columns:1fr 1fr}.topbar{padding:0 13px}}
+</style>
+</head>
+<body>
+<div id="loginView" class="login">
+  <div class="loginbox">
+    <div class="brand">Adspool <small>MVP</small></div>
+    <h1 style="margin-top:20px">Admin Login</h1>
+    <p class="sub" style="margin-bottom:10px">Local business advertising control panel</p>
+    <div class="field"><label>Email</label><input id="loginEmail" type="email" value="admin@adspool.local"></div>
+    <div class="field"><label>Password</label><input id="loginPassword" type="password" value="admin123"></div>
+    <div id="loginError" class="error"></div>
+    <button class="btn primary" style="width:100%" onclick="login()">Sign in</button>
+    <div class="hint">Demo credentials: admin@adspool.local / admin123</div>
+    <button class="btn" style="width:100%;margin-top:10px" onclick="enterPublic()">View Public Ads</button>
+  </div>
+</div>
+
+<div id="app" class="app" style="display:none">
+  <header class="topbar">
+    <div class="brand">Adspool <small>ADMIN MVP</small></div>
+    <div style="display:flex;gap:8px"><button class="btn small" onclick="showView('public')">Public Website</button><button class="btn small" onclick="logout()">Logout</button></div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar">
+      <button class="navbtn active" data-view="dashboard" onclick="showView('dashboard')">▣ &nbsp; Dashboard</button>
+      <button class="navbtn" data-view="ads" onclick="showView('ads')">▤ &nbsp; Advertisements</button>
+      <button class="navbtn" data-view="create" onclick="startCreate()">＋ &nbsp; Create Ad</button>
+      <div class="navsection">Views</div>
+      <button class="navbtn" data-view="published" onclick="setAdStatusFilter('published')">● &nbsp; Published</button>
+      <button class="navbtn" data-view="scheduled" onclick="setAdStatusFilter('scheduled')">◷ &nbsp; Scheduled</button>
+      <button class="navbtn" data-view="drafts" onclick="setAdStatusFilter('draft')">◌ &nbsp; Drafts</button>
+      <button class="navbtn" data-view="expired" onclick="setAdStatusFilter('expired')">○ &nbsp; Expired</button>
+      <button class="navbtn" data-view="categories" onclick="showView('categories')">☷ &nbsp; Categories</button>
+      <button class="navbtn" data-view="public" onclick="showView('public')">↗ &nbsp; Public Ads</button>
+    </aside>
+
+    <main class="main">
+      <section id="dashboard" class="view active">
+        <h1>Dashboard</h1><p class="sub">Manage local business advertisements.</p>
+        <div id="dashCards" class="cards"></div>
+        <div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h2>Recently created</h2><p class="sub" style="margin:0">Latest advertisements in your system.</p></div><button class="btn primary" onclick="startCreate()">+ Create Advertisement</button></div><div id="recentAds" style="margin-top:12px"></div></div>
+      </section>
+
+      <section id="ads" class="view">
+        <h1>Advertisements</h1><p class="sub">Search, filter, edit and publish your ads.</p>
+        <div class="panel">
+          <div class="toolbar">
+            <input id="adSearch" class="search" placeholder="Search Ad ID, business, phone..." oninput="renderAdsTable(1)">
+            <select id="adCategoryFilter" onchange="renderAdsTable(1)"></select>
+            <select id="adStatusFilter" onchange="renderAdsTable(1)">
+              <option value="all">All statuses</option><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="published">Published</option><option value="expired">Expired</option><option value="unpublished">Unpublished</option>
+            </select>
+            <select id="adPageSize" onchange="renderAdsTable(1)"><option>10</option><option selected>20</option><option>50</option><option>100</option></select>
+            <button class="btn" onclick="clearAdFilters()">Clear</button>
+          </div>
+          <div id="adsTable"></div>
+        </div>
+      </section>
+
+      <section id="create" class="view">
+        <h1 id="formTitle">Create Advertisement</h1><p class="sub">Enter the details and watch the advertisement update live.</p>
+        <div class="creategrid">
+          <div class="panel">
+            <div class="formgrid">
+              <div class="field"><label>Business Name *</label><input id="fBusiness" maxlength="80" oninput="updatePreview()"></div>
+              <div class="field"><label>Category *</label><select id="fCategory"></select></div>
+              <div class="field full"><label>Services</label><div id="servicesContainer" class="servicesDynamic"></div><button type="button" class="btn small" style="width:max-content;margin-top:8px" onclick="addService()">+ Add Service</button><div class="hint">Add as many services as needed. The preview automatically adjusts the text size and wraps the content.</div></div>
+              <div class="field full"><label>Address *</label><textarea id="fAddress" rows="3" maxlength="250" oninput="updatePreview()"></textarea></div>
+              <div class="field"><label>Phone *</label><input id="fPhone" maxlength="30" oninput="updatePreview()"></div>
+              <div class="field"><label>WhatsApp (optional)</label><input id="fWhatsapp" maxlength="30"></div>
+              <div class="field full"><label>Background Color</label>
+                <div class="colorrow"><div id="swatches" class="swatches"></div><input id="fColor" class="colorinput" type="color" value="#ffffff" onchange="setColor(this.value)"><span id="contrastLabel" class="hint"></span></div>
+              </div>
+              <div class="field"><label>Start Date & Time *</label><input id="fStart" type="datetime-local"></div>
+              <div class="field"><label>End Date & Time *</label><input id="fEnd" type="datetime-local"></div>
+            </div>
+            <div class="actions">
+              <button class="btn" onclick="saveAd('draft')">Save Draft</button>
+              <button class="btn primary" onclick="saveAd('publish')">Publish</button>
+            </div>
+          </div>
+          <div class="sticky">
+            <div class="panel"><h2>Live Preview</h2><div class="previewwrap"><div id="adPreview" class="ad"></div></div><div id="previewId" class="hint" style="text-align:center;margin-top:10px"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="categories" class="view">
+        <h1>Categories</h1><p class="sub">Manage the categories available while creating advertisements.</p>
+        <div class="panel"><div class="toolbar"><input id="newCategory" placeholder="New category name"><button class="btn primary" onclick="addCategory()">Add Category</button></div><div id="categoryList"></div></div>
+      </section>
+
+      <section id="public" class="view">
+        <h1>Public Ads</h1><p class="sub">This is the visitor-facing view. Only currently active advertisements appear.</p>
+        <div class="publicbar"><input id="publicSearch" class="search" placeholder="Search business, service or location..." oninput="renderPublic()"><div id="categoryChips" class="categorychips"></div></div>
+        <div id="publicGrid" class="publicgrid"></div>
+      </section>
+    </main>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+const STORAGE='adspool_mvp_v1';
+const defaultCategories=['Automobile','Lawyers','Doctors & Clinics','Salons & Beauty','Restaurants & Food','Shops & Retail','Real Estate','Education & Training','Hotels & Travel','Home Services','Finance & Insurance','IT & Digital Services','Construction','Interior Design','Electrical & Plumbing','Health & Fitness','Wedding & Events','Manufacturers','Professional Services','Other'];
+const swatches=['#ffffff','#f2f4f7','#dff3ff','#e4f7e8','#fff6bf','#ffe6c7','#ffe1ea','#173a67','#155b3a','#4b2a72','#7c1d1d','#111111'];
+let state={ads:[],categories:defaultCategories.map((name,i)=>({id:i+1,name,active:true})),nextId:1};
+let editingId=null, adsPage=1, publicCategory='all';
+
+function load(){try{const x=JSON.parse(localStorage.getItem(STORAGE));if(x){state=x;}}catch(e){} normalize(); renderAll();}
+function normalize(){state.ads.forEach(a=>refreshStatus(a)); if(!state.nextId) state.nextId=(state.ads.reduce((m,a)=>Math.max(m,parseInt(String(a.adId||'').replace(/\D/g,''))||0),0)+1);}
+function persist(){localStorage.setItem(STORAGE,JSON.stringify(state));}
+function now(){return new Date();}
+function refreshStatus(a){
+  // Drafts and manually unpublished ads stay that way until an admin action.
+  if(a.status==='unpublished'||a.status==='draft') return a.status;
+
+  const nowMs=Date.now();
+  const startMs=Date.parse(a.startAt);
+  const endMs=Date.parse(a.endAt);
+  if(Number.isNaN(startMs)||Number.isNaN(endMs)) return a.status;
+
+  // Scheduled: start time is still in the future.
+  if(nowMs < startMs){
+    a.status='scheduled';
+    a.expiredAt=null;
+  // Published: current time is inside the active window.
+  }else if(nowMs <= endMs){
+    a.status='published';
+    a.expiredAt=null;
+  // Expired: end time has passed. This is checked automatically.
+  }else{
+    a.status='expired';
+    a.expiredAt=a.expiredAt||new Date().toISOString();
+  }
+  return a.status;
+}
+function refreshAllStatuses(){
+  let changed=false;
+  state.ads.forEach(a=>{
+    const before=a.status;
+    refreshStatus(a);
+    if(before!==a.status) changed=true;
+  });
+  if(changed) persist();
+  return changed;
+}
+function runExpiryScheduler(){
+  const changed=refreshAllStatuses();
+  // Refresh any visible lists immediately when an ad changes state.
+  const activeView=document.querySelector('.view.active')?.id;
+  if(changed){
+    renderDashboard();
+    if(['ads','published','scheduled','drafts','expired'].includes(activeView)) renderAdsTable(adsPage);
+    if(activeView==='public') renderPublic();
+  }else if(activeView==='public'){
+    // Keep the public page accurate even when an ad expires while it is open.
+    renderPublic();
+  }
+}
+function formatDate(v){if(!v)return '-';return new Date(v).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'});}
+function adNumber(){const n=state.nextId++;return 'ADS-'+String(n).padStart(6,'0');}
+function contrast(hex){hex=hex.replace('#','');const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);const lum=(0.299*r+0.587*g+0.114*b);return lum>155?'#111827':'#ffffff';}
+function showToast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
+function login(){if(document.getElementById('loginEmail').value==='admin@adspool.local'&&document.getElementById('loginPassword').value==='admin123'){sessionStorage.adspool='1';document.getElementById('loginView').style.display='none';document.getElementById('app').style.display='block';load();}else document.getElementById('loginError').textContent='Invalid demo credentials.'}
+function logout(){sessionStorage.removeItem('adspool');location.reload()}
+function enterPublic(){document.getElementById('loginView').style.display='none';document.getElementById('app').style.display='block';load();showView('public')}
+function showView(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById(v).classList.add('active');
+  document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
+  if(v==='dashboard')renderDashboard();if(v==='ads'||v==='published'||v==='scheduled'||v==='drafts'||v==='expired')renderAdsTable(1);if(v==='categories')renderCategories();if(v==='public')renderPublic();
+}
+function startCreate(){editingId=null;clearForm();document.getElementById('formTitle').textContent='Create Advertisement';document.getElementById('previewId').textContent='New advertisement — Ad ID generated when saved';showView('create');}
+function clearForm(){
+  ['fBusiness','fAddress','fPhone','fWhatsapp'].forEach(id=>document.getElementById(id).value=''); document.getElementById('servicesContainer').innerHTML=''; addService(); addService(); addService();
+  document.getElementById('fCategory').value=state.categories.find(c=>c.active)?.id||'';
+  document.getElementById('fColor').value='#ffffff';setColor('#ffffff');
+  const d=new Date(), end=new Date(Date.now()+30*86400000);document.getElementById('fStart').value=toLocalInput(d);document.getElementById('fEnd').value=toLocalInput(end);updatePreview();
+}
+function toLocalInput(d){const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);return x.toISOString().slice(0,16)}
+function fillCategorySelects(){const active=state.categories.filter(c=>c.active);document.getElementById('fCategory').innerHTML=active.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');document.getElementById('adCategoryFilter').innerHTML='<option value="all">All categories</option>'+state.categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');}
+function getFormServices(){return [...document.querySelectorAll('#servicesContainer .serviceInput')].map(x=>x.value.trim()).filter(Boolean)}
+function addService(value=''){
+  const box=document.getElementById('servicesContainer'); if(!box)return;
+  const count=box.querySelectorAll('.serviceRow').length;
+  if(count>=15){showToast('Maximum 15 services for this MVP.');return}
+  const row=document.createElement('div'); row.className='serviceRow';
+  const input=document.createElement('input'); input.className='serviceInput'; input.maxLength=70; input.placeholder='Service '+(count+1); input.value=value; input.oninput=updatePreview;
+  const remove=document.createElement('button'); remove.type='button'; remove.className='btn serviceRemove'; remove.textContent='×'; remove.title='Remove service'; remove.onclick=()=>{row.remove();renumberServices();updateServiceRemoveButtons();updatePreview()};
+  row.append(input,remove); box.appendChild(row); updateServiceRemoveButtons(); updatePreview();
+}
+function renumberServices(){document.querySelectorAll('#servicesContainer .serviceInput').forEach((x,i)=>x.placeholder='Service '+(i+1))}
+function updateServiceRemoveButtons(){const rows=document.querySelectorAll('#servicesContainer .serviceRow');document.querySelectorAll('#servicesContainer .serviceRemove').forEach(b=>b.disabled=rows.length<=1)}
+function renderServiceInputs(values=[]){
+  const box=document.getElementById('servicesContainer'); box.innerHTML='';
+  (values.length?values:['','','']).forEach(v=>addService(v));
+}
+function getAdSizing(ad){
+  const services=(ad.services||[]).filter(Boolean);
+  const chars=services.reduce((n,x)=>n+x.length,0);
+  const name=(ad.businessName||'Business Name').length;
+  const phone=(ad.phone||'').length;
+  const address=(ad.address||'').length;
+
+  let serviceSize=17;
+  if(services.length>=4) serviceSize=15;
+  if(services.length>=6) serviceSize=13;
+  if(services.length>=9) serviceSize=12;
+  if(services.length>=12) serviceSize=11;
+  if(chars>90) serviceSize=Math.min(serviceSize,13);
+  if(chars>130) serviceSize=Math.min(serviceSize,12);
+  if(chars>180) serviceSize=Math.min(serviceSize,11);
+
+  let addressSize=16;
+  if(address>75) addressSize=14;
+  if(address>115) addressSize=13;
+  if(address>160) addressSize=12;
+
+  let nameSize=27;
+  if(name>24) nameSize=23;
+  if(name>34) nameSize=20;
+  if(name>48) nameSize=18;
+
+  let phoneSize=28;
+  if(phone>12) phoneSize=24;
+  if(phone>15) phoneSize=21;
+  if(phone>18) phoneSize=18;
+
+  // Header grows only when the business name wraps.
+  const nameLines=Math.max(1,Math.ceil(name/26));
+  const headerHeight=Math.max(62,Math.ceil(nameLines*nameSize*1.05+24));
+
+  // The middle section owns services + address. The phone is never included
+  // in this calculation because it is a fixed footer.
+  const serviceCharsPerLine=Math.max(20,Math.floor(390/(serviceSize*0.56)));
+  const serviceLines=services.length
+    ? Math.max(1,Math.ceil(chars/serviceCharsPerLine))
+    : 1;
+
+  const addressCharsPerLine=Math.max(24,Math.floor(390/(addressSize*0.55)));
+  const addressLines=Math.max(1,Math.ceil(address/addressCharsPerLine));
+
+  const bodyHeight=Math.max(
+    110,
+    Math.ceil(
+      serviceLines*serviceSize*1.2 +
+      addressLines*addressSize*1.25 +
+      24
+    )
+  );
+
+  // Fixed footer: phone always sits at the bottom.
+  const footerHeight=58;
+
+  return {
+    serviceSize,addressSize,nameSize,phoneSize,
+    minHeight:Math.ceil(headerHeight+bodyHeight+footerHeight)
+  };
+}
+function adMarkup(ad){
+  const bg=ad.backgroundColor||'#ffffff',fg=ad.textColor||contrast(bg),s=getAdSizing(ad);
+  const services=(ad.services||[]).filter(Boolean);
+  const serviceHtml=services.length?services.map(esc).join(' <span class="bullet">•</span> '):'Service-1 <span class="bullet">•</span> Service-2 <span class="bullet">•</span> Service-3';
+  return `<div class="ad" style="color:${fg};background:${bg};min-height:${s.minHeight}px">
+    <div class="adhead" style="font-size:${s.nameSize}px">${esc(ad.businessName||'Business Name')}</div>
+    <div class="adbody"><div class="servicesline" style="font-size:${s.serviceSize}px">${serviceHtml}</div><div class="address" style="font-size:${s.addressSize}px">${esc(ad.address||'')}</div></div>
+    <div class="adphone" style="font-size:${s.phoneSize}px">${esc(ad.phone||'')}</div>
+  </div>`;
+}
+function updatePreview(){
+  const bg=document.getElementById('fColor').value||'#fff',fg=contrast(bg);
+  document.getElementById('contrastLabel').textContent='Automatic text: '+(fg==='#ffffff'?'White':'Black');
+  const ad={businessName:document.getElementById('fBusiness').value.trim()||'Business Name',services:getFormServices(),address:document.getElementById('fAddress').value.trim()||'12, 3rd Block, Jayanagar 5th Block, Bangalore-34',phone:document.getElementById('fPhone').value.trim()||'+91 9001009001',backgroundColor:bg,textColor:fg};
+  document.getElementById('adPreview').innerHTML=adMarkup(ad);
+  document.getElementById('adPreview').style.background='transparent';
+}
+function setColor(c){document.getElementById('fColor').value=c;document.querySelectorAll('.swatch').forEach(s=>s.classList.toggle('selected',s.dataset.color.toLowerCase()===c.toLowerCase()));updatePreview();}
+function renderSwatches(){document.getElementById('swatches').innerHTML=swatches.map(c=>`<button class="swatch" title="${c}" data-color="${c}" style="background:${c}" onclick="setColor('${c}')"></button>`).join('');}
+function validateForm(){
+  const b=document.getElementById('fBusiness').value.trim(),cat=document.getElementById('fCategory').value,address=document.getElementById('fAddress').value.trim(),phone=document.getElementById('fPhone').value.trim(),s=document.getElementById('fStart').value,e=document.getElementById('fEnd').value;
+  if(!b||!cat||!address||!phone||!s||!e){showToast('Please fill all required fields.');return false}
+  if(new Date(e)<=new Date(s)){showToast('End date/time must be after start date/time.');return false}
+  return true;
+}
+function saveAd(mode){
+  if(!validateForm())return;
+  const data={businessName:document.getElementById('fBusiness').value.trim(),categoryId:Number(document.getElementById('fCategory').value),services:getFormServices(),address:document.getElementById('fAddress').value.trim(),phone:document.getElementById('fPhone').value.trim(),whatsapp:document.getElementById('fWhatsapp').value.trim(),backgroundColor:document.getElementById('fColor').value,textColor:contrast(document.getElementById('fColor').value),startAt:new Date(document.getElementById('fStart').value).toISOString(),endAt:new Date(document.getElementById('fEnd').value).toISOString(),updatedAt:new Date().toISOString()};
+  if(editingId){const a=state.ads.find(x=>x.id===editingId);Object.assign(a,data);if(mode==='publish'&&a.status!=='unpublished')a.status='published';else if(mode==='draft')a.status='draft';refreshStatus(a);showToast('Advertisement updated.');}
+  else {const a={id:crypto.randomUUID(),adId:adNumber(),...data,createdAt:new Date().toISOString(),publishedAt:null,unpublishedAt:null,expiredAt:null,status:'draft'};if(mode==='publish'){a.publishedAt=new Date().toISOString();a.status='published';refreshStatus(a)}state.ads.unshift(a);showToast('Advertisement '+a.adId+' saved.');}
+  persist();renderAll();showView('ads');
+}
+function editAd(id){const a=state.ads.find(x=>x.id===id);if(!a)return;editingId=id;document.getElementById('formTitle').textContent='Edit Advertisement — '+a.adId;document.getElementById('fBusiness').value=a.businessName;document.getElementById('fCategory').value=a.categoryId;renderServiceInputs(a.services||[]);document.getElementById('fAddress').value=a.address;document.getElementById('fPhone').value=a.phone;document.getElementById('fWhatsapp').value=a.whatsapp||'';document.getElementById('fColor').value=a.backgroundColor;document.getElementById('fStart').value=toLocalInput(new Date(a.startAt));document.getElementById('fEnd').value=toLocalInput(new Date(a.endAt));setColor(a.backgroundColor);document.getElementById('previewId').textContent=a.adId;showView('create');}
+function duplicateAd(id){const a=state.ads.find(x=>x.id===id);if(!a)return;const copy={...a,id:crypto.randomUUID(),adId:adNumber(),status:'draft',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),publishedAt:null,unpublishedAt:null,expiredAt:null};state.ads.unshift(copy);persist();renderAll();showToast('Duplicated as '+copy.adId+' (Draft)');}
+function publishAd(id){const a=state.ads.find(x=>x.id===id);if(!a)return;if(new Date(a.endAt)<=new Date(a.startAt)){showToast('Invalid schedule. Edit the ad.');return}a.status='published';a.publishedAt=a.publishedAt||new Date().toISOString();refreshStatus(a);persist();renderAll();showToast(a.status==='scheduled'?'Advertisement scheduled.':'Advertisement published.');}
+function unpublishAd(id){const a=state.ads.find(x=>x.id===id);if(!a)return;a.status='unpublished';a.unpublishedAt=new Date().toISOString();persist();renderAll();showToast('Advertisement unpublished.');}
+function deleteAd(id){const a=state.ads.find(x=>x.id===id);if(!a)return;if(confirm('Delete '+a.adId+' permanently?')){state.ads=state.ads.filter(x=>x.id!==id);persist();renderAll();showToast('Advertisement deleted.');}}
+function setAdStatusFilter(s){document.getElementById('adStatusFilter').value=s;showView('ads');renderAdsTable(1)}
+function renderAdsTable(page=adsPage){
+  refreshAllStatuses();adsPage=page;
+  const q=(document.getElementById('adSearch')?.value||'').toLowerCase(),cat=document.getElementById('adCategoryFilter')?.value||'all',status=document.getElementById('adStatusFilter')?.value||'all',size=Number(document.getElementById('adPageSize')?.value||20);
+  let arr=state.ads.filter(a=>{const text=(a.adId+' '+a.businessName+' '+a.phone).toLowerCase();return(!q||text.includes(q))&&(cat==='all'||String(a.categoryId)===cat)&&(status==='all'||a.status===status)});
+  const pages=Math.max(1,Math.ceil(arr.length/size));if(page>pages)page=pages;adsPage=page;const slice=arr.slice((page-1)*size,page*size);
+  if(!slice.length){document.getElementById('adsTable').innerHTML='<div class="empty">No advertisements found.</div>';return}
+  const rows=slice.map(a=>{const c=state.categories.find(x=>x.id===a.categoryId)?.name||'Other';return `<tr><td><b>${a.adId}</b></td><td>${esc(a.businessName)}</td><td>${esc(c)}</td><td>${formatDate(a.startAt)}</td><td>${formatDate(a.endAt)}</td><td><span class="badge ${a.status}">${a.status}</span></td><td><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn small" onclick="editAd('${a.id}')">Edit</button>${a.status==='published'||a.status==='scheduled'?`<button class="btn small" onclick="unpublishAd('${a.id}')">Unpublish</button>`:''}${a.status==='draft'||a.status==='unpublished'?`<button class="btn small primary" onclick="publishAd('${a.id}')">Publish</button>`:''}<button class="btn small" onclick="duplicateAd('${a.id}')">Duplicate</button><button class="btn small danger" onclick="deleteAd('${a.id}')">Delete</button></div></td></tr>`}).join('');
+  document.getElementById('adsTable').innerHTML=`<div class="tablewrap"><table class="table"><thead><tr><th>Ad ID</th><th>Business</th><th>Category</th><th>Start</th><th>End</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:12px;color:#6b7280"><span>Showing ${arr.length?((page-1)*size+1):0}–${Math.min(page*size,arr.length)} of ${arr.length}</span><div class="pagination">${Array.from({length:pages},(_,i)=>`<button class="pagebtn ${i+1===page?'active':''}" onclick="renderAdsTable(${i+1})">${i+1}</button>`).join('')}</div></div>`;
+}
+function clearAdFilters(){document.getElementById('adSearch').value='';document.getElementById('adCategoryFilter').value='all';document.getElementById('adStatusFilter').value='all';renderAdsTable(1)}
+function renderDashboard(){refreshAllStatuses();const counts={published:0,scheduled:0,draft:0,expired:0,unpublished:0};state.ads.forEach(a=>counts[a.status]=(counts[a.status]||0)+1);document.getElementById('dashCards').innerHTML=[['Total Ads',state.ads.length],['Published',counts.published],['Scheduled',counts.scheduled],['Drafts',counts.draft],['Expired',counts.expired]].map(x=>`<div class="card"><div class="label">${x[0]}</div><div class="num">${x[1]}</div></div>`).join('');const recent=state.ads.slice(0,8);document.getElementById('recentAds').innerHTML=recent.length?`<div class="tablewrap"><table class="table"><thead><tr><th>Ad ID</th><th>Business</th><th>Status</th><th>Created</th></tr></thead><tbody>${recent.map(a=>`<tr><td>${a.adId}</td><td>${esc(a.businessName)}</td><td><span class="badge ${a.status}">${a.status}</span></td><td>${formatDate(a.createdAt)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No ads yet. Create your first advertisement.</div>'}
+function renderCategories(){document.getElementById('categoryList').innerHTML=state.categories.map(c=>{const n=state.ads.filter(a=>a.categoryId===c.id).length;return `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #edf0f2"><div><b>${esc(c.name)}</b><span class="hint" style="margin-left:8px">${n} ads</span></div><button class="btn small" onclick="toggleCategory(${c.id})">${c.active?'Deactivate':'Activate'}</button></div>`}).join('')}
+function addCategory(){const name=document.getElementById('newCategory').value.trim();if(!name)return;if(state.categories.some(c=>c.name.toLowerCase()===name.toLowerCase())){showToast('Category already exists.');return}state.categories.push({id:Date.now(),name,active:true});document.getElementById('newCategory').value='';persist();fillCategorySelects();renderCategories();showToast('Category added.')}
+function toggleCategory(id){const c=state.categories.find(x=>x.id===id);if(c){c.active=!c.active;persist();fillCategorySelects();renderCategories();}}
+function publicActive(){refreshAllStatuses();return state.ads.filter(a=>a.status==='published'&&new Date(a.startAt)<=new Date()&&new Date(a.endAt)>=new Date())}
+function renderPublic(){
+  const q=(document.getElementById('publicSearch')?.value||'').toLowerCase();
+  const arr=publicActive().filter(a=>{const c=state.categories.find(x=>x.id===a.categoryId)?.name||'';const hay=(a.businessName+' '+a.address+' '+a.services.join(' ')+' '+c).toLowerCase();return(!q||hay.includes(q))&&(publicCategory==='all'||a.categoryId===Number(publicCategory))});
+  const chips=[`<button class="chip ${publicCategory==='all'?'active':''}" onclick="publicCategory='all';renderPublic()">All</button>`].concat(state.categories.filter(c=>c.active).map(c=>`<button class="chip ${publicCategory===String(c.id)||publicCategory===c.id?'active':''}" onclick="publicCategory='${c.id}';renderPublic()">${esc(c.name)}</button>`));
+  document.getElementById('categoryChips').innerHTML=chips.join('');
+  document.getElementById('publicGrid').innerHTML=arr.length?arr.map(a=>`<div class="publicad"><div class="mini">${adMarkup(a)}</div><div class="publicmeta"><b>${a.adId}</b> · ${esc(state.categories.find(c=>c.id===a.categoryId)?.name||'Other')}</div><div class="publicmeta">Valid until ${formatDate(a.endAt)}</div><div class="publicactions"><a class="btn small" href="tel:${esc(a.phone.replace(/\s/g,''))}">Call</a>${a.whatsapp?`<a class="btn small" target="_blank" href="https://wa.me/${encodeURIComponent(a.whatsapp.replace(/\D/g,''))}">WhatsApp</a>`:''}</div></div>`).join(''):'<div class="empty" style="grid-column:1/-1">No active advertisements found.</div>';
+}
+function renderAll(){fillCategorySelects();renderSwatches();renderDashboard();renderAdsTable(adsPage);renderCategories();updatePreview();renderPublic();}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+document.getElementById('fCategory').addEventListener('change',updatePreview);
+
+// Automatic scheduling/expiry for the static MVP. GitHub Pages has no server-side
+// cron job, so the browser checks dates on load, focus, visibility change, and every 30 seconds.
+setInterval(runExpiryScheduler,30000);
+window.addEventListener('focus',runExpiryScheduler);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)runExpiryScheduler()});
+if(sessionStorage.adspool==='1'){document.getElementById('loginView').style.display='none';document.getElementById('app').style.display='block';load()}else{document.getElementById('loginView').style.display='flex'}
+</script>
+</body>
+</html>
