@@ -405,9 +405,18 @@ function renderAds(){
 function shareAd(id){
   const a=activeAds().find(x=>x.id===id);if(!a)return;
   const u=new URL(window.location.href);u.searchParams.set('ad',a.id);
-  if(navigator.share)navigator.share({title:a.businessName,text:`${a.businessName} on Adspool`,url:u.href}).catch(()=>{});
-  else if(navigator.clipboard)navigator.clipboard.writeText(u.href).then(()=>alert('Ad link copied.'));
-  else prompt('Copy this Adspool link:',u.href);
+  const shareText=`${a.businessName} on Adspool\n${u.href}`;
+  if(navigator.share){
+    navigator.share({
+      title:`${a.businessName} on Adspool`,
+      text:`${a.businessName} on Adspool`,
+      url:u.href
+    }).catch(()=>{});
+  }else if(navigator.clipboard){
+    navigator.clipboard.writeText(shareText).then(()=>alert('Adspool share text and link copied.'));
+  }else{
+    prompt('Copy this Adspool share text and link:',shareText);
+  }
 }
 
 function viewAd(id){
