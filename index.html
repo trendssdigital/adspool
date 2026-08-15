@@ -445,7 +445,13 @@ window.addEventListener('storage',e=>{
 });
 window.addEventListener('focus',()=>{loadPremiumBanners();renderPremiumBanner();});
 
+function openSharedAd(){
+  const id=new URLSearchParams(window.location.search).get('ad');
+  if(id){setTimeout(()=>{if(activeAds().some(a=>a.id===id))viewAd(id)},150)}
+}
+
 load();
+openSharedAd();
 </script>
 </body>
 </html>
