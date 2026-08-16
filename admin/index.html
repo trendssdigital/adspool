@@ -118,7 +118,9 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 .previewwrap{display:flex;justify-content:center;padding:6px}
 
 /* ---------- ticket ad preview (shared visual language with public site) ---------- */
-.ad{width:100%;max-width:400px;min-height:240px;height:auto;border:2px solid currentColor;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;text-align:center;font-family:var(--signage);box-shadow:0 10px 26px rgba(18,32,26,.08)}
+.ad{position:relative;width:100%;max-width:400px;min-height:240px;height:auto;border:2px solid currentColor;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;text-align:center;font-family:var(--signage);box-shadow:0 10px 26px rgba(18,32,26,.08)}
+.ad-frame{position:relative;width:100%;max-width:400px}
+.promo-badge{position:absolute;top:-10px;right:-10px;width:54px;height:54px;border-radius:50%;background:#fff;border:3px solid var(--danger);color:var(--danger);display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--sans);font-weight:800;font-size:11px;line-height:1.15;box-shadow:0 6px 14px rgba(0,0,0,.18);z-index:5;padding:4px;overflow:hidden}
 .ad .adhead{flex:0 0 auto;padding:15px 12px 10px;border-bottom:2px solid currentColor;font-size:25px;font-weight:800;line-height:1.06;min-height:60px;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere}
 .ad .adbody{flex:1;padding:13px 18px 10px;display:flex;flex-direction:column;justify-content:center;gap:11px}
 .servicesline{font-size:16px;font-weight:700;line-height:1.22;word-break:break-word}
@@ -400,6 +402,12 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
         <div class="field">
           <label>WhatsApp (optional)</label>
           <input id="fWhatsapp" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digit WhatsApp number" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
+        </div>
+
+        <div class="field">
+          <label>Promo Badge (optional)</label>
+          <input id="fBadge" maxlength="12" placeholder="e.g. 10% OFF" oninput="updatePreview()">
+          <span class="hint">Shows as a small round badge on the ad. Leave blank for none.</span>
         </div>
 
         <div class="field full">
@@ -698,6 +706,7 @@ function editAd(id){
   document.getElementById('fState').value=a.state||'Karnataka';
   document.getElementById('fPhone').value=a.phone||'';
   document.getElementById('fWhatsapp').value=a.whatsapp||'';
+  document.getElementById('fBadge').value=a.badge||'';
   document.getElementById('fColor').value=a.backgroundColor||'#ffffff';
 
   document.getElementById('servicesContainer').innerHTML='';
@@ -719,7 +728,7 @@ function cancelCreate(){
 }
 
 function clearForm(){
-  ['fBusiness','fAddressLine','fArea','fPin','fPhone','fWhatsapp'].forEach(id=>document.getElementById(id).value='');
+  ['fBusiness','fAddressLine','fArea','fPin','fPhone','fWhatsapp','fBadge'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fCity').value='Bangalore';
   document.getElementById('fState').value='Karnataka';
   document.getElementById('servicesContainer').innerHTML='';
@@ -797,14 +806,18 @@ function adMarkup(a){
   const fg=a.textColor||contrast(bg);
   const address=buildAddress(a);
   const tpl=a.templateId||1;
-  return`<div class="ad tpl-${tpl}" style="color:${fg};background:${esc(bg)}">
-    <div class="adhead">${esc(a.businessName||'Business Name')}</div>
-    <div class="adbody">
-      <div class="servicesline">${(a.services||[]).map(esc).join(' • ')}</div>
-      <div class="address">📍 ${esc(address||'Address')}</div>
-      ${address?`<a class="directionBtn" href="${mapsUrl(address)}" target="_blank" rel="noopener">📍 Share Directions</a>`:''}
+  const badge=(a.badge||'').trim();
+  return`<div class="ad-frame">
+    ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
+    <div class="ad tpl-${tpl}" style="color:${fg};background:${esc(bg)}">
+      <div class="adhead">${esc(a.businessName||'Business Name')}</div>
+      <div class="adbody">
+        <div class="servicesline">${(a.services||[]).map(esc).join(' • ')}</div>
+        <div class="address">📍 ${esc(address||'Address')}</div>
+        ${address?`<a class="directionBtn" href="${mapsUrl(address)}" target="_blank" rel="noopener">📍 Share Directions</a>`:''}
+      </div>
+      <div class="adphone">${esc(a.phone||'')}</div>
     </div>
-    <div class="adphone">${esc(a.phone||'')}</div>
   </div>`;
 }
 
@@ -825,7 +838,8 @@ function updatePreview(){
     phone:document.getElementById('fPhone').value||'+91 9001009001',
     backgroundColor:bg,
     textColor:fg,
-    templateId:selectedTemplateId
+    templateId:selectedTemplateId,
+    badge:document.getElementById('fBadge').value
   };
 
   document.getElementById('adPreview').innerHTML=adMarkup(a);
@@ -890,6 +904,7 @@ function saveAd(mode){
     pin:address.pin,
     phone:phone,
     whatsapp:document.getElementById('fWhatsapp').value.trim(),
+    badge:document.getElementById('fBadge').value.trim(),
     backgroundColor:document.getElementById('fColor').value,
     textColor:contrast(document.getElementById('fColor').value),
     templateId:selectedTemplateId||1,
