@@ -10,18 +10,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,440;0,9..144,600;0,9..144,700;1,9..144,500&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#12201a;
-  --forest:#0b6b49;
-  --forest-dark:#074430;
-  --forest-deep:#052a1e;
-  --gold:#e2a63a;
-  --gold-deep:#b8811f;
-  --gold-soft:#f7e8c0;
-  --paper:#faf6ec;
+  --ink:#0a0a0a;
+  --forest:#073D6D;
+  --forest-dark:#052a4d;
+  --forest-deep:#031d35;
+  --gold:#02A9D6;
+  --gold-deep:#0286ab;
+  --gold-soft:#d9f2fa;
+  --paper:#f5f7f9;
   --card:#ffffff;
-  --muted:#6c7a6f;
-  --border:#e4decb;
-  --border-strong:#d6cca9;
+  --muted:#667080;
+  --border:#e3e7ec;
+  --border-strong:#c9d0d9;
   --danger:#b23a2e;
   --serif:'Fraunces',Georgia,serif;
   --sans:'Public Sans',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
@@ -50,7 +50,7 @@ img{max-width:100%}
 
 /* ---------- brand mark ---------- */
 .brandmark{display:flex;align-items:center;gap:10px}
-.spool{width:34px;height:34px;flex:none}
+.spool{height:34px;width:auto;flex:none;display:block}
 .brand{font-family:var(--serif);font-size:23px;font-weight:700;color:var(--forest-dark);letter-spacing:-.3px;display:flex;flex-direction:column;line-height:1}
 .brand small{font-family:var(--mono);font-size:9.5px;color:var(--muted);font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-top:4px}
 
@@ -163,14 +163,14 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 .about p{color:#4d5a51;line-height:1.7;margin:0 auto 22px;max-width:640px;font-size:15.5px}
 
 /* ---------- footer ---------- */
-.footer{background:var(--forest-deep);color:#e9f1ec;padding:36px 5% 26px}
+.footer{background:var(--forest-deep);color:#eaf1f7;padding:36px 5% 26px}
 .footer-inner{max-width:1240px;margin:auto;display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
 .footer .brand{color:#fff}
-.footer .brand small{color:#9fc4b0}
-.footer-tagline{font-size:12.5px;color:#9fc4b0;margin-top:10px;max-width:260px;line-height:1.6}
-.footer-links{display:flex;gap:22px;font-size:13px;font-weight:600;color:#d9ecdf}
+.footer .brand small{color:#9db8d1}
+.footer-tagline{font-size:12.5px;color:#9db8d1;margin-top:10px;max-width:260px;line-height:1.6}
+.footer-links{display:flex;gap:22px;font-size:13px;font-weight:600;color:#d8e6f0}
 .footer-links a:hover{color:var(--gold)}
-.footer-bottom{max-width:1240px;margin:26px auto 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);font-family:var(--mono);font-size:11px;color:#7fa895}
+.footer-bottom{max-width:1240px;margin:26px auto 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);font-family:var(--mono);font-size:11px;color:#7d97b3}
 
 /* ---------- modal ---------- */
 .modal-backdrop{position:fixed;inset:0;background:rgba(5,20,14,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
@@ -210,18 +210,7 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 
 <header class="topbar">
   <a href="#" class="brandmark">
-    <svg class="spool" viewBox="0 0 40 40" fill="none">
-      <circle cx="20" cy="20" r="18" fill="var(--forest)"/>
-      <circle cx="20" cy="20" r="8.5" fill="var(--paper)"/>
-      <circle cx="20" cy="20" r="2.6" fill="var(--gold)"/>
-      <g stroke="var(--gold)" stroke-width="2" stroke-linecap="round">
-        <line x1="20" y1="6" x2="20" y2="10.5"/>
-        <line x1="20" y1="29.5" x2="20" y2="34"/>
-        <line x1="6" y1="20" x2="10.5" y2="20"/>
-        <line x1="29.5" y1="20" x2="34" y2="20"/>
-      </g>
-    </svg>
-    <span class="brand">Adspool<small>Discover · Connect · Grow</small></span>
+    <img class="spool" src="adspool-logo.png" alt="Adspool">
   </a>
   <nav class="nav">
     <div class="navlinks">
@@ -316,16 +305,7 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
   <div class="footer-inner">
     <div>
       <span class="brandmark">
-        <svg class="spool" viewBox="0 0 40 40" fill="none">
-          <circle cx="20" cy="20" r="18" fill="#0d7d56"/>
-          <circle cx="20" cy="20" r="8.5" fill="#052a1e"/>
-          <circle cx="20" cy="20" r="2.6" fill="var(--gold)"/>
-          <g stroke="var(--gold)" stroke-width="2" stroke-linecap="round">
-            <line x1="20" y1="6" x2="20" y2="10.5"/><line x1="20" y1="29.5" x2="20" y2="34"/>
-            <line x1="6" y1="20" x2="10.5" y2="20"/><line x1="29.5" y1="20" x2="34" y2="20"/>
-          </g>
-        </svg>
-        <span class="brand">Adspool<small>Discover · Connect · Grow</small></span>
+        <img class="spool" src="adspool-logo.png" alt="Adspool" style="filter:brightness(0) invert(1)">
       </span>
       <div class="footer-tagline">A local business directory built for Bangalore's neighbourhoods.</div>
     </div>
