@@ -132,7 +132,9 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 .ad-perf::before{left:-22px}
 .ad-perf::after{right:-22px}
 
-.ad{width:100%;min-height:225px;border:2px solid currentColor;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;text-align:center;font-family:var(--signage)}
+.ad{position:relative;width:100%;min-height:225px;border:2px solid currentColor;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;text-align:center;font-family:var(--signage)}
+.ad-frame{position:relative;width:100%}
+.promo-badge{position:absolute;top:-8px;right:-8px;width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid var(--danger);color:var(--danger);display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--sans);font-weight:800;font-size:9.5px;line-height:1.15;box-shadow:0 6px 14px rgba(0,0,0,.18);z-index:5;padding:3px;overflow:hidden}
 .ad .adhead{flex:0 0 auto;padding:14px 12px 10px;border-bottom:2px solid currentColor;font-size:22px;font-weight:800;line-height:1.08;min-height:56px;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere}
 .ad .adbody{flex:1;padding:12px 16px 10px;display:flex;flex-direction:column;justify-content:center;gap:10px}
 .servicesline{font-size:14.5px;font-weight:700;line-height:1.25;word-break:break-word;overflow-wrap:anywhere}
@@ -448,13 +450,17 @@ function adMarkup(a){
   const services=(a.services||[]).filter(Boolean);
   const serviceHtml=services.length?services.map(esc).join(' <span>•</span> '):'Local business services';
   const tpl=a.templateId||1;
-  return `<div class="ad tpl-${tpl}" style="color:${fg};background:${esc(bg)}">
-    <div class="adhead" style="font-size:${s.nameSize}px">${esc(a.businessName||'Business Name')}</div>
-    <div class="adbody">
-      <div class="servicesline" style="font-size:${s.serviceSize}px">${serviceHtml}</div>
-      <div class="address" style="font-size:${s.addressSize}px">📍 ${esc(address||'')}</div>
+  const badge=(a.badge||'').trim();
+  return `<div class="ad-frame">
+    ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
+    <div class="ad tpl-${tpl}" style="color:${fg};background:${esc(bg)}">
+      <div class="adhead" style="font-size:${s.nameSize}px">${esc(a.businessName||'Business Name')}</div>
+      <div class="adbody">
+        <div class="servicesline" style="font-size:${s.serviceSize}px">${serviceHtml}</div>
+        <div class="address" style="font-size:${s.addressSize}px">📍 ${esc(address||'')}</div>
+      </div>
+      <div class="adphone" style="font-size:20px">${esc(a.phone||'')}</div>
     </div>
-    <div class="adphone" style="font-size:20px">${esc(a.phone||'')}</div>
   </div>`;
 }
 
