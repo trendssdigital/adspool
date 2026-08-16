@@ -6,7 +6,7 @@
 <title>Adspool — Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,440;0,9..144,600;0,9..144,700;1,9..144,500&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,440;0,9..144,600;0,9..144,700;1,9..144,500&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&family=Baloo+2:wght@600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Poppins:wght@500;600;700;800&family=Courier+Prime:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
 :root{
   --ink:#0a0a0a;
@@ -26,6 +26,10 @@
   --sans:'Public Sans',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
   --signage:'Baloo 2',system-ui,sans-serif;
+  --tpl2-font:'Playfair Display','Times New Roman',Georgia,serif;
+  --tpl3-font:'Poppins',system-ui,sans-serif;
+  --tpl4-font:'Courier Prime','Courier New',monospace;
+  --tpl5-font:'Bebas Neue',Impact,sans-serif;
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:var(--sans);background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
@@ -122,10 +126,43 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 .ad .adphone{flex:0 0 auto;min-height:54px;border-top:2px solid currentColor;padding:7px 8px 10px;font-size:24px;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:var(--mono)}
 .directionBtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin-top:2px;border:0;border-radius:8px;padding:8px 12px;background:var(--forest);color:#fff;font-size:12px;font-weight:700;text-decoration:none;font-family:var(--sans)}
 
+/* ---------- ad templates (rotate per ad, kept consistent between admin preview & public site) ---------- */
+/* Template 1 — Classic Signage (default, unchanged) uses the base .ad rules above */
+
+/* Template 2 — Editorial Serif */
+.ad.tpl-2{font-family:var(--tpl2-font);border-radius:6px}
+.ad.tpl-2 .adhead{font-style:italic;font-weight:700;letter-spacing:.01em;text-transform:none}
+.ad.tpl-2 .adbody,.ad.tpl-2 .servicesline{font-family:var(--tpl2-font)}
+.ad.tpl-2 .adphone{font-family:var(--tpl2-font);font-style:italic;font-weight:700}
+
+/* Template 3 — Modern Sans */
+.ad.tpl-3{font-family:var(--tpl3-font);border-radius:26px}
+.ad.tpl-3 .adhead{text-transform:uppercase;letter-spacing:.05em;font-weight:800}
+.ad.tpl-3 .adbody,.ad.tpl-3 .servicesline{font-family:var(--tpl3-font)}
+.ad.tpl-3 .adphone{font-family:var(--tpl3-font);letter-spacing:.04em;font-weight:700}
+
+/* Template 4 — Classified Typewriter */
+.ad.tpl-4{font-family:var(--tpl4-font);border-radius:2px}
+.ad.tpl-4 .adhead{text-transform:uppercase;letter-spacing:.08em;border-bottom-style:dashed;font-weight:700}
+.ad.tpl-4 .adbody,.ad.tpl-4 .servicesline{font-family:var(--tpl4-font)}
+.ad.tpl-4 .adphone{font-family:var(--tpl4-font);border-top-style:dashed;letter-spacing:.05em}
+
+/* Template 5 — Bold Billboard */
+.ad.tpl-5{font-family:var(--tpl5-font);border-radius:10px}
+.ad.tpl-5 .adhead{font-size:32px;letter-spacing:.03em;text-transform:uppercase}
+.ad.tpl-5 .adbody,.ad.tpl-5 .servicesline{font-family:var(--tpl5-font);letter-spacing:.02em}
+.ad.tpl-5 .adphone{font-family:var(--tpl5-font);font-size:28px;letter-spacing:.04em}
+
 .colorrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .swatches{display:flex;gap:7px;flex-wrap:wrap}
 .swatch{width:28px;height:28px;border-radius:8px;border:2px solid #fff;box-shadow:0 0 0 1px var(--border-strong)}
 .colorinput{width:44px;height:38px;padding:2px}
+
+.tplpicker{display:flex;gap:8px;flex-wrap:wrap}
+.tplchip{border:1.5px solid var(--border-strong);background:var(--card);border-radius:12px;padding:9px 13px;text-align:left;display:flex;flex-direction:column;gap:3px;min-width:128px}
+.tplchip .tplchip-name{font-size:12.5px;font-weight:700;color:var(--ink);font-family:var(--sans)}
+.tplchip .tplchip-sample{font-size:15px;line-height:1}
+.tplchip.active{border-color:var(--forest);background:var(--gold-soft);box-shadow:0 0 0 3px rgba(2,169,214,.15)}
 
 .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
 .empty{padding:40px;text-align:center;color:var(--muted)}
@@ -316,6 +353,12 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
         </div>
 
         <div class="field full">
+          <label>Ad Template *</label>
+          <div id="templatePicker" class="tplpicker"></div>
+          <span class="hint">The highlighted one is auto-suggested for variety — tap any card to pick that look instead.</span>
+        </div>
+
+        <div class="field full">
           <label>Services</label>
           <div id="servicesContainer" class="servicesDynamic"></div>
           <button type="button" class="btn small" style="width:max-content;margin-top:8px" onclick="addService()">+ Add Service</button>
@@ -391,6 +434,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
     <div class="sticky">
       <div class="panel">
         <h2>Live Preview</h2>
+        <div id="previewTemplateLabel" class="hint" style="text-align:center;margin-bottom:10px"></div>
         <div class="previewwrap"><div id="adPreview"></div></div>
         <div id="previewId" class="hint" style="text-align:center;margin-top:10px"></div>
       </div>
@@ -515,14 +559,29 @@ const defaultCategories=[
 
 const swatches=['#ffffff','#f2f4f7','#dff3ff','#e4f7e8','#fff6bf','#ffe6c7','#ffe1ea','#173a67','#155b3a','#4b2a72','#7c1d1d','#111111'];
 
+/* Each new ad is suggested the next template in rotation for variety, but the
+   admin can always pick any of these 5 typography templates instead — whatever
+   is picked/shown in the admin live preview is exactly what renders on the
+   public site once published. */
+const adTemplates=[
+  {id:1,name:'Classic Signage',cssVar:'var(--signage)'},
+  {id:2,name:'Editorial Serif',cssVar:'var(--tpl2-font)'},
+  {id:3,name:'Modern Sans',cssVar:'var(--tpl3-font)'},
+  {id:4,name:'Classified Typewriter',cssVar:'var(--tpl4-font)'},
+  {id:5,name:'Bold Billboard',cssVar:'var(--tpl5-font)'}
+];
+
 let state={
   ads:[],
   categories:defaultCategories.map((name,i)=>({id:i+1,name,active:true})),
-  nextId:1
+  nextId:1,
+  templateCounter:0
 };
+sortCategories();
 
 let premiumBanners=[];
 let editingId=null;
+let selectedTemplateId=1;
 let publicCategory='all';
 
 function esc(s){
@@ -542,6 +601,8 @@ function load(){
 function normalize(){
   (state.ads||[]).forEach(refreshStatus);
   if(!state.nextId)state.nextId=1;
+  if(typeof state.templateCounter!=='number')state.templateCounter=0;
+  sortCategories();
 }
 
 function persist(){ localStorage.setItem(STORAGE,JSON.stringify(state)); }
@@ -611,7 +672,10 @@ function showView(v){
 /* CREATE / EDIT */
 function startCreate(){
   editingId=null;
+  selectedTemplateId=(state.templateCounter%adTemplates.length)+1;
+  fillCategorySelects();
   clearForm();
+  renderTemplatePicker();
   document.getElementById('formTitle').textContent='Create Advertisement';
   document.getElementById('previewId').textContent='';
   showView('create');
@@ -621,7 +685,9 @@ function editAd(id){
   const a=state.ads.find(x=>x.id===id);
   if(!a)return;
   editingId=id;
+  selectedTemplateId=a.templateId||1;
   fillCategorySelects();
+  renderTemplatePicker();
 
   document.getElementById('fBusiness').value=a.businessName||'';
   document.getElementById('fCategory').value=a.categoryId;
@@ -730,7 +796,8 @@ function adMarkup(a){
   const bg=a.backgroundColor||'#fff';
   const fg=a.textColor||contrast(bg);
   const address=buildAddress(a);
-  return`<div class="ad" style="color:${fg};background:${esc(bg)}">
+  const tpl=a.templateId||1;
+  return`<div class="ad tpl-${tpl}" style="color:${fg};background:${esc(bg)}">
     <div class="adhead">${esc(a.businessName||'Business Name')}</div>
     <div class="adbody">
       <div class="servicesline">${(a.services||[]).map(esc).join(' • ')}</div>
@@ -757,10 +824,16 @@ function updatePreview(){
     pin:document.getElementById('fPin').value,
     phone:document.getElementById('fPhone').value||'+91 9001009001',
     backgroundColor:bg,
-    textColor:fg
+    textColor:fg,
+    templateId:selectedTemplateId
   };
 
   document.getElementById('adPreview').innerHTML=adMarkup(a);
+  const tplLabel=document.getElementById('previewTemplateLabel');
+  if(tplLabel){
+    const tpl=adTemplates[selectedTemplateId-1]||adTemplates[0];
+    tplLabel.textContent='Showing: '+tpl.name;
+  }
 }
 
 function setColor(c){
@@ -772,6 +845,22 @@ function renderSwatches(){
   document.getElementById('swatches').innerHTML=swatches.map(c=>`<button type="button" class="swatch" style="background:${c}" onclick="setColor('${c}')"></button>`).join('');
 }
 
+function renderTemplatePicker(){
+  const box=document.getElementById('templatePicker');
+  if(!box)return;
+  box.innerHTML=adTemplates.map(t=>`
+    <button type="button" class="tplchip ${t.id===selectedTemplateId?'active':''}" onclick="chooseTemplate(${t.id})">
+      <span class="tplchip-name">${esc(t.name)}</span>
+      <span class="tplchip-sample" style="font-family:${t.cssVar}">Aa Bb 123</span>
+    </button>`).join('');
+}
+
+function chooseTemplate(id){
+  selectedTemplateId=id;
+  renderTemplatePicker();
+  updatePreview();
+}
+
 /* SAVE AD */
 function saveAd(mode){
   const business=document.getElementById('fBusiness').value.trim();
@@ -781,10 +870,14 @@ function saveAd(mode){
   const s=document.getElementById('fStart').value;
   const e=document.getElementById('fEnd').value;
 
-  if(!business||!cat||!address.addressLine||!address.area||!address.pin||address.pin.length!==6||!phone||phone.length!==10||!s||!e||new Date(e)<=new Date(s)){
-    showToast('Please complete all required fields correctly.');
-    return;
-  }
+  if(!business){ showToast('Business Name is required.'); return; }
+  if(!cat){ showToast('Please select a Category.'); return; }
+  if(!address.addressLine){ showToast('Address Line is required.'); return; }
+  if(!address.area){ showToast('Area / Locality is required.'); return; }
+  if(!address.pin||address.pin.length!==6){ showToast('PIN / Area Code must be exactly 6 digits.'); return; }
+  if(!phone||phone.length!==10){ showToast('Phone must be exactly 10 digits.'); return; }
+  if(!s||!e){ showToast('Start and End Date & Time are required.'); return; }
+  if(new Date(e)<=new Date(s)){ showToast('End Date & Time must be after Start Date & Time.'); return; }
 
   const data={
     businessName:business,
@@ -799,6 +892,7 @@ function saveAd(mode){
     whatsapp:document.getElementById('fWhatsapp').value.trim(),
     backgroundColor:document.getElementById('fColor').value,
     textColor:contrast(document.getElementById('fColor').value),
+    templateId:selectedTemplateId||1,
     startAt:new Date(s).toISOString(),
     endAt:new Date(e).toISOString()
   };
@@ -809,6 +903,7 @@ function saveAd(mode){
     if(mode==='draft')existing.status='draft';
     else if(existing.status==='draft'||existing.status==='unpublished')refreshStatus(existing);
   }else{
+    state.templateCounter++;
     state.ads.unshift({
       id:crypto.randomUUID(),
       adId:'ADS-'+String(state.nextId++).padStart(6,'0'),
@@ -912,10 +1007,22 @@ function renderCategories(){
     </div>`).join('');
 }
 
+/* Keeps categories A→Z, with "Other" always pinned last regardless of when it was added */
+function sortCategories(){
+  state.categories.sort((a,b)=>{
+    const aOther=(a.name||'').trim().toLowerCase()==='other';
+    const bOther=(b.name||'').trim().toLowerCase()==='other';
+    if(aOther&&!bOther)return 1;
+    if(bOther&&!aOther)return-1;
+    return(a.name||'').localeCompare(b.name||'',undefined,{sensitivity:'base'});
+  });
+}
+
 function addCategory(){
   const n=document.getElementById('newCategory').value.trim();
   if(!n)return;
   state.categories.push({id:Date.now(),name:n,active:true});
+  sortCategories();
   document.getElementById('newCategory').value='';
   persist();
   fillCategorySelects();
