@@ -65,6 +65,25 @@ img{max-width:100%}
 .navlinks a{position:relative;padding-bottom:3px}
 .navlinks a:hover{color:var(--forest)}
 
+/* ---------- sticky search bar (appears under topbar on scroll) ---------- */
+.sticky-searchbar{position:fixed;left:0;right:0;top:76px;z-index:39;background:rgba(250,246,236,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);box-shadow:0 8px 24px rgba(18,32,26,.06);transform:translateY(-10px);opacity:0;pointer-events:none;transition:transform .22s ease,opacity .22s ease}
+.sticky-searchbar.show{transform:translateY(0);opacity:1;pointer-events:auto}
+.sticky-searchbar-inner{max-width:1240px;margin:auto;padding:12px 5%;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.sticky-searchbox{background:var(--card);border:1.5px solid var(--border-strong);border-radius:12px;padding:6px;display:flex;gap:6px;box-shadow:0 8px 20px rgba(18,32,26,.08);flex:1;max-width:520px}
+.sticky-searchbox input{flex:1;border:0;outline:0;padding:10px 12px;font-size:14px;min-width:0;background:transparent;color:var(--ink)}
+.sticky-searchbox input::placeholder{color:#93a097}
+.sticky-searchbox .btn{padding:9px 16px;font-size:13px}
+.sticky-stats{display:flex;gap:22px;flex:none}
+.sticky-stats div{font-family:var(--mono)}
+.sticky-stats b{display:block;font-size:17px;color:var(--forest-dark);font-weight:600}
+.sticky-stats span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.sticky-chips-row{max-width:1240px;margin:auto;padding:0 5% 10px}
+.sticky-chips{display:flex;gap:8px;overflow-x:auto;padding:0;margin:0;scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent}
+.sticky-chips::-webkit-scrollbar{height:5px}
+.sticky-chips::-webkit-scrollbar-track{background:transparent}
+.sticky-chips::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:999px}
+.sticky-chips .chip{padding:7px 14px;font-size:12px}
+
 /* ---------- hero ---------- */
 .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
 .hero::before{content:"";position:absolute;inset:0;background:
@@ -231,6 +250,9 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
   .hero-inner{padding:40px 5% 36px}
   .searchbox{display:block}
   .searchbox .btn{width:100%;margin-top:7px}
+  .sticky-searchbar-inner{flex-direction:column;align-items:stretch;gap:10px;padding:10px 5%}
+  .sticky-stats{justify-content:space-between;gap:14px}
+  .sticky-searchbox{max-width:none}
   .section{padding:38px 5%}
   .ads-grid{grid-template-columns:1fr}
   .feature-grid{grid-template-columns:1fr}
@@ -254,6 +276,23 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
   </nav>
 </header>
 
+<div id="stickySearchbar" class="sticky-searchbar">
+  <div class="sticky-searchbar-inner">
+    <div class="sticky-searchbox">
+      <input id="searchInputSticky" type="search" placeholder="Search business name, Ad ID, service or location…" autocomplete="off" oninput="syncSearch(this.value)">
+      <button class="btn primary" onclick="document.getElementById('ads').scrollIntoView({behavior:'smooth'})">Search</button>
+    </div>
+    <div class="sticky-stats">
+      <div><b id="statTotalSticky">—</b><span>Active ads</span></div>
+      <div><b id="statCatsSticky">—</b><span>Categories</span></div>
+      <div><b>Free</b><span>To browse</span></div>
+    </div>
+  </div>
+  <div class="sticky-chips-row">
+    <div id="categoriesSticky" class="chips sticky-chips"></div>
+  </div>
+</div>
+
 <section class="hero">
   <div class="hero-inner">
     <div>
@@ -261,7 +300,7 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
       <h1>Local businesses, <em>one spool</em> of listings away.</h1>
       <p class="lede">Adspool gathers active advertisements from businesses near you — search by name, service or locality, and connect directly with the ones that fit.</p>
       <div class="searchbox">
-        <input id="searchInput" type="search" placeholder="Search business name, Ad ID, service or location…" autocomplete="off" oninput="renderAds()">
+        <input id="searchInput" type="search" placeholder="Search business name, Ad ID, service or location…" autocomplete="off" oninput="syncSearch(this.value)">
         <button class="btn primary" onclick="document.getElementById('ads').scrollIntoView({behavior:'smooth'})">Search</button>
       </div>
       <div class="hero-stats">
@@ -291,6 +330,8 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
   </div>
 </section>
 
+<div id="stickySpacer" style="height:0;transition:height .22s ease"></div>
+
 <section class="section" id="ads">
   <div class="section-head">
     <div>
@@ -298,7 +339,7 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
       <h2>Featured ads</h2>
       <p>Browse advertisements that are currently active.</p>
     </div>
-    <a class="link" href="#ads" onclick="resetFilters();return false">View all ads →</a>
+    <a class="link" href="#ads" onclick="viewAllAds(event)">View all ads →</a>
   </div>
   <div id="categories" class="chips"></div>
   <div id="premiumSection" class="premium-section" style="display:none">
@@ -380,8 +421,18 @@ function load(){
 }
 
 function updateStats(){
-  document.getElementById('statTotal').textContent=activeAds().length;
-  document.getElementById('statCats').textContent=state.categories.filter(c=>c.active).length;
+  const total=activeAds().length;
+  const cats=state.categories.filter(c=>c.active).length;
+  document.getElementById('statTotal').textContent=total;
+  document.getElementById('statCats').textContent=cats;
+  document.getElementById('statTotalSticky').textContent=total;
+  document.getElementById('statCatsSticky').textContent=cats;
+}
+
+function syncSearch(val){
+  document.getElementById('searchInput').value=val;
+  document.getElementById('searchInputSticky').value=val;
+  renderAds();
 }
 
 function refreshStatus(a){
@@ -505,9 +556,10 @@ function renderPremiumBanner(){
 
 function renderCategories(){
   const cats=state.categories.filter(c=>c.active);
-  document.getElementById('categories').innerHTML=
-    `<button class="chip ${selectedCategory==='all'?'active':''}" onclick="setCategory('all')">All Categories</button>`+
+  const html=`<button class="chip ${selectedCategory==='all'?'active':''}" onclick="setCategory('all')">All Categories</button>`+
     cats.map(c=>`<button class="chip ${String(selectedCategory)===String(c.id)?'active':''}" onclick="setCategory('${c.id}')">${esc(c.name)}</button>`).join('');
+  document.getElementById('categories').innerHTML=html;
+  document.getElementById('categoriesSticky').innerHTML=html;
 }
 
 function setCategory(id){selectedCategory=id;premiumIndex=0;renderCategories();renderPremiumBanner();renderAds()}
@@ -515,7 +567,23 @@ function setCategory(id){selectedCategory=id;premiumIndex=0;renderCategories();r
 function resetFilters(){
   selectedCategory='all';
   document.getElementById('searchInput').value='';
+  document.getElementById('searchInputSticky').value='';
   renderCategories();renderPremiumBanner();renderAds();
+  document.getElementById('categories').scrollLeft=0;
+  document.getElementById('categoriesSticky').scrollLeft=0;
+}
+
+function viewAllAds(e){
+  if(e)e.preventDefault();
+  const hadFilter=selectedCategory!=='all'||(document.getElementById('searchInput').value||'').trim()!=='';
+  resetFilters();
+  const bar=document.getElementById('stickySearchbar');
+  const topbarH=document.querySelector('.topbar')?.offsetHeight||0;
+  const stickyH=bar&&bar.classList.contains('show')?bar.offsetHeight:0;
+  const target=document.getElementById('ads');
+  const y=target.getBoundingClientRect().top+window.pageYOffset-(topbarH+stickyH+14);
+  window.scrollTo({top:y,behavior:'smooth'});
+  if(hadFilter)showToast('Filters cleared — showing all ads.');
 }
 
 function renderAds(){
@@ -608,6 +676,28 @@ function openSharedAd(){
 
 load();
 openSharedAd();
+
+/* Show the sticky search bar once the hero's own search box has scrolled
+   out of view under the fixed header; hide it again once back at top. */
+(function initStickySearch(){
+  const bar=document.getElementById('stickySearchbar');
+  const spacer=document.getElementById('stickySpacer');
+  const heroBox=document.querySelector('.hero .searchbox');
+  const topbar=document.querySelector('.topbar');
+  const inlineChips=document.getElementById('categories');
+  if(!bar||!heroBox)return;
+  function onScroll(){
+    const headerH=topbar?topbar.offsetHeight:0;
+    const r=heroBox.getBoundingClientRect();
+    const shouldShow=r.bottom<headerH;
+    bar.classList.toggle('show',shouldShow);
+    if(spacer)spacer.style.height=shouldShow?bar.offsetHeight+'px':'0px';
+    if(inlineChips)inlineChips.style.visibility=shouldShow?'hidden':'visible';
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',onScroll);
+  onScroll();
+})();
 </script>
 </body>
 </html>
