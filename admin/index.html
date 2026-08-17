@@ -218,7 +218,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 @keyframes toastin{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
 
 .banner-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.banner-card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.banner-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
 .banner-card img{width:100%;aspect-ratio:4.8/1;object-fit:cover;background:var(--paper);display:block}
 .banner-info{padding:14px}
 .banner-meta{font-size:12px;color:var(--muted);line-height:1.65;margin-top:6px}
@@ -232,12 +232,6 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 .premium-banner-img{display:block;width:100%;aspect-ratio:4.8/1;object-fit:cover}
 .premium-banner-label{position:absolute;left:12px;top:12px;background:var(--gold);color:var(--forest-deep);padding:5px 9px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700}
 .premium-banner-business{position:absolute;left:14px;bottom:12px;background:rgba(5,42,30,.75);color:#fff;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700}
-
-/* ---------- premium creatives (1080x1080 banner uploads) ---------- */
-.banner-card.square img{aspect-ratio:1/1}
-.banner-card.square .banner-preview{aspect-ratio:1/1}
-.pc-preview-wrap{position:relative;width:100%;max-width:340px;margin:0 auto;overflow:hidden;border-radius:16px;background:var(--forest-deep);border:1px solid var(--border)}
-.pc-preview-img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}
 
 @media(max-width:1000px){
   .cards{grid-template-columns:repeat(3,1fr)}
@@ -374,7 +368,6 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
   <div class="createtabs">
     <button type="button" class="createtab active" data-tab="normal" onclick="switchCreateTab('normal')"><span class="tag">1</span>Normal Ads</button>
     <button type="button" class="createtab" data-tab="premium" onclick="switchCreateTab('premium')"><span class="tag">2</span>Premium Ads</button>
-    <button type="button" class="createtab" data-tab="premiumcreative" onclick="switchCreateTab('premiumcreative')"><span class="tag">3</span>Premium Creatives</button>
   </div>
 
   <div id="tabNormalAds" class="createtabpanel active">
@@ -548,116 +541,6 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
       <div id="premiumAdminGrid" class="banner-grid"></div>
     </div>
   </div>
-
-  <div id="tabPremiumCreatives" class="createtabpanel">
-  <div class="creategrid">
-    <div class="panel">
-      <h2 id="pcFormTitle" style="margin-bottom:16px">Create Premium Creative</h2>
-      <div class="formgrid">
-
-        <div class="field">
-          <label>Business Name *</label>
-          <input id="pcBusiness" maxlength="80" oninput="updatePCPreview()">
-        </div>
-
-        <div class="field">
-          <label>Category *</label>
-          <select id="pcCategory"></select>
-        </div>
-
-        <div class="field full">
-          <label id="pcImageLabel">Banner Creative *</label>
-          <input id="pcImage" type="file" accept="image/jpeg,image/png,image/webp">
-          <div class="banner-note" id="pcImageNote">Required: exactly <strong>1080 × 1080 px</strong> (1:1). Create the artwork separately; this portal is only for uploading and scheduling it.</div>
-        </div>
-
-        <div class="field full">
-          <label>Address *</label>
-          <div class="address-grid">
-            <div class="field">
-              <label>Address Line</label>
-              <input id="pcAddressLine" maxlength="150" placeholder="House / Shop / Street">
-            </div>
-            <div class="field">
-              <label>Area / Locality</label>
-              <input id="pcArea" maxlength="80" placeholder="Area">
-            </div>
-            <div class="field">
-              <label>PIN / Area Code</label>
-              <input id="pcPin" inputmode="numeric" maxlength="6" placeholder="560001" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)">
-            </div>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>City *</label>
-          <input id="pcCity" value="Bangalore" readonly>
-        </div>
-
-        <div class="field">
-          <label>State *</label>
-          <input id="pcState" value="Karnataka" readonly>
-        </div>
-
-        <div class="field">
-          <label>Phone *</label>
-          <input id="pcPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digit mobile number" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
-        </div>
-
-        <div class="field">
-          <label>WhatsApp (optional)</label>
-          <input id="pcWhatsapp" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digit WhatsApp number" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
-        </div>
-
-        <div class="field">
-          <label>Promo Badge (optional)</label>
-          <input id="pcBadge" maxlength="12" placeholder="e.g. 10% OFF" oninput="updatePCPreview()">
-          <span class="hint">Shows alongside the listing. Leave blank for none.</span>
-        </div>
-
-        <div class="field">
-          <label>Start Date & Time *</label>
-          <input id="pcStart" type="datetime-local">
-        </div>
-
-        <div class="field">
-          <label>End Date & Time *</label>
-          <input id="pcEnd" type="datetime-local">
-        </div>
-
-      </div>
-
-      <div class="actions">
-        <button class="btn" onclick="cancelCreatePC()">Cancel</button>
-        <button class="btn" onclick="savePremiumCreative('draft')">Save Draft</button>
-        <button class="btn primary" onclick="savePremiumCreative('publish')">Publish</button>
-      </div>
-    </div>
-
-    <!-- PREVIEW -->
-    <div class="sticky">
-      <div class="panel">
-        <h2>Live Preview</h2>
-        <div class="previewwrap"><div id="pcAdPreview"></div></div>
-        <div id="pcPreviewId" class="hint" style="text-align:center;margin-top:10px"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="toolbar">
-      <h2 style="margin:0;flex:1">Uploaded Premium Creatives</h2>
-      <select id="pcFilter" onchange="renderPCAdmin()">
-        <option value="all">All</option>
-        <option value="draft">Draft</option>
-        <option value="scheduled">Scheduled</option>
-        <option value="published">Published</option>
-        <option value="expired">Expired</option>
-      </select>
-    </div>
-    <div id="pcAdminGrid" class="banner-grid"></div>
-  </div>
-  </div>
 </section>
 
 <!-- CATEGORIES -->
@@ -704,7 +587,6 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 <script>
 const STORAGE='adspool_mvp_v1';
 const PREMIUM_STORAGE='adspool_premium_banners_v1';
-const PC_STORAGE='adspool_premium_creatives_v1';
 
 const defaultCategories=[
 'Automobile','Lawyers','Doctors & Clinics','Salons & Beauty','Restaurants & Food','Shops & Retail',
@@ -736,11 +618,8 @@ let state={
 sortCategories();
 
 let premiumBanners=[];
-let premiumCreatives=[];
 let editingId=null;
 let editingPremiumId=null;
-let editingPCId=null;
-let pcImageData=null;
 let selectedTemplateId=1;
 let publicCategory='all';
 
@@ -751,15 +630,11 @@ function esc(s){
 function load(){
   try{ const x=JSON.parse(localStorage.getItem(STORAGE)); if(x)state=x; }catch(e){}
   try{ premiumBanners=JSON.parse(localStorage.getItem(PREMIUM_STORAGE))||[]; }catch(e){ premiumBanners=[]; }
-  try{ premiumCreatives=JSON.parse(localStorage.getItem(PC_STORAGE))||[]; }catch(e){ premiumCreatives=[]; }
   normalize();
   premiumBanners.forEach(refreshPremiumStatus);
-  premiumCreatives.forEach(refreshPCStatus);
   renderAll();
   premiumCategories();
-  pcCategories();
   renderPremiumAdmin();
-  renderPCAdmin();
 }
 
 function normalize(){
@@ -788,15 +663,6 @@ function refreshPremiumStatus(b){
   const s=Date.parse(b.startAt),e=Date.parse(b.endAt),n=Date.now();
   b.status=Number.isNaN(s)||Number.isNaN(e)?b.status:(n<s?'scheduled':n<=e?'active':'expired');
 }
-
-function refreshPCStatus(a){
-  if(a.status==='unpublished'||a.status==='draft')return;
-  const s=Date.parse(a.startAt),e=Date.parse(a.endAt),n=Date.now();
-  if(Number.isNaN(s)||Number.isNaN(e))return;
-  a.status=n<s?'scheduled':n<=e?'published':'expired';
-}
-
-function persistPC(){ localStorage.setItem(PC_STORAGE,JSON.stringify(premiumCreatives)); }
 
 function showToast(t){
   const e=document.getElementById('toast');
@@ -847,9 +713,7 @@ function switchCreateTab(tab){
   document.querySelectorAll('.createtab').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));
   document.getElementById('tabNormalAds').classList.toggle('active',tab==='normal');
   document.getElementById('tabPremiumAds').classList.toggle('active',tab==='premium');
-  document.getElementById('tabPremiumCreatives').classList.toggle('active',tab==='premiumcreative');
   if(tab==='premium'){ premiumCategories(); setPremiumDefaultDates(); renderPremiumAdmin(); }
-  if(tab==='premiumcreative'){ pcCategories(); setPCDefaultDates(); renderPCAdmin(); updatePCPreview(); }
 }
 
 /* CREATE / EDIT */
@@ -1005,20 +869,6 @@ function adMarkup(a){
   </div>`;
 }
 
-/* PREMIUM CREATIVE MARKUP (shared by create/edit preview, admin public preview and the
-   Uploaded Premium Creatives list — mirrors the promo-badge handling used in adMarkup()) */
-function pcPreviewMarkup(b,opts){
-  opts=opts||{};
-  const badge=(b.badge||'').trim();
-  const businessLabel=(!opts.hideBusiness&&b.businessName)?`<span class="premium-banner-business">${esc(b.businessName)}${opts.categoryName?' · '+esc(opts.categoryName):''}</span>`:'';
-  return`<div class="pc-preview-wrap"${opts.style?` style="${opts.style}"`:''}>
-    ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
-    <img class="pc-preview-img" src="${esc(b.imageData||'')}" alt="${esc(b.businessName||'Premium creative preview')}">
-    <span class="premium-banner-label">PREMIUM</span>
-    ${businessLabel}
-  </div>`;
-}
-
 /* PREVIEW */
 function updatePreview(){
   const bg=document.getElementById('fColor').value;
@@ -1140,46 +990,33 @@ function setAdStatusFilter(s){
   renderAdsTable();
 }
 
-/* Combines normal ads with published/scheduled/etc. Premium Creatives into one
-   list so both kinds show together — same shape (adId, businessName, categoryId,
-   startAt, endAt, status) — tagged with _type so the table/dashboard know which
-   edit/delete function and label to use. */
-function combinedAdminAds(){
-  const normal=state.ads.map(a=>({...a,_type:'normal'}));
-  const pc=premiumCreatives.map(b=>({...b,_type:'premiumcreative'}));
-  return[...normal,...pc].sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
-}
-
 function renderAdsTable(){
   refreshStatuses();
   const q=(document.getElementById('adSearch')?.value||'').toLowerCase();
   const cat=document.getElementById('adCategoryFilter')?.value||'all';
   const st=document.getElementById('adStatusFilter')?.value||'all';
 
-  const arr=combinedAdminAds().filter(a=>
-    (!q||(a.adId+' '+a.businessName+' '+(a.phone||'')).toLowerCase().includes(q)) &&
+  const arr=state.ads.filter(a=>
+    (!q||(a.adId+' '+a.businessName+' '+a.phone).toLowerCase().includes(q)) &&
     (cat==='all'||String(a.categoryId)===cat) &&
     (st==='all'||a.status===st)
   );
 
   document.getElementById('adsTable').innerHTML=arr.length?`<div class="tablewrap"><table class="table"><thead><tr>
-      <th>Ad ID</th><th>Business</th><th>Category</th><th>Type</th><th>Start</th><th>End</th><th>Status</th><th>Actions</th>
+      <th>Ad ID</th><th>Business</th><th>Category</th><th>Start</th><th>End</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody>
-    ${arr.map(a=>{
-      const isPC=a._type==='premiumcreative';
-      return`<tr>
-      <td class="mono">${esc(a.adId||'—')}</td>
+    ${arr.map(a=>`<tr>
+      <td class="mono">${esc(a.adId)}</td>
       <td>${esc(a.businessName)}</td>
-      <td>${esc(state.categories.find(c=>c.id===Number(a.categoryId))?.name||'Other')}</td>
-      <td>${isPC?'<span class="badge unpublished">Premium Creative</span>':'Normal'}</td>
+      <td>${esc(state.categories.find(c=>c.id===a.categoryId)?.name||'Other')}</td>
       <td>${new Date(a.startAt).toLocaleString()}</td>
       <td>${new Date(a.endAt).toLocaleString()}</td>
       <td><span class="badge ${a.status}">${a.status}</span></td>
       <td style="display:flex;gap:6px">
-        <button class="btn small" onclick="${isPC?`editPC('${a.id}')`:`editAd('${a.id}')`}">Edit</button>
-        <button class="btn small danger" onclick="${isPC?`deletePC('${a.id}')`:`deleteAd('${a.id}')`}">Delete</button>
+        <button class="btn small" onclick="editAd('${a.id}')">Edit</button>
+        <button class="btn small danger" onclick="deleteAd('${a.id}')">Delete</button>
       </td>
-    </tr>`;}).join('')}
+    </tr>`).join('')}
     </tbody></table></div>`:'<div class="empty">No advertisements found.</div>';
 }
 
@@ -1190,7 +1027,7 @@ function clearAdFilters(){
   renderAdsTable();
 }
 
-function refreshStatuses(){ state.ads.forEach(refreshStatus); persist(); premiumCreatives.forEach(refreshPCStatus); persistPC(); }
+function refreshStatuses(){ state.ads.forEach(refreshStatus); persist(); }
 
 function deleteAd(id){
   if(confirm('Delete this advertisement?')){
@@ -1203,27 +1040,24 @@ function deleteAd(id){
 /* DASHBOARD */
 function renderDashboard(){
   refreshStatuses();
-  const all=combinedAdminAds();
   const c={published:0,scheduled:0,draft:0,expired:0};
-  all.forEach(a=>c[a.status]=(c[a.status]||0)+1);
+  state.ads.forEach(a=>c[a.status]=(c[a.status]||0)+1);
 
   document.getElementById('dashCards').innerHTML=[
-    ['Total Ads',all.length],['Published',c.published],['Scheduled',c.scheduled],['Drafts',c.draft],['Expired',c.expired]
+    ['Total Ads',state.ads.length],['Published',c.published],['Scheduled',c.scheduled],['Drafts',c.draft],['Expired',c.expired]
   ].map(x=>`<div class="card"><div class="label">${x[0]}</div><div class="num">${x[1]}</div></div>`).join('');
 
-  const recent=all.slice(0,5);
+  const recent=state.ads.slice(0,5);
   document.getElementById('recentAds').innerHTML=recent.length?`<div class="tablewrap"><table class="table"><thead><tr>
       <th>Ad ID</th><th>Business</th><th>Category</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody>
-    ${recent.map(a=>{
-      const isPC=a._type==='premiumcreative';
-      return`<tr>
-      <td class="mono">${esc(a.adId||'—')}</td>
+    ${recent.map(a=>`<tr>
+      <td class="mono">${esc(a.adId)}</td>
       <td>${esc(a.businessName)}</td>
-      <td>${esc(state.categories.find(c=>c.id===Number(a.categoryId))?.name||'Other')}</td>
+      <td>${esc(state.categories.find(c=>c.id===a.categoryId)?.name||'Other')}</td>
       <td><span class="badge ${a.status}">${a.status}</span></td>
-      <td><button class="btn small" onclick="${isPC?`editPC('${a.id}')`:`editAd('${a.id}')`}">Edit</button></td>
-    </tr>`;}).join('')}
+      <td><button class="btn small" onclick="editAd('${a.id}')">Edit</button></td>
+    </tr>`).join('')}
     </tbody></table></div>`:'<div class="empty">No ads yet.</div>';
 }
 
@@ -1256,7 +1090,6 @@ function addCategory(){
   persist();
   fillCategorySelects();
   premiumCategories();
-  pcCategories();
   renderCategories();
 }
 
@@ -1266,7 +1099,6 @@ function toggleCategory(id){
   persist();
   fillCategorySelects();
   premiumCategories();
-  pcCategories();
   renderCategories();
 }
 
@@ -1296,22 +1128,11 @@ function renderPublic(){
   const filtered=arr.filter(a=>
     (publicCategory==='all'||String(a.categoryId)===publicCategory) &&
     (!q||(a.businessName+' '+(a.services||[]).join(' ')+' '+buildAddress(a)).toLowerCase().includes(q))
-  ).map(a=>({...a,_type:'normal'}));
+  );
 
-  /* Premium Creatives are shown next to normal ads in the same grid — no separate
-     listing — so a visitor sees every active ad (normal or premium) side by side. */
-  premiumCreatives.forEach(refreshPCStatus);
-  const pcFiltered=premiumCreatives.filter(b=>
-    b.status==='published' &&
-    (publicCategory==='all'||String(b.categoryId)===publicCategory) &&
-    (!q||(b.businessName+' '+buildAddress(b)).toLowerCase().includes(q))
-  ).map(b=>({...b,_type:'premiumcreative'}));
-
-  const combined=[...filtered,...pcFiltered].sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
-
-  document.getElementById('publicGrid').innerHTML=combined.length?combined.map(a=>`
+  document.getElementById('publicGrid').innerHTML=filtered.length?filtered.map(a=>`
     <div class="publicad">
-      <div class="mini">${a._type==='premiumcreative'?pcPreviewMarkup(a,{style:'max-width:none'}):adMarkup(a)}</div>
+      <div class="mini">${adMarkup(a)}</div>
       <div class="publicmeta"><strong>${esc(a.businessName)}</strong></div>
     </div>`).join(''):'<div class="empty">No active advertisements found.</div>';
 
@@ -1479,225 +1300,6 @@ function deleteBanner(id){
   }
 }
 
-/* PREMIUM CREATIVES (1080x1080 banner + full listing details, mirrors Normal Ads) */
-function pcCategories(){
-  const e=document.getElementById('pcCategory');
-  if(!e)return;
-  e.innerHTML='<option value="">Select category</option>'+state.categories.filter(c=>c.active).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
-}
-
-function setPCDefaultDates(force){
-  const s=document.getElementById('pcStart');
-  const e=document.getElementById('pcEnd');
-  if(!s||!e)return;
-  const now=new Date();
-  const end=new Date(Date.now()+30*86400000);
-  if(force||!s.value)s.value=toLocalInput(now);
-  if(force||!e.value)e.value=toLocalInput(end);
-}
-
-function getPCAddressData(){
-  return{
-    addressLine:document.getElementById('pcAddressLine').value.trim(),
-    area:document.getElementById('pcArea').value.trim(),
-    city:document.getElementById('pcCity').value.trim(),
-    state:document.getElementById('pcState').value.trim(),
-    pin:document.getElementById('pcPin').value.trim()
-  };
-}
-
-function updatePCPreview(){
-  const wrap=document.getElementById('pcAdPreview');
-  if(!wrap)return;
-  const name=document.getElementById('pcBusiness').value.trim();
-  const badge=document.getElementById('pcBadge')?document.getElementById('pcBadge').value.trim():'';
-  if(pcImageData){
-    wrap.innerHTML=pcPreviewMarkup({imageData:pcImageData,businessName:name,badge:badge});
-  }else{
-    wrap.innerHTML=`<div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:10px">Upload a 1080 × 1080 banner creative to preview it here.</div>`;
-  }
-}
-
-document.getElementById('pcImage').addEventListener('change',function(){
-  const f=this.files[0];
-  const input=this;
-  if(!f)return;
-  if(!['image/jpeg','image/png','image/webp'].includes(f.type)){ showToast('Use JPG, PNG or WebP.'); input.value=''; return; }
-  if(f.size>3*1024*1024){ showToast('Keep banner creative below 3 MB.'); input.value=''; return; }
-  const reader=new FileReader();
-  reader.onload=()=>{
-    const img=new Image();
-    img.onload=()=>{
-      if(img.naturalWidth!==1080||img.naturalHeight!==1080){
-        showToast('Banner Creative must be exactly 1080 × 1080 px. Yours is '+img.naturalWidth+' × '+img.naturalHeight+'.');
-        input.value='';
-        return;
-      }
-      pcImageData=reader.result;
-      updatePCPreview();
-    };
-    img.onerror=()=>{ showToast('Could not read the image file.'); input.value=''; };
-    img.src=reader.result;
-  };
-  reader.readAsDataURL(f);
-});
-
-function clearPCForm(){
-  ['pcBusiness','pcAddressLine','pcArea','pcPin','pcPhone','pcWhatsapp','pcBadge'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('pcCity').value='Bangalore';
-  document.getElementById('pcState').value='Karnataka';
-  document.getElementById('pcImage').value='';
-  pcImageData=null;
-  editingPCId=null;
-  document.getElementById('pcFormTitle').textContent='Create Premium Creative';
-  document.getElementById('pcImageLabel').textContent='Banner Creative *';
-  document.getElementById('pcImageNote').innerHTML='Required: exactly <strong>1080 × 1080 px</strong> (1:1). Create the artwork separately; this portal is only for uploading and scheduling it.';
-  document.getElementById('pcPreviewId').textContent='';
-  setPCDefaultDates(true);
-  updatePCPreview();
-}
-
-function cancelCreatePC(){
-  clearPCForm();
-}
-
-/* SAVE PREMIUM CREATIVE */
-function savePremiumCreative(mode){
-  const business=document.getElementById('pcBusiness').value.trim();
-  const cat=document.getElementById('pcCategory').value;
-  const address=getPCAddressData();
-  const phone=document.getElementById('pcPhone').value.trim();
-  const s=document.getElementById('pcStart').value;
-  const e=document.getElementById('pcEnd').value;
-  const editing=editingPCId?premiumCreatives.find(x=>x.id===editingPCId):null;
-
-  if(!business){ showToast('Business Name is required.'); return; }
-  if(!cat){ showToast('Please select a Category.'); return; }
-  if(!pcImageData&&!(editing&&editing.imageData)){ showToast('Banner Creative (1080 × 1080) is required.'); return; }
-  if(!address.addressLine){ showToast('Address Line is required.'); return; }
-  if(!address.area){ showToast('Area / Locality is required.'); return; }
-  if(!address.pin||address.pin.length!==6){ showToast('PIN / Area Code must be exactly 6 digits.'); return; }
-  if(!phone||phone.length!==10){ showToast('Phone must be exactly 10 digits.'); return; }
-  if(!s||!e){ showToast('Start and End Date & Time are required.'); return; }
-  if(new Date(e)<=new Date(s)){ showToast('End Date & Time must be after Start Date & Time.'); return; }
-
-  const data={
-    businessName:business,
-    categoryId:Number(cat),
-    imageData:pcImageData||(editing?editing.imageData:''),
-    addressLine:address.addressLine,
-    area:address.area,
-    city:address.city,
-    state:address.state,
-    pin:address.pin,
-    phone:phone,
-    whatsapp:document.getElementById('pcWhatsapp').value.trim(),
-    badge:document.getElementById('pcBadge').value.trim(),
-    startAt:new Date(s).toISOString(),
-    endAt:new Date(e).toISOString()
-  };
-
-  if(editing){
-    Object.assign(editing,data);
-    if(mode==='draft')editing.status='draft';
-    else if(editing.status==='draft'||editing.status==='unpublished')refreshPCStatus(editing);
-  }else{
-    premiumCreatives.unshift({
-      id:'PC-'+Date.now(),
-      adId:'ADS-'+String(state.nextId++).padStart(6,'0'),
-      adType:'premiumcreative',
-      ...data,
-      status:mode==='draft'?'draft':'published',
-      createdAt:new Date().toISOString()
-    });
-    persist(); /* saves the shared ad-id counter (state.nextId) that was just advanced */
-  }
-
-  editingPCId=null;
-  pcImageData=null;
-  persistPC();
-  renderPCAdmin();
-  renderAdsTable();
-  renderDashboard();
-  clearPCForm();
-  showToast(mode==='draft'?'Draft saved.':'Premium creative published.');
-}
-
-function renderPCAdmin(){
-  premiumCreatives.forEach(refreshPCStatus);
-  persistPC();
-  const filterEl=document.getElementById('pcFilter');
-  const filter=filterEl?filterEl.value:'all';
-  const grid=document.getElementById('pcAdminGrid');
-  if(!grid)return;
-  const arr=premiumCreatives.filter(b=>filter==='all'||b.status===filter);
-
-  grid.innerHTML=arr.length?arr.map(b=>{
-    const c=state.categories.find(x=>String(x.id)===String(b.categoryId));
-    const badge=(b.badge||'').trim();
-    return`<article class="banner-card square">
-      ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
-      <img src="${esc(b.imageData)}" alt="${esc(b.businessName)}">
-      <div class="banner-info">
-        <b>${esc(b.businessName)}</b>
-        <div class="banner-meta">
-          ${b.adId?`Ad ID: ${esc(b.adId)}<br>`:''}
-          Category: ${esc(c?.name||'Unknown')}<br>
-          Address: ${esc(buildAddress(b)||'—')}<br>
-          Phone: ${esc(b.phone||'—')}<br>
-          Start: ${new Date(b.startAt).toLocaleString()}<br>
-          Expiry: ${new Date(b.endAt).toLocaleString()}<br>
-          Status: <span class="badge ${b.status}">${b.status}</span>
-        </div>
-        <div class="banner-actions">
-          <button class="btn small" onclick="editPC('${b.id}')">Edit</button>
-          <button class="btn small danger" onclick="deletePC('${b.id}')">Delete</button>
-        </div>
-      </div>
-    </article>`;
-  }).join(''):'<div class="empty" style="grid-column:1/-1">No premium creatives uploaded.</div>';
-}
-
-function editPC(id){
-  const b=premiumCreatives.find(x=>x.id===id);
-  if(!b)return;
-  editingPCId=id;
-  pcImageData=null;
-  pcCategories();
-  document.getElementById('pcImage').value='';
-  document.getElementById('pcBusiness').value=b.businessName||'';
-  document.getElementById('pcCategory').value=b.categoryId;
-  document.getElementById('pcAddressLine').value=b.addressLine||'';
-  document.getElementById('pcArea').value=b.area||'';
-  document.getElementById('pcPin').value=b.pin||'';
-  document.getElementById('pcCity').value=b.city||'Bangalore';
-  document.getElementById('pcState').value=b.state||'Karnataka';
-  document.getElementById('pcPhone').value=b.phone||'';
-  document.getElementById('pcWhatsapp').value=b.whatsapp||'';
-  document.getElementById('pcBadge').value=b.badge||'';
-  document.getElementById('pcStart').value=toLocalInputFromISO(b.startAt);
-  document.getElementById('pcEnd').value=toLocalInputFromISO(b.endAt);
-  document.getElementById('pcAdPreview').innerHTML=pcPreviewMarkup(b);
-  document.getElementById('pcFormTitle').textContent='Edit Premium Creative';
-  document.getElementById('pcImageLabel').textContent='Banner Creative (leave empty to keep current)';
-  document.getElementById('pcImageNote').textContent='Upload a new 1080 × 1080 file only if you want to replace the current creative.';
-  document.getElementById('pcPreviewId').textContent='Editing '+b.id;
-  showView('create');
-  switchCreateTab('premiumcreative');
-  document.getElementById('tabPremiumCreatives').scrollIntoView({behavior:'smooth',block:'start'});
-}
-
-function deletePC(id){
-  if(confirm('Delete this premium creative?')){
-    premiumCreatives=premiumCreatives.filter(b=>b.id!==id);
-    persistPC();
-    if(editingPCId===id)clearPCForm();
-    renderPCAdmin();
-    renderAdsTable();
-    renderDashboard();
-  }
-}
-
 /* PREMIUM PUBLIC DISPLAY */
 function renderAdminPublicPremium(){
   const section=document.getElementById('adminPublicPremium');
@@ -1730,7 +1332,6 @@ function renderAll(){
   renderCategories();
   updatePreview();
   setPremiumDefaultDates();
-  setPCDefaultDates();
 }
 
 document.getElementById('fCategory').addEventListener('change',updatePreview);
@@ -1739,14 +1340,9 @@ setInterval(()=>{
   refreshStatuses();
   premiumBanners.forEach(refreshPremiumStatus);
   localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));
-  premiumCreatives.forEach(refreshPCStatus);
-  localStorage.setItem(PC_STORAGE,JSON.stringify(premiumCreatives));
   renderDashboard();
   if(document.getElementById('tabPremiumAds').classList.contains('active')){
     renderPremiumAdmin();
-  }
-  if(document.getElementById('tabPremiumCreatives').classList.contains('active')){
-    renderPCAdmin();
   }
 },30000);
 
