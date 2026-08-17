@@ -30,6 +30,7 @@
   --tpl3-font:'Poppins',system-ui,sans-serif;
   --tpl4-font:'Courier Prime','Courier New',monospace;
   --tpl5-font:'Bebas Neue',Impact,sans-serif;
+  --sidebar-w:236px;
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:var(--sans);background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
@@ -177,6 +178,16 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 .publicad{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
 .publicmeta{font-size:12px;color:var(--muted);margin:8px 0}
 
+/* ---------- admin sticky preview bar (Public Ads tab only) ---------- */
+.admin-sticky-bar{position:fixed;top:66px;left:var(--sidebar-w);right:0;z-index:15;background:rgba(245,247,249,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);box-shadow:0 8px 20px rgba(18,32,26,.06);transform:translateY(-8px);opacity:0;pointer-events:none;transition:transform .2s ease,opacity .2s ease,left .15s ease}
+.admin-sticky-bar.show{transform:translateY(0);opacity:1;pointer-events:auto}
+.admin-sticky-bar-inner{padding:12px 28px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.admin-sticky-bar-inner input{max-width:280px}
+.admin-sticky-chips{display:flex;gap:7px;flex-wrap:nowrap;overflow-x:auto;padding:0 28px 10px;scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent}
+.admin-sticky-chips::-webkit-scrollbar{height:5px}
+.admin-sticky-chips::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:999px}
+.admin-sticky-chips .chip{white-space:nowrap;flex:none}
+
 /* ---------- categories list ---------- */
 .catrow{display:flex;justify-content:space-between;align-items:center;padding:13px 2px;border-bottom:1px solid var(--border)}
 .catrow:last-child{border-bottom:0}
@@ -222,6 +233,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
   .banner-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(max-width:720px){
+  :root{--sidebar-w:64px}
   .sidebar{width:64px;padding:14px 6px}
   .navbtn{justify-content:center}
   .navbtn span.label{display:none}
@@ -245,7 +257,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 <div id="loginView" class="login">
   <div class="loginbox">
     <span class="brandmark">
-      <img class="spool" src="../adspool-logo.png" alt="Adspool">
+      <img class="spool" src="/adspool-logo.png" alt="Adspool">
       <span class="brand"><small>Admin</small></span>
     </span>
     <h1 style="margin-top:22px;font-size:24px">Sign in</h1>
@@ -267,7 +279,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 <div id="app" class="app" style="display:none">
 <header class="topbar">
   <span class="brandmark">
-    <img class="spool" src="../adspool-logo.png" alt="Adspool">
+    <img class="spool" src="/adspool-logo.png" alt="Adspool">
     <span class="brand"><small>Admin</small></span>
   </span>
   <div style="display:flex;gap:8px">
@@ -275,6 +287,13 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
     <button class="btn small" onclick="logout()">Logout</button>
   </div>
 </header>
+
+<div id="adminStickyBar" class="admin-sticky-bar">
+  <div class="admin-sticky-bar-inner">
+    <input id="publicSearchSticky" class="search" placeholder="Search business, service or location…" oninput="syncPublicSearch(this.value)">
+  </div>
+  <div id="categoryChipsSticky" class="categorychips admin-sticky-chips"></div>
+</div>
 
 <div class="layout">
 <aside class="sidebar">
@@ -536,9 +555,10 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
   <p class="sub">Visitor-facing view.</p>
 
   <div class="publicbar">
-    <input id="publicSearch" class="search" placeholder="Search business, service or location…" oninput="renderPublic()">
+    <input id="publicSearch" class="search" placeholder="Search business, service or location…" oninput="syncPublicSearch(this.value)">
     <div id="categoryChips" class="categorychips"></div>
   </div>
+  <div id="publicStickySpacer" style="height:0;transition:height .2s ease"></div>
 
   <div id="adminPublicPremium" class="premium-section" style="display:none">
     <div style="margin-bottom:10px"><h2 style="font-size:18px">Premium Banners</h2></div>
@@ -675,6 +695,8 @@ function showView(v){
   if(v==='categories')renderCategories();
   if(v==='public')renderPublic();
   if(v==='premium-banners'){ premiumCategories(); setPremiumDefaultDates(); renderPremiumAdmin(); }
+
+  updateAdminStickyBar();
 }
 
 /* CREATE / EDIT */
@@ -1060,14 +1082,22 @@ function publicActive(){
   return state.ads.filter(a=>a.status==='published');
 }
 
+function syncPublicSearch(val){
+  document.getElementById('publicSearch').value=val;
+  document.getElementById('publicSearchSticky').value=val;
+  renderPublic();
+}
+
 function renderPublic(){
   const arr=publicActive();
   const q=(document.getElementById('publicSearch')?.value||'').toLowerCase();
   const cats=[{id:'all',name:'All Categories'},...state.categories.filter(c=>c.active)];
 
-  document.getElementById('categoryChips').innerHTML=cats.map(c=>
+  const chipsHtml=cats.map(c=>
     `<button class="chip ${publicCategory===String(c.id)?'active':''}" onclick="publicCategory='${String(c.id)}';renderPublic()">${esc(c.name)}</button>`
   ).join('');
+  document.getElementById('categoryChips').innerHTML=chipsHtml;
+  document.getElementById('categoryChipsSticky').innerHTML=chipsHtml;
 
   const filtered=arr.filter(a=>
     (publicCategory==='all'||String(a.categoryId)===publicCategory) &&
@@ -1242,6 +1272,31 @@ document.getElementById('loginEmail').value='';
 document.getElementById('loginPassword').value='';
 document.getElementById('loginView').style.display='flex';
 document.getElementById('app').style.display='none';
+
+/* ADMIN STICKY PREVIEW BAR — only active on the "Public Ads" tab, mirrors
+   the sticky search+category behaviour added to the public site so the
+   admin preview matches what visitors now see. */
+function updateAdminStickyBar(){
+  const bar=document.getElementById('adminStickyBar');
+  const spacer=document.getElementById('publicStickySpacer');
+  const inlineBar=document.querySelector('#public .publicbar');
+  const topbar=document.querySelector('.topbar');
+  if(!bar||!spacer||!inlineBar)return;
+
+  const isPublicView=document.getElementById('public').classList.contains('active');
+  if(!isPublicView){
+    bar.classList.remove('show');
+    spacer.style.height='0px';
+    return;
+  }
+  const headerH=topbar?topbar.offsetHeight:0;
+  const r=inlineBar.getBoundingClientRect();
+  const shouldShow=r.bottom<headerH;
+  bar.classList.toggle('show',shouldShow);
+  spacer.style.height=shouldShow?bar.offsetHeight+'px':'0px';
+}
+window.addEventListener('scroll',updateAdminStickyBar,{passive:true});
+window.addEventListener('resize',updateAdminStickyBar);
 </script>
 </body>
 </html>
