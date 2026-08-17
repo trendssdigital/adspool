@@ -115,6 +115,13 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 .serviceRemove{width:38px;padding:0}
 
 .creategrid{display:grid;grid-template-columns:minmax(330px,1fr) minmax(340px,420px);gap:20px;align-items:start}
+.createtabs{display:flex;gap:6px;margin:18px 0 22px;border-bottom:1.5px solid var(--border)}
+.createtab{padding:11px 20px;font-weight:700;font-size:13.5px;color:var(--muted);background:transparent;border:0;border-bottom:2.5px solid transparent;cursor:pointer;margin-bottom:-1.5px;display:flex;align-items:center;gap:7px}
+.createtab .tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--border);color:var(--muted);padding:2px 7px;border-radius:999px}
+.createtab.active{color:var(--forest-dark);border-bottom-color:var(--gold)}
+.createtab.active .tag{background:var(--gold);color:var(--forest-deep)}
+.createtabpanel{display:none}
+.createtabpanel.active{display:block}
 .sticky{position:sticky;top:90px}
 .previewwrap{display:flex;justify-content:center;padding:6px}
 
@@ -306,7 +313,6 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
   <button class="navbtn" data-view="drafts" onclick="setAdStatusFilter('draft')"><span class="ico">◌</span><span class="label">Drafts</span></button>
   <button class="navbtn" data-view="expired" onclick="setAdStatusFilter('expired')"><span class="ico">○</span><span class="label">Expired</span></button>
   <button class="navbtn" data-view="categories" onclick="showView('categories')"><span class="ico">☷</span><span class="label">Categories</span></button>
-  <button class="navbtn" data-view="premium-banners" onclick="showView('premium-banners')"><span class="ico">★</span><span class="label">Premium Banners</span></button>
   <button class="navbtn" data-view="public" onclick="showView('public')"><span class="ico">↗</span><span class="label">Public Ads</span></button>
 </aside>
 
@@ -357,8 +363,14 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 <section id="create" class="view">
   <span class="eyebrow"><span class="dot"></span>Listing builder</span>
   <h1 id="formTitle">Create Advertisement</h1>
-  <p class="sub">Enter the details and watch the advertisement update live.</p>
+  <p class="sub" id="formSub">Enter the details and watch the advertisement update live.</p>
 
+  <div class="createtabs">
+    <button type="button" class="createtab active" data-tab="normal" onclick="switchCreateTab('normal')"><span class="tag">1</span>Normal Ads</button>
+    <button type="button" class="createtab" data-tab="premium" onclick="switchCreateTab('premium')"><span class="tag">2</span>Premium Ads</button>
+  </div>
+
+  <div id="tabNormalAds" class="createtabpanel active">
   <div class="creategrid">
     <div class="panel">
       <div class="formgrid">
@@ -467,6 +479,68 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
       </div>
     </div>
   </div>
+  </div>
+
+  <div id="tabPremiumAds" class="createtabpanel">
+    <div class="panel">
+      <h2 id="premiumFormTitle">Upload Premium Banner</h2>
+      <div class="formgrid">
+
+        <div class="field">
+          <label id="premiumImageLabel">Banner Creative *</label>
+          <input id="premiumImage" type="file" accept="image/jpeg,image/png,image/webp">
+          <div class="banner-note" id="premiumImageNote">Recommended: <strong>1920 × 400 px</strong> (4.8:1). Create the artwork separately; this portal is only for uploading and scheduling it.</div>
+        </div>
+
+        <div class="field">
+          <label>Business / Brand Name *</label>
+          <input id="premiumBusiness" maxlength="100" placeholder="Example: ABC Automobiles">
+        </div>
+
+        <div class="field">
+          <label>Category *</label>
+          <select id="premiumCategory"></select>
+        </div>
+
+        <div class="field">
+          <label>Start Date & Time *</label>
+          <input id="premiumStart" type="datetime-local">
+        </div>
+
+        <div class="field">
+          <label>Expiry Date & Time *</label>
+          <input id="premiumEnd" type="datetime-local">
+        </div>
+
+        <div class="field full">
+          <label>Preview</label>
+          <div id="premiumPreview">
+            <div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:10px">Choose a banner to preview it here.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="premiumCancelEditBtn" onclick="clearPremiumForm()" style="display:none">Cancel Edit</button>
+        <button class="btn" onclick="clearPremiumForm()">Clear</button>
+        <button class="btn primary" id="premiumSubmitBtn" onclick="savePremiumBanner()">Upload & Schedule</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="toolbar">
+        <h2 style="margin:0;flex:1">Uploaded Premium Banners</h2>
+        <select id="premiumFilter" onchange="renderPremiumAdmin()">
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+      <div id="premiumAdminGrid" class="banner-grid"></div>
+    </div>
+  </div>
 </section>
 
 <!-- CATEGORIES -->
@@ -483,77 +557,12 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
   </div>
 </section>
 
-<!-- PREMIUM BANNERS -->
-<section id="premium-banners" class="view">
-  <span class="eyebrow"><span class="dot"></span>Spotlight</span>
-  <h1>Premium Banners</h1>
-  <p class="sub">Upload finished premium creatives and control where and when they appear.</p>
-
-  <div class="panel">
-    <h2 id="premiumFormTitle">Upload Premium Banner</h2>
-    <div class="formgrid">
-
-      <div class="field">
-        <label id="premiumImageLabel">Banner Creative *</label>
-        <input id="premiumImage" type="file" accept="image/jpeg,image/png,image/webp">
-        <div class="banner-note" id="premiumImageNote">Recommended: <strong>1920 × 400 px</strong> (4.8:1). Create the artwork separately; this portal is only for uploading and scheduling it.</div>
-      </div>
-
-      <div class="field">
-        <label>Business / Brand Name *</label>
-        <input id="premiumBusiness" maxlength="100" placeholder="Example: ABC Automobiles">
-      </div>
-
-      <div class="field">
-        <label>Category *</label>
-        <select id="premiumCategory"></select>
-      </div>
-
-      <div class="field">
-        <label>Start Date & Time *</label>
-        <input id="premiumStart" type="datetime-local">
-      </div>
-
-      <div class="field">
-        <label>Expiry Date & Time *</label>
-        <input id="premiumEnd" type="datetime-local">
-      </div>
-
-      <div class="field full">
-        <label>Preview</label>
-        <div id="premiumPreview">
-          <div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:10px">Choose a banner to preview it here.</div>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="actions">
-      <button class="btn" id="premiumCancelEditBtn" onclick="clearPremiumForm()" style="display:none">Cancel Edit</button>
-      <button class="btn" onclick="clearPremiumForm()">Clear</button>
-      <button class="btn primary" id="premiumSubmitBtn" onclick="savePremiumBanner()">Upload & Schedule</button>
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="toolbar">
-      <h2 style="margin:0;flex:1">Uploaded Premium Banners</h2>
-      <select id="premiumFilter" onchange="renderPremiumAdmin()">
-        <option value="all">All</option>
-        <option value="active">Active</option>
-        <option value="scheduled">Scheduled</option>
-        <option value="expired">Expired</option>
-      </select>
-    </div>
-    <div id="premiumAdminGrid" class="banner-grid"></div>
-  </div>
-</section>
-
 <!-- PUBLIC -->
 <section id="public" class="view">
   <span class="eyebrow"><span class="dot"></span>Preview</span>
   <h1>Public Ads</h1>
   <p class="sub">Visitor-facing view.</p>
+
 
   <div class="publicbar">
     <input id="publicSearch" class="search" placeholder="Search business, service or location…" oninput="syncPublicSearch(this.value)">
@@ -696,9 +705,15 @@ function showView(v){
   if(['published','scheduled','drafts','expired'].includes(v))renderAdsTable();
   if(v==='categories')renderCategories();
   if(v==='public')renderPublic();
-  if(v==='premium-banners'){ premiumCategories(); setPremiumDefaultDates(); renderPremiumAdmin(); }
 
   updateAdminStickyBar();
+}
+
+function switchCreateTab(tab){
+  document.querySelectorAll('.createtab').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));
+  document.getElementById('tabNormalAds').classList.toggle('active',tab==='normal');
+  document.getElementById('tabPremiumAds').classList.toggle('active',tab==='premium');
+  if(tab==='premium'){ premiumCategories(); setPremiumDefaultDates(); renderPremiumAdmin(); }
 }
 
 /* CREATE / EDIT */
@@ -709,8 +724,15 @@ function startCreate(){
   clearForm();
   renderTemplatePicker();
   document.getElementById('formTitle').textContent='Create Advertisement';
+  document.getElementById('formSub').textContent='Enter the details and watch the advertisement update live.';
   document.getElementById('previewId').textContent='';
   showView('create');
+  switchCreateTab('normal');
+}
+
+function startCreatePremium(){
+  showView('create');
+  switchCreateTab('premium');
 }
 
 function editAd(id){
@@ -742,8 +764,10 @@ function editAd(id){
 
   setColor(a.backgroundColor||'#ffffff');
   document.getElementById('formTitle').textContent='Edit Advertisement';
+  document.getElementById('formSub').textContent='Enter the details and watch the advertisement update live.';
   document.getElementById('previewId').textContent=a.adId?('Editing '+a.adId):'';
   showView('create');
+  switchCreateTab('normal');
 }
 
 function cancelCreate(){
@@ -1239,7 +1263,7 @@ function previewBanner(id){
   const b=premiumBanners.find(x=>x.id===id);
   if(!b)return;
   document.getElementById('premiumPreview').innerHTML=`<img class="banner-preview" src="${esc(b.imageData)}" alt="${esc(b.businessName)}">`;
-  showView('premium-banners');
+  startCreatePremium();
 }
 
 function toLocalInputFromISO(iso){
@@ -1263,8 +1287,8 @@ function editBanner(id){
   document.getElementById('premiumImageNote').textContent='Upload a new file only if you want to replace the current creative.';
   document.getElementById('premiumSubmitBtn').textContent='Save Changes';
   document.getElementById('premiumCancelEditBtn').style.display='';
-  showView('premium-banners');
-  document.getElementById('premium-banners').scrollIntoView({behavior:'smooth',block:'start'});
+  startCreatePremium();
+  document.getElementById('tabPremiumAds').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function deleteBanner(id){
@@ -1317,7 +1341,7 @@ setInterval(()=>{
   premiumBanners.forEach(refreshPremiumStatus);
   localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));
   renderDashboard();
-  if(document.getElementById('premium-banners').classList.contains('active')){
+  if(document.getElementById('tabPremiumAds').classList.contains('active')){
     renderPremiumAdmin();
   }
 },30000);
