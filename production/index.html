@@ -148,6 +148,10 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 .premium-banner-arrow.next{right:14px}
 @media (max-width:640px){.premium-banner-arrow{width:34px;height:34px}.premium-banner-arrow svg{width:15px;height:15px}}
 
+/* ---------- premium creatives (1080x1080 uploaded banner cards) ---------- */
+.pc-preview-wrap{position:relative;width:100%;overflow:hidden;border-radius:10px;background:var(--forest-deep)}
+.pc-preview-img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}
+
 /* ---------- ad ticket card ---------- */
 .ads-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
 .ad-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 3px 14px rgba(18,32,26,.05);position:relative;transition:transform .15s ease,box-shadow .15s ease}
@@ -362,6 +366,15 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
       <div id="premiumBannerMeta" style="font-family:var(--mono);font-size:11px;color:var(--muted)"></div>
     </div>
   </div>
+  <div id="pcSection" class="premium-section" style="display:none">
+    <div class="section-head" style="margin-bottom:12px">
+      <div>
+        <span class="eyebrow"><span class="dot"></span>Spotlight</span>
+        <h2 style="font-size:22px">Premium creatives</h2>
+      </div>
+    </div>
+    <div id="pcGrid" class="ads-grid"></div>
+  </div>
   <div id="adsGrid" class="ads-grid"></div>
 </section>
 
@@ -411,6 +424,7 @@ const STORAGE='adspool_mvp_v1';
 let state={ads:[],categories:[]};
 let selectedCategory='all';
 let premiumBanners=[];let premiumIndex=0;let premiumTimer=null;
+let premiumCreatives=[];
 
 function load(){
   try{
@@ -421,8 +435,10 @@ function load(){
   if(!Array.isArray(state.categories))state.categories=[];
   state.ads.forEach(refreshStatus);
   loadPremiumBanners();
+  loadPremiumCreatives();
   renderCategories();
   renderPremiumBanner();
+  renderPremiumCreatives();
   renderAds();
   updateStats();
 }
@@ -440,6 +456,7 @@ function syncSearch(val){
   document.getElementById('searchInput').value=val;
   document.getElementById('searchInputSticky').value=val;
   renderAds();
+  renderPremiumCreatives();
 }
 
 function refreshStatus(a){
@@ -584,6 +601,53 @@ function premiumPrev(){
   renderPremiumBanner();
 }
 
+/* PREMIUM CREATIVES (1080x1080 uploaded banners with full business/contact details) */
+function loadPremiumCreatives(){
+  try{premiumCreatives=JSON.parse(localStorage.getItem('adspool_premium_creatives_v1'))||[]}catch(e){premiumCreatives=[]}
+  premiumCreatives.forEach(b=>{
+    if(b.status==='unpublished'||b.status==='draft')return;
+    const s=Date.parse(b.startAt),e=Date.parse(b.endAt),n=Date.now();
+    if(Number.isNaN(s)||Number.isNaN(e))return;
+    b.status=n<s?'scheduled':n<=e?'published':'expired';
+  });
+}
+function activePremiumCreatives(){
+  loadPremiumCreatives();
+  return premiumCreatives.filter(b=>b.status==='published' && new Date(b.startAt)<=new Date() && new Date(b.endAt)>=new Date());
+}
+function renderPremiumCreatives(){
+  const section=document.getElementById('pcSection'),grid=document.getElementById('pcGrid');
+  if(!section||!grid)return;
+  const q=(document.getElementById('searchInput').value||'').trim().toLowerCase();
+  const arr=activePremiumCreatives().filter(b=>{
+    const category=state.categories.find(c=>String(c.id)===String(b.categoryId))?.name||'Other';
+    const hay=[b.businessName,buildAddress(b),category].join(' ').toLowerCase();
+    return (!q||hay.includes(q)) && (selectedCategory==='all'||String(b.categoryId)===String(selectedCategory));
+  });
+  if(!arr.length){ section.style.display='none'; grid.innerHTML=''; return; }
+  section.style.display='block';
+  grid.innerHTML=arr.map(b=>{
+    const cat=state.categories.find(c=>String(c.id)===String(b.categoryId))?.name||'Other';
+    const phone=(b.phone||'').replace(/\s/g,'');
+    const wa=(b.whatsapp||'').replace(/\D/g,'');
+    const address=buildAddress(b);
+    return `<article class="ad-card">
+      <div class="ad-mini"><div class="pc-preview-wrap"><img class="pc-preview-img" src="${esc(b.imageData)}" alt="${esc(b.businessName)} premium creative"><span class="premium-banner-label">PREMIUM</span></div></div>
+      <div class="ad-perf"></div>
+      <div class="ad-info">
+        <div class="ad-name">${esc(b.businessName)}</div>
+        <div class="ad-category">${esc(cat)}</div>
+        <div class="ad-id">Premium Creative</div>
+        <div class="ad-actions">
+          <a class="btn primary" href="tel:${esc(phone)}">Call</a>
+          ${wa?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}">WhatsApp</a>`:''}
+          ${address?`<a class="btn" target="_blank" rel="noopener" href="${mapsUrl(address)}">Directions</a>`:''}
+        </div>
+      </div>
+    </article>`;
+  }).join('');
+}
+
 function renderCategories(){
   const cats=state.categories.filter(c=>c.active);
   const html=`<button class="chip ${selectedCategory==='all'?'active':''}" onclick="setCategory('all')">All Categories</button>`+
@@ -592,13 +656,13 @@ function renderCategories(){
   document.getElementById('categoriesSticky').innerHTML=html;
 }
 
-function setCategory(id){selectedCategory=id;premiumIndex=0;renderCategories();renderPremiumBanner();renderAds()}
+function setCategory(id){selectedCategory=id;premiumIndex=0;renderCategories();renderPremiumBanner();renderPremiumCreatives();renderAds()}
 
 function resetFilters(){
   selectedCategory='all';
   document.getElementById('searchInput').value='';
   document.getElementById('searchInputSticky').value='';
-  renderCategories();renderPremiumBanner();renderAds();
+  renderCategories();renderPremiumBanner();renderPremiumCreatives();renderAds();
   document.getElementById('categories').scrollLeft=0;
   document.getElementById('categoriesSticky').scrollLeft=0;
 }
@@ -691,13 +755,14 @@ function closeModal(){document.getElementById('modalBackdrop').classList.remove(
 setInterval(()=>{
   renderCategories();
   renderAds();
+  renderPremiumCreatives();
   updateStats();
 },30000);
 
 window.addEventListener('storage',e=>{
-  if(e.key===STORAGE||e.key==='adspool_premium_banners_v1')load();
+  if(e.key===STORAGE||e.key==='adspool_premium_banners_v1'||e.key==='adspool_premium_creatives_v1')load();
 });
-window.addEventListener('focus',()=>{loadPremiumBanners();renderPremiumBanner();});
+window.addEventListener('focus',()=>{loadPremiumBanners();renderPremiumBanner();loadPremiumCreatives();renderPremiumCreatives();});
 
 function openSharedAd(){
   const id=new URLSearchParams(window.location.search).get('ad');
