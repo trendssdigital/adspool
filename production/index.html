@@ -140,6 +140,13 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 .premium-banner-dots{display:flex;gap:5px}
 .premium-dot{width:7px;height:7px;border-radius:50%;background:var(--border-strong)}
 .premium-dot.active{background:var(--gold-deep)}
+.premium-banner-arrow{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(5,42,30,.55);border:1px solid rgba(255,255,255,.35);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:6;transition:background .15s ease,transform .15s ease;padding:0}
+.premium-banner-arrow:hover{background:rgba(5,42,30,.82);transform:translateY(-50%) scale(1.06)}
+.premium-banner-arrow:active{transform:translateY(-50%) scale(.96)}
+.premium-banner-arrow svg{width:18px;height:18px;display:block}
+.premium-banner-arrow.prev{left:14px}
+.premium-banner-arrow.next{right:14px}
+@media (max-width:640px){.premium-banner-arrow{width:34px;height:34px}.premium-banner-arrow svg{width:15px;height:15px}}
 
 /* ---------- ad ticket card ---------- */
 .ads-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
@@ -541,9 +548,17 @@ function renderPremiumBanner(){
   const b=arr[premiumIndex];
   const cat=state.categories.find(c=>String(c.id)===String(b.categoryId))?.name||'Other';
   section.style.display='block';
+  const arrows=arr.length>1?`
+    <button type="button" class="premium-banner-arrow prev" aria-label="Previous banner" onclick="premiumPrev()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <button type="button" class="premium-banner-arrow next" aria-label="Next banner" onclick="premiumNext()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>`:'';
   wrap.innerHTML=`<img class="premium-banner-img" src="${esc(b.imageData)}" alt="${esc(b.businessName)} premium banner">
     <span class="premium-banner-label">PREMIUM</span>
-    <span class="premium-banner-business">${esc(b.businessName)} · ${esc(cat)}</span>`;
+    <span class="premium-banner-business">${esc(b.businessName)} · ${esc(cat)}</span>
+    ${arrows}`;
   dots.innerHTML=arr.map((x,i)=>`<span class="premium-dot ${i===premiumIndex?'active':''}"></span>`).join('');
   meta.textContent=`${premiumIndex+1} of ${arr.length}`;
   if(premiumTimer)clearInterval(premiumTimer);
@@ -552,6 +567,21 @@ function renderPremiumBanner(){
     if(!current.length){renderPremiumBanner();return}
     premiumIndex=(premiumIndex+1)%current.length;renderPremiumBanner();
   },5000):null;
+}
+function currentPremiumArr(){
+  return activePremiumBanners().filter(x=>selectedCategory==='all'||String(x.categoryId)===String(selectedCategory));
+}
+function premiumNext(){
+  const arr=currentPremiumArr();
+  if(!arr.length)return;
+  premiumIndex=(premiumIndex+1)%arr.length;
+  renderPremiumBanner();
+}
+function premiumPrev(){
+  const arr=currentPremiumArr();
+  if(!arr.length)return;
+  premiumIndex=(premiumIndex-1+arr.length)%arr.length;
+  renderPremiumBanner();
 }
 
 function renderCategories(){
