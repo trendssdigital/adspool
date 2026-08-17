@@ -218,7 +218,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 @keyframes toastin{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
 
 .banner-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.banner-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.banner-card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
 .banner-card img{width:100%;aspect-ratio:4.8/1;object-fit:cover;background:var(--paper);display:block}
 .banner-info{padding:14px}
 .banner-meta{font-size:12px;color:var(--muted);line-height:1.65;margin-top:6px}
@@ -611,7 +611,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 
         <div class="field">
           <label>Promo Badge (optional)</label>
-          <input id="pcBadge" maxlength="12" placeholder="e.g. 10% OFF">
+          <input id="pcBadge" maxlength="12" placeholder="e.g. 10% OFF" oninput="updatePCPreview()">
           <span class="hint">Shows alongside the listing. Leave blank for none.</span>
         </div>
 
@@ -629,8 +629,8 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 
       <div class="actions">
         <button class="btn" onclick="cancelCreatePC()">Cancel</button>
-        <button class="btn" onclick="savePremiumCreative('draft')">Save Draft</button>
-        <button class="btn primary" onclick="savePremiumCreative('publish')">Publish</button>
+        <button id="pcSaveDraftBtn" class="btn" onclick="savePremiumCreative('draft')">Save Draft</button>
+        <button id="pcSubmitBtn" class="btn primary" onclick="savePremiumCreative('publish')">Publish</button>
       </div>
     </div>
 
@@ -690,11 +690,6 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
   <div id="adminPublicPremium" class="premium-section" style="display:none">
     <div style="margin-bottom:10px"><h2 style="font-size:18px">Premium Banners</h2></div>
     <div id="adminPublicPremiumWrap" class="premium-banner-wrap"></div>
-  </div>
-
-  <div id="adminPublicCreatives" class="premium-section" style="display:none">
-    <div style="margin-bottom:10px"><h2 style="font-size:18px">Premium Creatives</h2></div>
-    <div id="adminPublicCreativesGrid" class="publicgrid"></div>
   </div>
 
   <div id="publicGrid" class="publicgrid"></div>
@@ -767,11 +762,44 @@ function load(){
   renderPCAdmin();
 }
 
+function ensureAdIds(){
+  const records=[...(state.ads||[]),...(premiumBanners||[]),...(premiumCreatives||[])];
+  const used=new Set();
+  let maxId=0;
+
+  records.forEach(a=>{
+    const m=String(a.adId||'').match(/^ADS-(\d+)$/);
+    if(m){
+      const n=Number(m[1]);
+      if(Number.isFinite(n))maxId=Math.max(maxId,n);
+    }
+  });
+
+  state.nextId=Math.max(Number(state.nextId)||1,maxId+1);
+
+  records.forEach(a=>{
+    const existing=String(a.adId||'');
+    if(existing&&/^ADS-\d+$/.test(existing)&&!used.has(existing)){
+      used.add(existing);
+      return;
+    }
+    let id;
+    do{ id='ADS-'+String(state.nextId++).padStart(6,'0'); }while(used.has(id));
+    a.adId=id;
+    used.add(id);
+  });
+}
+
 function normalize(){
+  if(!Array.isArray(state.ads))state.ads=[];
   (state.ads||[]).forEach(refreshStatus);
   if(!state.nextId)state.nextId=1;
   if(typeof state.templateCounter!=='number')state.templateCounter=0;
+  ensureAdIds();
   sortCategories();
+  persist();
+  localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));
+  persistPC();
 }
 
 function persist(){ localStorage.setItem(STORAGE,JSON.stringify(state)); }
@@ -1010,6 +1038,20 @@ function adMarkup(a){
   </div>`;
 }
 
+/* PREMIUM CREATIVE MARKUP (shared by create/edit preview, admin public preview and the
+   Uploaded Premium Creatives list — mirrors the promo-badge handling used in adMarkup()) */
+function pcPreviewMarkup(b,opts){
+  opts=opts||{};
+  const badge=(b.badge||'').trim();
+  const businessLabel=(!opts.hideBusiness&&b.businessName)?`<span class="premium-banner-business">${esc(b.businessName)}${opts.categoryName?' · '+esc(opts.categoryName):''}</span>`:'';
+  return`<div class="pc-preview-wrap"${opts.style?` style="${opts.style}"`:''}>
+    ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
+    <img class="pc-preview-img" src="${esc(b.imageData||'')}" alt="${esc(b.businessName||'Premium creative preview')}">
+    <span class="premium-banner-label">PREMIUM</span>
+    ${businessLabel}
+  </div>`;
+}
+
 /* PREVIEW */
 function updatePreview(){
   const bg=document.getElementById('fColor').value;
@@ -1131,33 +1173,46 @@ function setAdStatusFilter(s){
   renderAdsTable();
 }
 
+/* Combines normal ads with published/scheduled/etc. Premium Creatives into one
+   list so both kinds show together — same shape (adId, businessName, categoryId,
+   startAt, endAt, status) — tagged with _type so the table/dashboard know which
+   edit/delete function and label to use. */
+function combinedAdminAds(){
+  const normal=state.ads.map(a=>({...a,_type:'normal'}));
+  const pc=premiumCreatives.map(b=>({...b,_type:'premiumcreative'}));
+  return[...normal,...pc].sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+}
+
 function renderAdsTable(){
   refreshStatuses();
   const q=(document.getElementById('adSearch')?.value||'').toLowerCase();
   const cat=document.getElementById('adCategoryFilter')?.value||'all';
   const st=document.getElementById('adStatusFilter')?.value||'all';
 
-  const arr=state.ads.filter(a=>
-    (!q||(a.adId+' '+a.businessName+' '+a.phone).toLowerCase().includes(q)) &&
+  const arr=combinedAdminAds().filter(a=>
+    (!q||(a.adId+' '+a.businessName+' '+(a.phone||'')).toLowerCase().includes(q)) &&
     (cat==='all'||String(a.categoryId)===cat) &&
     (st==='all'||a.status===st)
   );
 
   document.getElementById('adsTable').innerHTML=arr.length?`<div class="tablewrap"><table class="table"><thead><tr>
-      <th>Ad ID</th><th>Business</th><th>Category</th><th>Start</th><th>End</th><th>Status</th><th>Actions</th>
+      <th>Ad ID</th><th>Business</th><th>Category</th><th>Type</th><th>Start</th><th>End</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody>
-    ${arr.map(a=>`<tr>
-      <td class="mono">${esc(a.adId)}</td>
+    ${arr.map(a=>{
+      const isPC=a._type==='premiumcreative';
+      return`<tr>
+      <td class="mono">${esc(a.adId||'—')}</td>
       <td>${esc(a.businessName)}</td>
-      <td>${esc(state.categories.find(c=>c.id===a.categoryId)?.name||'Other')}</td>
+      <td>${esc(state.categories.find(c=>c.id===Number(a.categoryId))?.name||'Other')}</td>
+      <td>${isPC?'<span class="badge unpublished">Premium Creative</span>':'Normal'}</td>
       <td>${new Date(a.startAt).toLocaleString()}</td>
       <td>${new Date(a.endAt).toLocaleString()}</td>
       <td><span class="badge ${a.status}">${a.status}</span></td>
       <td style="display:flex;gap:6px">
-        <button class="btn small" onclick="editAd('${a.id}')">Edit</button>
-        <button class="btn small danger" onclick="deleteAd('${a.id}')">Delete</button>
+        <button class="btn small" onclick="${isPC?`editPC('${a.id}')`:`editAd('${a.id}')`}">Edit</button>
+        <button class="btn small danger" onclick="${isPC?`deletePC('${a.id}')`:`deleteAd('${a.id}')`}">Delete</button>
       </td>
-    </tr>`).join('')}
+    </tr>`;}).join('')}
     </tbody></table></div>`:'<div class="empty">No advertisements found.</div>';
 }
 
@@ -1168,7 +1223,7 @@ function clearAdFilters(){
   renderAdsTable();
 }
 
-function refreshStatuses(){ state.ads.forEach(refreshStatus); persist(); }
+function refreshStatuses(){ state.ads.forEach(refreshStatus); persist(); premiumCreatives.forEach(refreshPCStatus); persistPC(); }
 
 function deleteAd(id){
   if(confirm('Delete this advertisement?')){
@@ -1181,24 +1236,27 @@ function deleteAd(id){
 /* DASHBOARD */
 function renderDashboard(){
   refreshStatuses();
+  const all=combinedAdminAds();
   const c={published:0,scheduled:0,draft:0,expired:0};
-  state.ads.forEach(a=>c[a.status]=(c[a.status]||0)+1);
+  all.forEach(a=>c[a.status]=(c[a.status]||0)+1);
 
   document.getElementById('dashCards').innerHTML=[
-    ['Total Ads',state.ads.length],['Published',c.published],['Scheduled',c.scheduled],['Drafts',c.draft],['Expired',c.expired]
+    ['Total Ads',all.length],['Published',c.published],['Scheduled',c.scheduled],['Drafts',c.draft],['Expired',c.expired]
   ].map(x=>`<div class="card"><div class="label">${x[0]}</div><div class="num">${x[1]}</div></div>`).join('');
 
-  const recent=state.ads.slice(0,5);
+  const recent=all.slice(0,5);
   document.getElementById('recentAds').innerHTML=recent.length?`<div class="tablewrap"><table class="table"><thead><tr>
       <th>Ad ID</th><th>Business</th><th>Category</th><th>Status</th><th>Actions</th>
     </tr></thead><tbody>
-    ${recent.map(a=>`<tr>
-      <td class="mono">${esc(a.adId)}</td>
+    ${recent.map(a=>{
+      const isPC=a._type==='premiumcreative';
+      return`<tr>
+      <td class="mono">${esc(a.adId||'—')}</td>
       <td>${esc(a.businessName)}</td>
-      <td>${esc(state.categories.find(c=>c.id===a.categoryId)?.name||'Other')}</td>
+      <td>${esc(state.categories.find(c=>c.id===Number(a.categoryId))?.name||'Other')}</td>
       <td><span class="badge ${a.status}">${a.status}</span></td>
-      <td><button class="btn small" onclick="editAd('${a.id}')">Edit</button></td>
-    </tr>`).join('')}
+      <td><button class="btn small" onclick="${isPC?`editPC('${a.id}')`:`editAd('${a.id}')`}">Edit</button></td>
+    </tr>`;}).join('')}
     </tbody></table></div>`:'<div class="empty">No ads yet.</div>';
 }
 
@@ -1271,16 +1329,26 @@ function renderPublic(){
   const filtered=arr.filter(a=>
     (publicCategory==='all'||String(a.categoryId)===publicCategory) &&
     (!q||(a.businessName+' '+(a.services||[]).join(' ')+' '+buildAddress(a)).toLowerCase().includes(q))
-  );
+  ).map(a=>({...a,_type:'normal'}));
 
-  document.getElementById('publicGrid').innerHTML=filtered.length?filtered.map(a=>`
+  /* Premium Creatives are shown next to normal ads in the same grid — no separate
+     listing — so a visitor sees every active ad (normal or premium) side by side. */
+  premiumCreatives.forEach(refreshPCStatus);
+  const pcFiltered=premiumCreatives.filter(b=>
+    b.status==='published' &&
+    (publicCategory==='all'||String(b.categoryId)===publicCategory) &&
+    (!q||(b.businessName+' '+buildAddress(b)).toLowerCase().includes(q))
+  ).map(b=>({...b,_type:'premiumcreative'}));
+
+  const combined=[...filtered,...pcFiltered].sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+
+  document.getElementById('publicGrid').innerHTML=combined.length?combined.map(a=>`
     <div class="publicad">
-      <div class="mini">${adMarkup(a)}</div>
+      <div class="mini">${a._type==='premiumcreative'?pcPreviewMarkup(a,{style:'max-width:none'}):adMarkup(a)}</div>
       <div class="publicmeta"><strong>${esc(a.businessName)}</strong></div>
     </div>`).join(''):'<div class="empty">No active advertisements found.</div>';
 
   renderAdminPublicPremium();
-  renderAdminPublicCreatives();
 }
 
 /* PREMIUM */
@@ -1361,6 +1429,7 @@ async function savePremiumBanner(){
 
   premiumBanners.unshift({
     id:'PB-'+Date.now(),
+    adId:'ADS-'+String(state.nextId++).padStart(6,'0'),
     businessName:name,
     categoryId:cat,
     imageData,
@@ -1369,6 +1438,7 @@ async function savePremiumBanner(){
     status:'scheduled'
   });
 
+  persist();
   localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));
   clearPremiumForm();
   renderPremiumAdmin();
@@ -1388,6 +1458,7 @@ function renderPremiumAdmin(){
       <div class="banner-info">
         <b>${esc(b.businessName)}</b>
         <div class="banner-meta">
+          Ad ID: ${esc(b.adId||'—')}<br>
           Category: ${esc(c?.name||'Unknown')}<br>
           Start: ${new Date(b.startAt).toLocaleString()}<br>
           Expiry: ${new Date(b.endAt).toLocaleString()}<br>
@@ -1395,6 +1466,7 @@ function renderPremiumAdmin(){
         </div>
         <div class="banner-actions">
           <button class="btn small" onclick="previewBanner('${b.id}')">Preview</button>
+          <button class="btn small" onclick="sharePremiumBanner('${b.id}')">Share</button>
           <button class="btn small" onclick="editBanner('${b.id}')">Edit</button>
           <button class="btn small danger" onclick="deleteBanner('${b.id}')">Delete</button>
         </div>
@@ -1408,6 +1480,21 @@ function previewBanner(id){
   if(!b)return;
   document.getElementById('premiumPreview').innerHTML=`<img class="banner-preview" src="${esc(b.imageData)}" alt="${esc(b.businessName)}">`;
   startCreatePremium();
+}
+
+function sharePremiumBanner(id){
+  const b=premiumBanners.find(x=>x.id===id);
+  if(!b)return;
+  const publicUrl=new URL('../production/',window.location.href);
+  publicUrl.searchParams.set('premium',b.id);
+  const message=`${b.businessName} — Premium Ad on Adspool: ${publicUrl.href}`;
+  if(navigator.share){
+    navigator.share({title:`${b.businessName} — Premium Ad on Adspool`,text:message,url:publicUrl.href}).catch(()=>{});
+  }else if(navigator.clipboard){
+    navigator.clipboard.writeText(message).then(()=>showToast('Premium ad link copied to clipboard.')).catch(()=>prompt('Copy this Adspool premium ad link:',message));
+  }else{
+    prompt('Copy this Adspool premium ad link:',message);
+  }
 }
 
 function toLocalInputFromISO(iso){
@@ -1475,8 +1562,9 @@ function updatePCPreview(){
   const wrap=document.getElementById('pcAdPreview');
   if(!wrap)return;
   const name=document.getElementById('pcBusiness').value.trim();
+  const badge=document.getElementById('pcBadge')?document.getElementById('pcBadge').value.trim():'';
   if(pcImageData){
-    wrap.innerHTML=`<div class="pc-preview-wrap"><img class="pc-preview-img" src="${pcImageData}" alt="Premium creative preview"><span class="premium-banner-label">PREMIUM</span>${name?`<span class="premium-banner-business">${esc(name)}</span>`:''}</div>`;
+    wrap.innerHTML=pcPreviewMarkup({imageData:pcImageData,businessName:name,badge:badge});
   }else{
     wrap.innerHTML=`<div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:10px">Upload a 1080 × 1080 banner creative to preview it here.</div>`;
   }
@@ -1517,6 +1605,9 @@ function clearPCForm(){
   document.getElementById('pcImageLabel').textContent='Banner Creative *';
   document.getElementById('pcImageNote').innerHTML='Required: exactly <strong>1080 × 1080 px</strong> (1:1). Create the artwork separately; this portal is only for uploading and scheduling it.';
   document.getElementById('pcPreviewId').textContent='';
+  document.getElementById('pcSaveDraftBtn').style.display='';
+  document.getElementById('pcSubmitBtn').textContent='Publish';
+  document.getElementById('pcSubmitBtn').onclick=()=>savePremiumCreative('publish');
   setPCDefaultDates(true);
   updatePCPreview();
 }
@@ -1527,6 +1618,7 @@ function cancelCreatePC(){
 
 /* SAVE PREMIUM CREATIVE */
 function savePremiumCreative(mode){
+  const wasEditing=!!editingPCId;
   const business=document.getElementById('pcBusiness').value.trim();
   const cat=document.getElementById('pcCategory').value;
   const address=getPCAddressData();
@@ -1564,22 +1656,29 @@ function savePremiumCreative(mode){
   if(editing){
     Object.assign(editing,data);
     if(mode==='draft')editing.status='draft';
-    else if(editing.status==='draft'||editing.status==='unpublished')refreshPCStatus(editing);
+    else if(mode==='save'){
+      if(editing.status!=='draft'&&editing.status!=='unpublished')refreshPCStatus(editing);
+    }else if(editing.status==='draft'||editing.status==='unpublished')refreshPCStatus(editing);
   }else{
     premiumCreatives.unshift({
       id:'PC-'+Date.now(),
+      adId:'ADS-'+String(state.nextId++).padStart(6,'0'),
+      adType:'premiumcreative',
       ...data,
       status:mode==='draft'?'draft':'published',
       createdAt:new Date().toISOString()
     });
+    persist(); /* saves the shared ad-id counter (state.nextId) that was just advanced */
   }
 
   editingPCId=null;
   pcImageData=null;
   persistPC();
   renderPCAdmin();
+  renderAdsTable();
+  renderDashboard();
   clearPCForm();
-  showToast(mode==='draft'?'Draft saved.':'Premium creative published.');
+  showToast(wasEditing?'Premium creative updated successfully.':(mode==='draft'?'Draft saved.':'Premium creative published.'));
 }
 
 function renderPCAdmin(){
@@ -1593,11 +1692,14 @@ function renderPCAdmin(){
 
   grid.innerHTML=arr.length?arr.map(b=>{
     const c=state.categories.find(x=>String(x.id)===String(b.categoryId));
+    const badge=(b.badge||'').trim();
     return`<article class="banner-card square">
+      ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
       <img src="${esc(b.imageData)}" alt="${esc(b.businessName)}">
       <div class="banner-info">
         <b>${esc(b.businessName)}</b>
         <div class="banner-meta">
+          ${b.adId?`Ad ID: ${esc(b.adId)}<br>`:''}
           Category: ${esc(c?.name||'Unknown')}<br>
           Address: ${esc(buildAddress(b)||'—')}<br>
           Phone: ${esc(b.phone||'—')}<br>
@@ -1633,11 +1735,14 @@ function editPC(id){
   document.getElementById('pcBadge').value=b.badge||'';
   document.getElementById('pcStart').value=toLocalInputFromISO(b.startAt);
   document.getElementById('pcEnd').value=toLocalInputFromISO(b.endAt);
-  document.getElementById('pcAdPreview').innerHTML=`<div class="pc-preview-wrap"><img class="pc-preview-img" src="${esc(b.imageData)}" alt="Premium creative preview"><span class="premium-banner-label">PREMIUM</span><span class="premium-banner-business">${esc(b.businessName)}</span></div>`;
+  document.getElementById('pcAdPreview').innerHTML=pcPreviewMarkup(b);
   document.getElementById('pcFormTitle').textContent='Edit Premium Creative';
   document.getElementById('pcImageLabel').textContent='Banner Creative (leave empty to keep current)';
   document.getElementById('pcImageNote').textContent='Upload a new 1080 × 1080 file only if you want to replace the current creative.';
-  document.getElementById('pcPreviewId').textContent='Editing '+b.id;
+  document.getElementById('pcPreviewId').textContent='Ad ID: '+(b.adId||'—')+' · Editing '+b.id;
+  document.getElementById('pcSaveDraftBtn').style.display='none';
+  document.getElementById('pcSubmitBtn').textContent='Save Changes';
+  document.getElementById('pcSubmitBtn').onclick=()=>savePremiumCreative('save');
   showView('create');
   switchCreateTab('premiumcreative');
   document.getElementById('tabPremiumCreatives').scrollIntoView({behavior:'smooth',block:'start'});
@@ -1649,31 +1754,9 @@ function deletePC(id){
     persistPC();
     if(editingPCId===id)clearPCForm();
     renderPCAdmin();
+    renderAdsTable();
+    renderDashboard();
   }
-}
-
-/* PREMIUM CREATIVES PUBLIC DISPLAY (admin's own Public Ads preview tab) */
-function renderAdminPublicCreatives(){
-  const section=document.getElementById('adminPublicCreatives');
-  const grid=document.getElementById('adminPublicCreativesGrid');
-  if(!section||!grid)return;
-
-  try{ premiumCreatives=JSON.parse(localStorage.getItem(PC_STORAGE))||[]; }catch(e){ premiumCreatives=[]; }
-  premiumCreatives.forEach(refreshPCStatus);
-
-  const arr=premiumCreatives.filter(b=>b.status==='published' && (publicCategory==='all'||String(b.categoryId)===String(publicCategory)));
-
-  if(!arr.length){ section.style.display='none'; grid.innerHTML=''; return; }
-
-  grid.innerHTML=arr.map(b=>{
-    const cat=state.categories.find(c=>String(c.id)===String(b.categoryId))?.name||'Other';
-    return`<div class="publicad">
-      <div class="pc-preview-wrap" style="max-width:none"><img class="pc-preview-img" src="${esc(b.imageData)}" alt="${esc(b.businessName)}"><span class="premium-banner-label">PREMIUM</span></div>
-      <div class="publicmeta"><strong>${esc(b.businessName)}</strong> · ${esc(cat)}</div>
-    </div>`;
-  }).join('');
-
-  section.style.display='block';
 }
 
 /* PREMIUM PUBLIC DISPLAY */
