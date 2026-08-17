@@ -629,8 +629,8 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 
       <div class="actions">
         <button class="btn" onclick="cancelCreatePC()">Cancel</button>
-        <button id="pcSaveDraftBtn" class="btn" onclick="savePremiumCreative('draft')">Save Draft</button>
-        <button id="pcSubmitBtn" class="btn primary" onclick="savePremiumCreative('publish')">Publish</button>
+        <button class="btn" onclick="savePremiumCreative('draft')">Save Draft</button>
+        <button class="btn primary" onclick="savePremiumCreative('publish')">Publish</button>
       </div>
     </div>
 
@@ -762,44 +762,11 @@ function load(){
   renderPCAdmin();
 }
 
-function ensureAdIds(){
-  const records=[...(state.ads||[]),...(premiumBanners||[]),...(premiumCreatives||[])];
-  const used=new Set();
-  let maxId=0;
-
-  records.forEach(a=>{
-    const m=String(a.adId||'').match(/^ADS-(\d+)$/);
-    if(m){
-      const n=Number(m[1]);
-      if(Number.isFinite(n))maxId=Math.max(maxId,n);
-    }
-  });
-
-  state.nextId=Math.max(Number(state.nextId)||1,maxId+1);
-
-  records.forEach(a=>{
-    const existing=String(a.adId||'');
-    if(existing&&/^ADS-\d+$/.test(existing)&&!used.has(existing)){
-      used.add(existing);
-      return;
-    }
-    let id;
-    do{ id='ADS-'+String(state.nextId++).padStart(6,'0'); }while(used.has(id));
-    a.adId=id;
-    used.add(id);
-  });
-}
-
 function normalize(){
-  if(!Array.isArray(state.ads))state.ads=[];
   (state.ads||[]).forEach(refreshStatus);
   if(!state.nextId)state.nextId=1;
   if(typeof state.templateCounter!=='number')state.templateCounter=0;
-  ensureAdIds();
   sortCategories();
-  persist();
-  localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));
-  persistPC();
 }
 
 function persist(){ localStorage.setItem(STORAGE,JSON.stringify(state)); }
@@ -1429,7 +1396,6 @@ async function savePremiumBanner(){
 
   premiumBanners.unshift({
     id:'PB-'+Date.now(),
-    adId:'ADS-'+String(state.nextId++).padStart(6,'0'),
     businessName:name,
     categoryId:cat,
     imageData,
@@ -1438,7 +1404,6 @@ async function savePremiumBanner(){
     status:'scheduled'
   });
 
-  persist();
   localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));
   clearPremiumForm();
   renderPremiumAdmin();
@@ -1458,7 +1423,6 @@ function renderPremiumAdmin(){
       <div class="banner-info">
         <b>${esc(b.businessName)}</b>
         <div class="banner-meta">
-          Ad ID: ${esc(b.adId||'—')}<br>
           Category: ${esc(c?.name||'Unknown')}<br>
           Start: ${new Date(b.startAt).toLocaleString()}<br>
           Expiry: ${new Date(b.endAt).toLocaleString()}<br>
@@ -1466,7 +1430,6 @@ function renderPremiumAdmin(){
         </div>
         <div class="banner-actions">
           <button class="btn small" onclick="previewBanner('${b.id}')">Preview</button>
-          <button class="btn small" onclick="sharePremiumBanner('${b.id}')">Share</button>
           <button class="btn small" onclick="editBanner('${b.id}')">Edit</button>
           <button class="btn small danger" onclick="deleteBanner('${b.id}')">Delete</button>
         </div>
@@ -1480,21 +1443,6 @@ function previewBanner(id){
   if(!b)return;
   document.getElementById('premiumPreview').innerHTML=`<img class="banner-preview" src="${esc(b.imageData)}" alt="${esc(b.businessName)}">`;
   startCreatePremium();
-}
-
-function sharePremiumBanner(id){
-  const b=premiumBanners.find(x=>x.id===id);
-  if(!b)return;
-  const publicUrl=new URL('../production/',window.location.href);
-  publicUrl.searchParams.set('premium',b.id);
-  const message=`${b.businessName} — Premium Ad on Adspool: ${publicUrl.href}`;
-  if(navigator.share){
-    navigator.share({title:`${b.businessName} — Premium Ad on Adspool`,text:message,url:publicUrl.href}).catch(()=>{});
-  }else if(navigator.clipboard){
-    navigator.clipboard.writeText(message).then(()=>showToast('Premium ad link copied to clipboard.')).catch(()=>prompt('Copy this Adspool premium ad link:',message));
-  }else{
-    prompt('Copy this Adspool premium ad link:',message);
-  }
 }
 
 function toLocalInputFromISO(iso){
@@ -1605,9 +1553,6 @@ function clearPCForm(){
   document.getElementById('pcImageLabel').textContent='Banner Creative *';
   document.getElementById('pcImageNote').innerHTML='Required: exactly <strong>1080 × 1080 px</strong> (1:1). Create the artwork separately; this portal is only for uploading and scheduling it.';
   document.getElementById('pcPreviewId').textContent='';
-  document.getElementById('pcSaveDraftBtn').style.display='';
-  document.getElementById('pcSubmitBtn').textContent='Publish';
-  document.getElementById('pcSubmitBtn').onclick=()=>savePremiumCreative('publish');
   setPCDefaultDates(true);
   updatePCPreview();
 }
@@ -1618,7 +1563,6 @@ function cancelCreatePC(){
 
 /* SAVE PREMIUM CREATIVE */
 function savePremiumCreative(mode){
-  const wasEditing=!!editingPCId;
   const business=document.getElementById('pcBusiness').value.trim();
   const cat=document.getElementById('pcCategory').value;
   const address=getPCAddressData();
@@ -1656,9 +1600,7 @@ function savePremiumCreative(mode){
   if(editing){
     Object.assign(editing,data);
     if(mode==='draft')editing.status='draft';
-    else if(mode==='save'){
-      if(editing.status!=='draft'&&editing.status!=='unpublished')refreshPCStatus(editing);
-    }else if(editing.status==='draft'||editing.status==='unpublished')refreshPCStatus(editing);
+    else if(editing.status==='draft'||editing.status==='unpublished')refreshPCStatus(editing);
   }else{
     premiumCreatives.unshift({
       id:'PC-'+Date.now(),
@@ -1678,7 +1620,7 @@ function savePremiumCreative(mode){
   renderAdsTable();
   renderDashboard();
   clearPCForm();
-  showToast(wasEditing?'Premium creative updated successfully.':(mode==='draft'?'Draft saved.':'Premium creative published.'));
+  showToast(mode==='draft'?'Draft saved.':'Premium creative published.');
 }
 
 function renderPCAdmin(){
@@ -1739,10 +1681,7 @@ function editPC(id){
   document.getElementById('pcFormTitle').textContent='Edit Premium Creative';
   document.getElementById('pcImageLabel').textContent='Banner Creative (leave empty to keep current)';
   document.getElementById('pcImageNote').textContent='Upload a new 1080 × 1080 file only if you want to replace the current creative.';
-  document.getElementById('pcPreviewId').textContent='Ad ID: '+(b.adId||'—')+' · Editing '+b.id;
-  document.getElementById('pcSaveDraftBtn').style.display='none';
-  document.getElementById('pcSubmitBtn').textContent='Save Changes';
-  document.getElementById('pcSubmitBtn').onclick=()=>savePremiumCreative('save');
+  document.getElementById('pcPreviewId').textContent='Editing '+b.id;
   showView('create');
   switchCreateTab('premiumcreative');
   document.getElementById('tabPremiumCreatives').scrollIntoView({behavior:'smooth',block:'start'});
