@@ -140,6 +140,17 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 .premium-banner-dots{display:flex;gap:5px}
 .premium-dot{width:7px;height:7px;border-radius:50%;background:var(--border-strong)}
 .premium-dot.active{background:var(--gold-deep)}
+.premium-banner-arrow{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(5,42,30,.55);border:1px solid rgba(255,255,255,.35);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:6;transition:background .15s ease,transform .15s ease;padding:0}
+.premium-banner-arrow:hover{background:rgba(5,42,30,.82);transform:translateY(-50%) scale(1.06)}
+.premium-banner-arrow:active{transform:translateY(-50%) scale(.96)}
+.premium-banner-arrow svg{width:18px;height:18px;display:block}
+.premium-banner-arrow.prev{left:14px}
+.premium-banner-arrow.next{right:14px}
+@media (max-width:640px){.premium-banner-arrow{width:34px;height:34px}.premium-banner-arrow svg{width:15px;height:15px}}
+
+/* ---------- premium creatives (1080x1080 uploaded banner cards) ---------- */
+.pc-preview-wrap{position:relative;width:100%;overflow:hidden;border-radius:10px;background:var(--forest-deep)}
+.pc-preview-img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}
 
 /* ---------- ad ticket card ---------- */
 .ads-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
@@ -153,7 +164,7 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 
 .ad{position:relative;width:100%;min-height:225px;border:2px solid currentColor;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;text-align:center;font-family:var(--signage)}
 .ad-frame{position:relative;width:100%}
-.promo-badge{position:absolute;top:-8px;right:-8px;width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid var(--danger);color:var(--danger);display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--sans);font-weight:800;font-size:9.5px;line-height:1.15;box-shadow:0 6px 14px rgba(0,0,0,.18);z-index:5;padding:3px;overflow:hidden}
+.promo-badge{position:absolute;top:-10px;right:-10px;width:52px;height:52px;background:#ff0000;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--sans);font-weight:800;font-size:8.5px;line-height:1.12;letter-spacing:.01em;text-transform:uppercase;box-shadow:0 6px 14px rgba(0,0,0,.22);z-index:5;padding:4px;overflow:hidden;clip-path:polygon(50.00% 0.00%, 61.39% 7.50%, 75.00% 6.70%, 81.11% 18.89%, 93.30% 25.00%, 92.50% 38.61%, 100.00% 50.00%, 92.50% 61.39%, 93.30% 75.00%, 81.11% 81.11%, 75.00% 93.30%, 61.39% 92.50%, 50.00% 100.00%, 38.61% 92.50%, 25.00% 93.30%, 18.89% 81.11%, 6.70% 75.00%, 7.50% 61.39%, 0.00% 50.00%, 7.50% 38.61%, 6.70% 25.00%, 18.89% 18.89%, 25.00% 6.70%, 38.61% 7.50%)}
 .ad .adhead{flex:0 0 auto;padding:14px 12px 10px;border-bottom:2px solid currentColor;font-size:22px;font-weight:800;line-height:1.08;min-height:56px;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere}
 .ad .adbody{flex:1;padding:12px 16px 10px;display:flex;flex-direction:column;justify-content:center;gap:10px}
 .servicesline{font-size:14.5px;font-weight:700;line-height:1.25;word-break:break-word;overflow-wrap:anywhere}
@@ -384,7 +395,7 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
       <div class="footer-tagline">A local business directory built for Bangalore's neighbourhoods.</div>
     </div>
     <div class="footer-links">
-      <a href="#about">About</a><a href="#ads">Ads</a><a href="#categories">Categories</a><a href="../admin/">Business / Admin</a>
+      <a href="#about">About</a><a href="#ads">Ads</a><a href="#categories">Categories</a>
     </div>
   </div>
   <div class="footer-bottom wrap">© 2026 Adspool. All rights reserved.</div>
@@ -404,6 +415,7 @@ const STORAGE='adspool_mvp_v1';
 let state={ads:[],categories:[]};
 let selectedCategory='all';
 let premiumBanners=[];let premiumIndex=0;let premiumTimer=null;
+let premiumCreatives=[];
 
 function load(){
   try{
@@ -414,6 +426,7 @@ function load(){
   if(!Array.isArray(state.categories))state.categories=[];
   state.ads.forEach(refreshStatus);
   loadPremiumBanners();
+  loadPremiumCreatives();
   renderCategories();
   renderPremiumBanner();
   renderAds();
@@ -515,6 +528,18 @@ function adMarkup(a){
   </div>`;
 }
 
+/* Shared markup for a Premium Creative's square banner — mirrors adMarkup()'s
+   promo-badge handling so both ad kinds look consistent. */
+function pcPreviewMarkup(b,opts){
+  opts=opts||{};
+  const badge=(b.badge||'').trim();
+  return`<div class="pc-preview-wrap">
+    ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
+    <img class="pc-preview-img" src="${esc(b.imageData)}" alt="${esc(b.businessName)} premium creative">
+    <span class="premium-banner-label">PREMIUM</span>
+  </div>`;
+}
+
 function loadPremiumBanners(){
   try{premiumBanners=JSON.parse(localStorage.getItem('adspool_premium_banners_v1'))||[]}catch(e){premiumBanners=[]}
   premiumBanners.forEach(b=>{
@@ -541,11 +566,17 @@ function renderPremiumBanner(){
   const b=arr[premiumIndex];
   const cat=state.categories.find(c=>String(c.id)===String(b.categoryId))?.name||'Other';
   section.style.display='block';
-  wrap.innerHTML=`<button type="button" onclick="viewPremiumBanner('${esc(b.id)}')" style="display:block;width:100%;padding:0;border:0;background:none;cursor:pointer" aria-label="View ${esc(b.businessName)} premium advertisement">
-    <img class="premium-banner-img" src="${esc(b.imageData)}" alt="${esc(b.businessName)} premium banner">
+  const arrows=arr.length>1?`
+    <button type="button" class="premium-banner-arrow prev" aria-label="Previous banner" onclick="premiumPrev()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <button type="button" class="premium-banner-arrow next" aria-label="Next banner" onclick="premiumNext()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>`:'';
+  wrap.innerHTML=`<img class="premium-banner-img" src="${esc(b.imageData)}" alt="${esc(b.businessName)} premium banner">
     <span class="premium-banner-label">PREMIUM</span>
     <span class="premium-banner-business">${esc(b.businessName)} · ${esc(cat)}</span>
-  </button>`;
+    ${arrows}`;
   dots.innerHTML=arr.map((x,i)=>`<span class="premium-dot ${i===premiumIndex?'active':''}"></span>`).join('');
   meta.textContent=`${premiumIndex+1} of ${arr.length}`;
   if(premiumTimer)clearInterval(premiumTimer);
@@ -554,6 +585,58 @@ function renderPremiumBanner(){
     if(!current.length){renderPremiumBanner();return}
     premiumIndex=(premiumIndex+1)%current.length;renderPremiumBanner();
   },5000):null;
+}
+function currentPremiumArr(){
+  return activePremiumBanners().filter(x=>selectedCategory==='all'||String(x.categoryId)===String(selectedCategory));
+}
+function premiumNext(){
+  const arr=currentPremiumArr();
+  if(!arr.length)return;
+  premiumIndex=(premiumIndex+1)%arr.length;
+  renderPremiumBanner();
+}
+function premiumPrev(){
+  const arr=currentPremiumArr();
+  if(!arr.length)return;
+  premiumIndex=(premiumIndex-1+arr.length)%arr.length;
+  renderPremiumBanner();
+}
+
+/* PREMIUM CREATIVES (1080x1080 uploaded banners with full business/contact details) */
+function loadPremiumCreatives(){
+  try{premiumCreatives=JSON.parse(localStorage.getItem('adspool_premium_creatives_v1'))||[]}catch(e){premiumCreatives=[]}
+  premiumCreatives.forEach(b=>{
+    if(b.status==='unpublished'||b.status==='draft')return;
+    const s=Date.parse(b.startAt),e=Date.parse(b.endAt),n=Date.now();
+    if(Number.isNaN(s)||Number.isNaN(e))return;
+    b.status=n<s?'scheduled':n<=e?'published':'expired';
+  });
+}
+function activePremiumCreatives(){
+  loadPremiumCreatives();
+  return premiumCreatives.filter(b=>b.status==='published' && new Date(b.startAt)<=new Date() && new Date(b.endAt)>=new Date());
+}
+/* Premium Creatives now render inline inside the main ads grid (see renderAds()) —
+   next to normal ads instead of in a separate section. This builds one card. */
+function pcCardMarkup(b){
+  const cat=state.categories.find(c=>String(c.id)===String(b.categoryId))?.name||'Other';
+  const phone=(b.phone||'').replace(/\s/g,'');
+  const wa=(b.whatsapp||'').replace(/\D/g,'');
+  const address=buildAddress(b);
+  return `<article class="ad-card">
+      <div class="ad-mini">${pcPreviewMarkup(b)}</div>
+      <div class="ad-perf"></div>
+      <div class="ad-info">
+        <div class="ad-name">${esc(b.businessName)}</div>
+        <div class="ad-category">${esc(cat)}</div>
+        <div class="ad-id">${esc(b.adId||'Premium Creative')}</div>
+        <div class="ad-actions">
+          <a class="btn primary" href="tel:${esc(phone)}">Call</a>
+          ${wa?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}">WhatsApp</a>`:''}
+          ${address?`<a class="btn" target="_blank" rel="noopener" href="${mapsUrl(address)}">Directions</a>`:''}
+        </div>
+      </div>
+    </article>`;
 }
 
 function renderCategories(){
@@ -590,11 +673,22 @@ function viewAllAds(e){
 
 function renderAds(){
   const q=(document.getElementById('searchInput').value||'').trim().toLowerCase();
-  const arr=activeAds().filter(a=>{
+
+  const normalArr=activeAds().filter(a=>{
     const category=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
     const hay=[a.businessName,a.adId,buildAddress(a),(a.services||[]).join(' '),category].join(' ').toLowerCase();
     return (!q||hay.includes(q)) && (selectedCategory==='all'||String(a.categoryId)===String(selectedCategory));
-  });
+  }).map(a=>({...a,_type:'normal'}));
+
+  /* Premium Creatives are merged into the same grid as normal ads — shown next
+     to each other, not in a separate listing. */
+  const pcArr=activePremiumCreatives().filter(b=>{
+    const category=state.categories.find(c=>String(c.id)===String(b.categoryId))?.name||'Other';
+    const hay=[b.businessName,b.adId,buildAddress(b),category].join(' ').toLowerCase();
+    return (!q||hay.includes(q)) && (selectedCategory==='all'||String(b.categoryId)===String(selectedCategory));
+  }).map(b=>({...b,_type:'premiumcreative'}));
+
+  const arr=[...normalArr,...pcArr].sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
 
   const grid=document.getElementById('adsGrid');
   if(!arr.length){
@@ -603,6 +697,7 @@ function renderAds(){
   }
 
   grid.innerHTML=arr.map(a=>{
+    if(a._type==='premiumcreative')return pcCardMarkup(a);
     const cat=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
     const phone=(a.phone||'').replace(/\s/g,'');
     const wa=(a.whatsapp||'').replace(/\D/g,'');
@@ -658,39 +753,6 @@ function viewAd(id){
   document.getElementById('modalBackdrop').classList.add('show');
 }
 
-function viewPremiumBanner(id){
-  const b=activePremiumBanners().find(x=>x.id===id);
-  if(!b)return;
-  const cat=state.categories.find(c=>String(c.id)===String(b.categoryId))?.name||'Other';
-  document.getElementById('modalTitle').textContent=b.businessName||'Premium Advertisement';
-  document.getElementById('modalContent').innerHTML=`
-    <div class="pc-shared-banner" style="position:relative">
-      <img class="premium-banner-img" style="width:100%;max-height:420px;object-fit:cover;border-radius:12px" src="${esc(b.imageData)}" alt="${esc(b.businessName||'Premium advertisement')}">
-      <span class="premium-banner-label">PREMIUM</span>
-    </div>
-    <div style="margin-top:15px;font-size:13px">
-      <b>Ad ID:</b> ${esc(b.adId||'Adspool Ad')}<br>
-      <b>Business:</b> ${esc(b.businessName||'')}<br>
-      <b>Category:</b> ${esc(cat)}
-    </div>
-    <div class="ad-actions" style="margin-top:15px">
-      <button class="btn primary" onclick="sharePremiumBanner('${esc(b.id)}')">Share</button>
-    </div>
-    <div class="modal-note">Adspool displays premium advertisements that are currently active in the Adspool system.</div>`;
-  document.getElementById('modalBackdrop').classList.add('show');
-}
-
-function sharePremiumBanner(id){
-  const b=activePremiumBanners().find(x=>x.id===id);
-  if(!b)return;
-  const u=new URL(window.location.href);
-  u.searchParams.set('premium',b.id);
-  const message=`${b.businessName} — Premium Ad on Adspool: ${u.href}`;
-  if(navigator.share)navigator.share({title:`${b.businessName} — Premium Ad on Adspool`,text:message,url:u.href}).catch(()=>{});
-  else if(navigator.clipboard)navigator.clipboard.writeText(message).then(()=>showToast('Premium ad link copied to clipboard.')).catch(()=>prompt('Copy this Adspool premium ad link:',message));
-  else prompt('Copy this Adspool premium ad link:',message);
-}
-
 function closeModal(){document.getElementById('modalBackdrop').classList.remove('show')}
 
 setInterval(()=>{
@@ -700,23 +762,17 @@ setInterval(()=>{
 },30000);
 
 window.addEventListener('storage',e=>{
-  if(e.key===STORAGE||e.key==='adspool_premium_banners_v1')load();
+  if(e.key===STORAGE||e.key==='adspool_premium_banners_v1'||e.key==='adspool_premium_creatives_v1')load();
 });
-window.addEventListener('focus',()=>{loadPremiumBanners();renderPremiumBanner();});
+window.addEventListener('focus',()=>{loadPremiumBanners();renderPremiumBanner();loadPremiumCreatives();renderAds();});
 
 function openSharedAd(){
   const id=new URLSearchParams(window.location.search).get('ad');
   if(id){setTimeout(()=>{if(activeAds().some(a=>a.id===id))viewAd(id)},150)}
 }
 
-function openSharedPremium(){
-  const id=new URLSearchParams(window.location.search).get('premium');
-  if(id){setTimeout(()=>{if(activePremiumBanners().some(b=>b.id===id))viewPremiumBanner(id)},180)}
-}
-
 load();
 openSharedAd();
-openSharedPremium();
 
 /* Show the sticky search bar once the hero's own search box has scrolled
    out of view under the fixed header; hide it again once back at top. */
