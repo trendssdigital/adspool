@@ -490,13 +490,13 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
   <p class="sub">Upload finished premium creatives and control where and when they appear.</p>
 
   <div class="panel">
-    <h2>Upload Premium Banner</h2>
+    <h2 id="premiumFormTitle">Upload Premium Banner</h2>
     <div class="formgrid">
 
       <div class="field">
-        <label>Banner Creative *</label>
+        <label id="premiumImageLabel">Banner Creative *</label>
         <input id="premiumImage" type="file" accept="image/jpeg,image/png,image/webp">
-        <div class="banner-note">Recommended: <strong>1920 × 400 px</strong> (4.8:1). Create the artwork separately; this portal is only for uploading and scheduling it.</div>
+        <div class="banner-note" id="premiumImageNote">Recommended: <strong>1920 × 400 px</strong> (4.8:1). Create the artwork separately; this portal is only for uploading and scheduling it.</div>
       </div>
 
       <div class="field">
@@ -529,8 +529,9 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
     </div>
 
     <div class="actions">
+      <button class="btn" id="premiumCancelEditBtn" onclick="clearPremiumForm()" style="display:none">Cancel Edit</button>
       <button class="btn" onclick="clearPremiumForm()">Clear</button>
-      <button class="btn primary" onclick="savePremiumBanner()">Upload & Schedule</button>
+      <button class="btn primary" id="premiumSubmitBtn" onclick="savePremiumBanner()">Upload & Schedule</button>
     </div>
   </div>
 
@@ -609,6 +610,7 @@ sortCategories();
 
 let premiumBanners=[];
 let editingId=null;
+let editingPremiumId=null;
 let selectedTemplateId=1;
 let publicCategory='all';
 
@@ -1136,7 +1138,15 @@ function setPremiumDefaultDates(){
 function clearPremiumForm(){
   ['premiumImage','premiumBusiness','premiumCategory'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('premiumPreview').innerHTML=`<div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:10px">Choose a banner to preview it here.</div>`;
+  document.getElementById('premiumStart').value='';
+  document.getElementById('premiumEnd').value='';
   setPremiumDefaultDates();
+  editingPremiumId=null;
+  document.getElementById('premiumFormTitle').textContent='Upload Premium Banner';
+  document.getElementById('premiumImageLabel').textContent='Banner Creative *';
+  document.getElementById('premiumImageNote').innerHTML='Recommended: <strong>1920 × 400 px</strong> (4.8:1). Create the artwork separately; this portal is only for uploading and scheduling it.';
+  document.getElementById('premiumSubmitBtn').textContent='Upload & Schedule';
+  document.getElementById('premiumCancelEditBtn').style.display='none';
 }
 
 document.getElementById('premiumImage').addEventListener('change',function(){
@@ -1156,12 +1166,30 @@ async function savePremiumBanner(){
   const s=document.getElementById('premiumStart').value;
   const e=document.getElementById('premiumEnd').value;
 
-  if(!f||!name||!cat||!s||!e){ showToast('Complete all premium banner fields.'); return; }
-  if(!['image/jpeg','image/png','image/webp'].includes(f.type)){ showToast('Use JPG, PNG or WebP.'); return; }
-  if(f.size>2*1024*1024){ showToast('Keep banner below 2 MB.'); return; }
+  const editing=editingPremiumId?premiumBanners.find(b=>b.id===editingPremiumId):null;
+
+  if(!name||!cat||!s||!e||(!editing&&!f)){ showToast('Complete all premium banner fields.'); return; }
+  if(f){
+    if(!['image/jpeg','image/png','image/webp'].includes(f.type)){ showToast('Use JPG, PNG or WebP.'); return; }
+    if(f.size>2*1024*1024){ showToast('Keep banner below 2 MB.'); return; }
+  }
   if(new Date(e)<=new Date(s)){ showToast('Expiry must be after start.'); return; }
 
-  const imageData=await fileData(f);
+  const imageData=f?await fileData(f):editing.imageData;
+
+  if(editing){
+    editing.businessName=name;
+    editing.categoryId=cat;
+    editing.imageData=imageData;
+    editing.startAt=new Date(s).toISOString();
+    editing.endAt=new Date(e).toISOString();
+    refreshPremiumStatus(editing);
+    localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));
+    clearPremiumForm();
+    renderPremiumAdmin();
+    showToast('Premium banner updated successfully.');
+    return;
+  }
 
   premiumBanners.unshift({
     id:'PB-'+Date.now(),
@@ -1199,6 +1227,7 @@ function renderPremiumAdmin(){
         </div>
         <div class="banner-actions">
           <button class="btn small" onclick="previewBanner('${b.id}')">Preview</button>
+          <button class="btn small" onclick="editBanner('${b.id}')">Edit</button>
           <button class="btn small danger" onclick="deleteBanner('${b.id}')">Delete</button>
         </div>
       </div>
@@ -1213,10 +1242,36 @@ function previewBanner(id){
   showView('premium-banners');
 }
 
+function toLocalInputFromISO(iso){
+  const d=new Date(iso);
+  return toLocalInput(d);
+}
+
+function editBanner(id){
+  const b=premiumBanners.find(x=>x.id===id);
+  if(!b)return;
+  editingPremiumId=id;
+  premiumCategories();
+  document.getElementById('premiumImage').value='';
+  document.getElementById('premiumBusiness').value=b.businessName;
+  document.getElementById('premiumCategory').value=b.categoryId;
+  document.getElementById('premiumStart').value=toLocalInputFromISO(b.startAt);
+  document.getElementById('premiumEnd').value=toLocalInputFromISO(b.endAt);
+  document.getElementById('premiumPreview').innerHTML=`<img class="banner-preview" src="${esc(b.imageData)}" alt="${esc(b.businessName)}">`;
+  document.getElementById('premiumFormTitle').textContent='Edit Premium Banner';
+  document.getElementById('premiumImageLabel').textContent='Banner Creative (leave empty to keep current)';
+  document.getElementById('premiumImageNote').textContent='Upload a new file only if you want to replace the current creative.';
+  document.getElementById('premiumSubmitBtn').textContent='Save Changes';
+  document.getElementById('premiumCancelEditBtn').style.display='';
+  showView('premium-banners');
+  document.getElementById('premium-banners').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
 function deleteBanner(id){
   if(confirm('Delete this premium banner?')){
     premiumBanners=premiumBanners.filter(b=>b.id!==id);
     localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));
+    if(editingPremiumId===id)clearPremiumForm();
     renderPremiumAdmin();
   }
 }
