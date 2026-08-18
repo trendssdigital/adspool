@@ -236,8 +236,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 .premium-section{margin-top:26px;margin-bottom:28px}
 .premium-banner-wrap{position:relative;width:100%;overflow:hidden;border-radius:16px;background:var(--forest-deep);border:1px solid var(--border)}
 .premium-banner-img{display:block;width:100%;aspect-ratio:4.8/1;object-fit:cover}
-.premium-banner-label{position:absolute;left:12px;top:12px;background:var(--gold);color:var(--forest-deep);padding:5px 9px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700}
-.premium-banner-business{position:absolute;left:14px;bottom:12px;background:rgba(5,42,30,.75);color:#fff;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700}
+.premium-banner-label{position:absolute;left:12px;top:12px;background:var(--gold);color:#fff;padding:5px 9px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700}
 
 @media(max-width:1000px){
   .cards{grid-template-columns:repeat(3,1fr)}
@@ -1411,11 +1410,9 @@ function renderAdminPublicPremium(){
   if(!arr.length){ section.style.display='none'; wrap.innerHTML=''; return; }
 
   const b=arr[Math.floor(Math.random()*arr.length)];
-  const cat=state.categories.find(c=>String(c.id)===String(b.categoryId))?.name||'Other';
 
   wrap.innerHTML=`<img class="premium-banner-img" src="${esc(b.imageData)}" alt="${esc(b.businessName)}">
-    <span class="premium-banner-label">PREMIUM</span>
-    <span class="premium-banner-business">${esc(b.businessName)} · ${esc(cat)}</span>`;
+    <span class="premium-banner-label">PREMIUM</span>`;
 
   section.style.display='block';
 }
