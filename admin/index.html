@@ -373,7 +373,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 
   <div class="createtabs">
     <button type="button" class="createtab active" data-tab="normal" onclick="switchCreateTab('normal')"><span class="tag">1</span>Normal Ads</button>
-    <button type="button" class="createtab" data-tab="premium" onclick="switchCreateTab('premium')"><span class="tag">2</span>Premium Ads</button>
+    <button type="button" class="createtab" data-tab="premium" onclick="switchCreateTab('premium')"><span class="tag">2</span>Premium Banners</button>
   </div>
 
   <div id="tabNormalAds" class="createtabpanel active">
@@ -387,7 +387,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
             <label class="modeOption"><input type="radio" name="normalMode" value="common" checked onchange="switchNormalMode('common')">Common</label>
             <label class="modeOption"><input type="radio" name="normalMode" value="creative" onchange="switchNormalMode('creative')">Creative</label>
           </div>
-          <span class="hint">Common builds the ad from the fields below using one of our templates. Creative lets you upload your own ready-made banner design instead.</span>
+          <span class="hint" id="normalModeHint">Common builds the ad from the fields below using one of our templates.</span>
         </div>
 
         <div class="field full" id="fieldCreativeUpload" style="display:none">
@@ -747,6 +747,9 @@ function setNormalMode(mode){
   document.getElementById('fieldTemplate').style.display=mode==='creative'?'none':'';
   document.getElementById('fieldServices').style.display=mode==='creative'?'none':'';
   document.getElementById('fieldBgColor').style.display=mode==='creative'?'none':'';
+  document.getElementById('normalModeHint').textContent=mode==='creative'?
+    'Creative lets you upload your own ready-made banner design instead.':
+    'Common builds the ad from the fields below using one of our templates.';
 }
 
 function switchNormalMode(mode){
