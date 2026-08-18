@@ -134,8 +134,7 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 .premium-section{margin-bottom:30px}
 .premium-banner-wrap{position:relative;width:100%;overflow:hidden;border-radius:16px;background:var(--forest-deep);border:1px solid var(--border)}
 .premium-banner-img{display:block;width:100%;aspect-ratio:4.8/1;object-fit:cover}
-.premium-banner-label{position:absolute;left:14px;top:14px;background:var(--gold);color:var(--forest-deep);padding:5px 10px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em}
-.premium-banner-business{position:absolute;left:14px;bottom:14px;background:rgba(5,42,30,.78);color:#fff;padding:8px 12px;border-radius:8px;font-size:12.5px;font-weight:700}
+.premium-banner-label{position:absolute;left:14px;top:14px;background:var(--gold);color:#fff;padding:5px 10px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em}
 .premium-banner-controls{display:flex;justify-content:space-between;align-items:center;margin-top:9px}
 .premium-banner-dots{display:flex;gap:5px}
 .premium-dot{width:7px;height:7px;border-radius:50%;background:var(--border-strong)}
@@ -557,7 +556,6 @@ function renderPremiumBanner(){
   }
   if(premiumIndex>=arr.length)premiumIndex=0;
   const b=arr[premiumIndex];
-  const cat=state.categories.find(c=>String(c.id)===String(b.categoryId))?.name||'Other';
   section.style.display='block';
   const arrows=arr.length>1?`
     <button type="button" class="premium-banner-arrow prev" aria-label="Previous banner" onclick="premiumPrev()">
@@ -568,7 +566,6 @@ function renderPremiumBanner(){
     </button>`:'';
   wrap.innerHTML=`<img class="premium-banner-img" src="${esc(b.imageData)}" alt="${esc(b.businessName)} premium banner">
     <span class="premium-banner-label">PREMIUM</span>
-    <span class="premium-banner-business">${esc(b.businessName)} · ${esc(cat)}</span>
     ${arrows}`;
   dots.innerHTML=arr.map((x,i)=>`<span class="premium-dot ${i===premiumIndex?'active':''}"></span>`).join('');
   meta.textContent=`${premiumIndex+1} of ${arr.length}`;
