@@ -467,6 +467,84 @@ function mapPremiumRow(r){
     startAt:r.start_at,endAt:r.end_at,status:r.status||'scheduled',createdAt:r.created_at,updatedAt:r.updated_at};
 }
 
+function activePremiumBanners(){
+  const now=Date.now();
+  return premiumBanners.filter(b=>{
+    const start=Date.parse(b.startAt), end=Date.parse(b.endAt);
+    const active = b.status==='active' || (Number.isFinite(start) && Number.isFinite(end) && now>=start && now<=end);
+    if(active) b.status='active';
+    return active;
+  });
+}
+
+function currentPremiumArr(){
+  return activePremiumBanners().filter(b=>
+    selectedCategory==='all' || String(b.categoryId)===String(selectedCategory)
+  );
+}
+
+function renderPremiumBanner(){
+  const section=document.getElementById('premiumSection');
+  const wrap=document.getElementById('premiumBannerWrap');
+  const dots=document.getElementById('premiumBannerDots');
+  const meta=document.getElementById('premiumBannerMeta');
+  if(!section||!wrap)return;
+
+  const arr=currentPremiumArr();
+
+  if(!arr.length){
+    section.style.display='none';
+    wrap.innerHTML='';
+    if(dots)dots.innerHTML='';
+    if(meta)meta.textContent='';
+    if(premiumTimer){clearInterval(premiumTimer);premiumTimer=null;}
+    return;
+  }
+
+  if(premiumIndex>=arr.length)premiumIndex=0;
+
+  const b=arr[premiumIndex];
+  section.style.display='block';
+
+  const arrows=arr.length>1?`
+    <button type="button" class="premium-banner-arrow prev" aria-label="Previous banner" onclick="premiumPrev()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <button type="button" class="premium-banner-arrow next" aria-label="Next banner" onclick="premiumNext()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>`:'';
+
+  wrap.innerHTML=`
+    <img class="premium-banner-img" src="${esc(b.imageData||'')}" alt="Premium banner">
+    <span class="premium-banner-label">PREMIUM</span>
+    ${arrows}`;
+
+  if(dots)dots.innerHTML=arr.map((x,i)=>`<span class="premium-dot ${i===premiumIndex?'active':''}"></span>`).join('');
+  if(meta)meta.textContent=`${premiumIndex+1} of ${arr.length}`;
+
+  if(premiumTimer)clearInterval(premiumTimer);
+  premiumTimer=arr.length>1?setInterval(()=>{
+    const current=currentPremiumArr();
+    if(!current.length){renderPremiumBanner();return;}
+    premiumIndex=(premiumIndex+1)%current.length;
+    renderPremiumBanner();
+  },5000):null;
+}
+
+function premiumNext(){
+  const arr=currentPremiumArr();
+  if(!arr.length)return;
+  premiumIndex=(premiumIndex+1)%arr.length;
+  renderPremiumBanner();
+}
+
+function premiumPrev(){
+  const arr=currentPremiumArr();
+  if(!arr.length)return;
+  premiumIndex=(premiumIndex-1+arr.length)%arr.length;
+  renderPremiumBanner();
+}
+
 function updateStats(){
   const total=activeAds().length;
   const cats=state.categories.filter(c=>c.active).length;
