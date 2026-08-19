@@ -671,10 +671,9 @@ function mapAdRow(r){
 }
 
 async function load(){
-  try{ premiumBanners=JSON.parse(localStorage.getItem(PREMIUM_STORAGE))||[]; }catch(e){ premiumBanners=[]; }
-
   await loadCategoriesFromSupabase();
   await loadAdsFromSupabase();
+  await loadPremiumBannersFromSupabase();
 
   normalize();
   premiumBanners.forEach(refreshPremiumStatus);
@@ -723,8 +722,38 @@ function normalize(){
   sortCategories();
 }
 
-/* Ads and categories are now persisted in Supabase. Premium banners remain local until Step 4. */
+/* Categories, Ads and Premium Banners are persisted in Supabase. */
 function persist(){}
+
+function mapPremiumRow(r){
+  return {
+    id:r.id,
+    businessName:r.business_name,
+    categoryId:Number(r.category_id),
+    imageData:r.image_url,
+    startAt:r.start_at,
+    endAt:r.end_at,
+    status:r.status||'scheduled',
+    createdAt:r.created_at,
+    updatedAt:r.updated_at
+  };
+}
+
+async function loadPremiumBannersFromSupabase(){
+  const {data,error}=await supabaseClient
+    .from('premium_banners')
+    .select('*')
+    .order('created_at',{ascending:false});
+
+  if(error){
+    console.error('Premium banners load error:',error);
+    showToast('Could not load premium banners: '+error.message);
+    premiumBanners=[];
+    return;
+  }
+
+  premiumBanners=(data||[]).map(mapPremiumRow);
+}
 
 function contrast(hex){
   hex=(hex||'#ffffff').replace('#','');
@@ -1396,50 +1425,91 @@ async function savePremiumBanner(){
   const s=document.getElementById('premiumStart').value;
   const e=document.getElementById('premiumEnd').value;
 
-  const editing=editingPremiumId?premiumBanners.find(b=>b.id===editingPremiumId):null;
+  const editing=editingPremiumId?premiumBanners.find(b=>String(b.id)===String(editingPremiumId)):null;
 
-  if(!name||!cat||!s||!e||(!editing&&!f)){ showToast('Complete all premium banner fields.'); return; }
-  if(f){
-    if(!['image/jpeg','image/png','image/webp'].includes(f.type)){ showToast('Use JPG, PNG or WebP.'); return; }
-    if(f.size>2*1024*1024){ showToast('Keep banner below 2 MB.'); return; }
-  }
-  if(new Date(e)<=new Date(s)){ showToast('Expiry must be after start.'); return; }
-
-  const imageData=f?await fileData(f):editing.imageData;
-
-  if(editing){
-    editing.businessName=name;
-    editing.categoryId=cat;
-    editing.imageData=imageData;
-    editing.startAt=new Date(s).toISOString();
-    editing.endAt=new Date(e).toISOString();
-    refreshPremiumStatus(editing);
-    localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));
-    clearPremiumForm();
-    renderPremiumAdmin();
-    showToast('Premium banner updated successfully.');
+  if(!name||!cat||!s||!e||(!editing&&!f)){
+    showToast('Complete all premium banner fields.');
     return;
   }
 
-  premiumBanners.unshift({
-    id:'PB-'+Date.now(),
-    businessName:name,
-    categoryId:cat,
-    imageData,
-    startAt:new Date(s).toISOString(),
-    endAt:new Date(e).toISOString(),
-    status:'scheduled'
-  });
+  if(f){
+    if(!['image/jpeg','image/png','image/webp'].includes(f.type)){
+      showToast('Use JPG, PNG or WebP.');
+      return;
+    }
+    if(f.size>2*1024*1024){
+      showToast('Keep banner below 2 MB.');
+      return;
+    }
+  }
 
-  localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));
+  if(new Date(e)<=new Date(s)){
+    showToast('Expiry must be after start.');
+    return;
+  }
+
+  const imageData=f?await fileData(f):(editing?editing.imageData:'');
+  const startAt=new Date(s).toISOString();
+  const endAt=new Date(e).toISOString();
+  const status=new Date(startAt)>new Date()? 'scheduled' : (new Date(endAt)>=new Date()?'active':'expired');
+
+  let error=null;
+
+  if(editing){
+    const payload={
+      business_name:name,
+      category_id:Number(cat),
+      image_url:imageData,
+      start_at:startAt,
+      end_at:endAt,
+      status,
+      updated_at:new Date().toISOString()
+    };
+
+    const result=await supabaseClient
+      .from('premium_banners')
+      .update(payload)
+      .eq('id',editing.id)
+      .select('*')
+      .single();
+
+    error=result.error;
+  }else{
+    const payload={
+      business_name:name,
+      category_id:Number(cat),
+      image_url:imageData,
+      start_at:startAt,
+      end_at:endAt,
+      status,
+      updated_at:new Date().toISOString()
+    };
+
+    const result=await supabaseClient
+      .from('premium_banners')
+      .insert(payload)
+      .select('*')
+      .single();
+
+    error=result.error;
+  }
+
+  if(error){
+    console.error('Save premium banner error:',error);
+    showToast('Could not save premium banner: '+error.message);
+    return;
+  }
+
+  editingPremiumId=null;
+  await loadPremiumBannersFromSupabase();
   clearPremiumForm();
   renderPremiumAdmin();
-  showToast('Premium banner uploaded successfully.');
+  renderAdminPublicPremium();
+  showToast(editing?'Premium banner updated successfully.':'Premium banner uploaded successfully.');
 }
 
 function renderPremiumAdmin(){
   premiumBanners.forEach(refreshPremiumStatus);
-  localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));
   const filter=document.getElementById('premiumFilter').value;
   const arr=premiumBanners.filter(b=>filter==='all'||b.status===filter);
 
@@ -1497,13 +1567,25 @@ function editBanner(id){
   document.getElementById('tabPremiumAds').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-function deleteBanner(id){
-  if(confirm('Delete this premium banner?')){
-    premiumBanners=premiumBanners.filter(b=>b.id!==id);
-    localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));
-    if(editingPremiumId===id)clearPremiumForm();
-    renderPremiumAdmin();
+async function deleteBanner(id){
+  if(!confirm('Delete this premium banner?'))return;
+
+  const {error}=await supabaseClient
+    .from('premium_banners')
+    .delete()
+    .eq('id',id);
+
+  if(error){
+    console.error('Delete premium banner error:',error);
+    showToast('Could not delete premium banner: '+error.message);
+    return;
   }
+
+  if(editingPremiumId===id)clearPremiumForm();
+  await loadPremiumBannersFromSupabase();
+  renderPremiumAdmin();
+  renderAdminPublicPremium();
+  showToast('Premium banner deleted.');
 }
 
 /* PREMIUM PUBLIC DISPLAY */
@@ -1512,7 +1594,6 @@ function renderAdminPublicPremium(){
   const wrap=document.getElementById('adminPublicPremiumWrap');
   if(!section||!wrap)return;
 
-  try{ premiumBanners=JSON.parse(localStorage.getItem(PREMIUM_STORAGE))||[]; }catch(e){ premiumBanners=[]; }
   premiumBanners.forEach(refreshPremiumStatus);
 
   const arr=premiumBanners.filter(b=>b.status==='active' && (publicCategory==='all'||String(b.categoryId)===String(publicCategory)));
@@ -1545,7 +1626,6 @@ document.getElementById('fCategory').addEventListener('change',updatePreview);
 setInterval(()=>{
   refreshStatuses();
   premiumBanners.forEach(refreshPremiumStatus);
-  localStorage.setItem(PREMIUM_STORAGE,JSON.stringify(premiumBanners));
   renderDashboard();
   if(document.getElementById('tabPremiumAds').classList.contains('active')){
     renderPremiumAdmin();
