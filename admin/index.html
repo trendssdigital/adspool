@@ -639,11 +639,23 @@ function esc(s){
   return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 }
 
-function load(){
-  try{ const x=JSON.parse(localStorage.getItem(STORAGE)); if(x)state=x; }catch(e){}
-  try{ premiumBanners=JSON.parse(localStorage.getItem(PREMIUM_STORAGE))||[]; }catch(e){ premiumBanners=[]; }
+async function load(){
+  // Keep existing localStorage handling temporarily for Ads/Premium.
+  // Categories will now come from Supabase.
+
+  try{
+    premiumBanners =
+      JSON.parse(localStorage.getItem(PREMIUM_STORAGE)) || [];
+  }catch(e){
+    premiumBanners=[];
+  }
+
+  await loadCategoriesFromSupabase();
+
   normalize();
+
   premiumBanners.forEach(refreshPremiumStatus);
+
   renderAll();
   premiumCategories();
   renderPremiumAdmin();
