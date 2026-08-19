@@ -108,16 +108,18 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 .field label{font-size:12px;font-weight:700;color:#495a4d}
 .full{grid-column:1/-1}
 .hint{font-size:11.5px;color:var(--muted)}
+
+.modeToggle{display:flex;gap:10px;flex-wrap:wrap}
+.modeOption{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;border:1.5px solid var(--border-strong);border-radius:9px;padding:9px 14px;background:var(--card)}
+.modeOption input{width:auto;margin:0;accent-color:var(--forest)}
+.modeOption:has(input:checked){border-color:var(--forest);background:var(--gold-soft);color:var(--forest-dark)}
+.creative-preview-img{display:block;width:100%;max-width:400px;border-radius:20px;box-shadow:0 10px 26px rgba(18,32,26,.08)}
+.banner-note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:6px}
 .address-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
 .servicesDynamic{display:flex;flex-direction:column;gap:8px}
 .serviceRow{display:flex;gap:8px}
 .serviceRow input{flex:1;min-width:0}
 .serviceRemove{width:38px;padding:0}
-.modeToggle{display:flex;gap:10px;flex-wrap:wrap}
-.modeOption{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;border:1.5px solid var(--border-strong);border-radius:9px;padding:9px 14px;background:var(--card)}
-.modeOption input{width:auto;margin:0;accent-color:var(--forest)}
-.modeOption:has(input:checked){border-color:var(--forest);background:var(--gold-soft);color:var(--forest-dark)}
-.creative-preview-img{display:block;width:100%;max-width:400px;border-radius:20px;box-shadow:0 10px 26px rgba(18,32,26,.08);object-fit:cover}
 
 .creategrid{display:grid;grid-template-columns:minmax(330px,1fr) minmax(340px,420px);gap:20px;align-items:start}
 .createtabs{display:flex;gap:6px;margin:18px 0 22px;border-bottom:1.5px solid var(--border)}
@@ -393,7 +395,8 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
             <label class="modeOption"><input type="radio" name="normalMode" value="common" checked onchange="switchNormalMode('common')">Common</label>
             <label class="modeOption"><input type="radio" name="normalMode" value="creative" onchange="switchNormalMode('creative')">Creative</label>
           </div>
-          <span class="hint">Common builds the ad from the fields below using one of our templates. Creative lets you upload your own ready-made banner design instead.</span>
+          <span class="hint" id="commonModeHint">Common builds the ad from the fields below using one of our templates.</span>
+          <span class="hint" id="creativeModeHint" style="display:none">Creative lets you upload your own ready-made banner design instead.</span>
         </div>
 
         <div class="field full" id="fieldCreativeUpload" style="display:none">
@@ -626,7 +629,6 @@ const supabaseClient = window.supabase.createClient(
 <script>
 const STORAGE='adspool_mvp_v1';
 const PREMIUM_STORAGE='adspool_premium_banners_v1';
-const CREATIVE_BUCKET='ad-creatives';
 
 const defaultCategories=[
 'Automobile','Lawyers','Doctors & Clinics','Salons & Beauty','Restaurants & Food','Shops & Retail',
@@ -664,6 +666,7 @@ let publicCategory='all';
 let premiumCarouselIndex=0;
 let normalAdMode='common';
 let creativeImageData=null;
+let creativeFile=null;
 
 function esc(s){
   return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -896,10 +899,12 @@ function switchCreateTab(tab){
 function setNormalMode(mode){
   normalAdMode=mode;
   document.querySelectorAll('input[name="normalMode"]').forEach(r=>r.checked=(r.value===mode));
-  document.getElementById('fieldCreativeUpload').style.display=mode==='creative'?'':'';
+  document.getElementById('fieldCreativeUpload').style.display=mode==='creative'?'':'none';
   document.getElementById('fieldTemplate').style.display=mode==='creative'?'none':'';
   document.getElementById('fieldServices').style.display=mode==='creative'?'none':'';
   document.getElementById('fieldBgColor').style.display=mode==='creative'?'none':'';
+  document.getElementById('commonModeHint').style.display=mode==='common'?'':'none';
+  document.getElementById('creativeModeHint').style.display=mode==='creative'?'':'none';
 }
 
 function switchNormalMode(mode){
@@ -910,17 +915,12 @@ function switchNormalMode(mode){
 function handleCreativeImageChange(input){
   const f=input.files[0];
   if(!f)return;
-  if(!['image/jpeg','image/png','image/webp'].includes(f.type)){
-    showToast('Use JPG, PNG or WebP.');
-    input.value='';
-    return;
-  }
-  if(f.size>2*1024*1024){
-    showToast('Keep the creative below 2 MB.');
-    input.value='';
-    return;
-  }
-  fileData(f).then(data=>{ creativeImageData=data; updatePreview(); });
+  if(!['image/jpeg','image/png','image/webp'].includes(f.type)){ showToast('Use JPG, PNG or WebP.'); input.value=''; return; }
+  if(f.size>2*1024*1024){ showToast('Keep the creative below 2 MB.'); input.value=''; return; }
+  creativeFile=f;
+  const r=new FileReader();
+  r.onload=()=>{ creativeImageData=r.result; updatePreview(); };
+  r.readAsDataURL(f);
 }
 
 /* CREATE / EDIT */
@@ -947,14 +947,15 @@ function editAd(id){
   if(!a)return;
   editingId=id;
   selectedTemplateId=a.templateId||1;
-  fillCategorySelects();
-  renderTemplatePicker();
-
   setNormalMode(a.adType==='creative'?'creative':'common');
   creativeImageData=a.creativeImageUrl||null;
-  document.getElementById('fCreativeImage').value='';
-  document.getElementById('creativeImageLabel').textContent='Banner Creative (leave empty to keep current)';
-  document.getElementById('creativeImageNote').textContent='Upload a new file only if you want to replace the current creative.';
+  creativeFile=null;
+  const creativeInput=document.getElementById('fCreativeImage');
+  if(creativeInput)creativeInput.value='';
+  document.getElementById('creativeImageLabel').textContent=a.adType==='creative'?'Banner Creative (leave empty to keep current)':'Banner Creative *';
+  document.getElementById('creativeImageNote').textContent=a.adType==='creative'?'Upload a new file only if you want to replace the current creative.':'Upload your ready-made banner design (JPG, PNG or WebP). It will be shown on the ad exactly as uploaded.';
+  fillCategorySelects();
+  renderTemplatePicker();
 
   document.getElementById('fBusiness').value=a.businessName||'';
   document.getElementById('fCategory').value=a.categoryId;
@@ -997,6 +998,7 @@ function clearForm(){
   document.getElementById('fColor').value='#ffffff';
   document.getElementById('fCreativeImage').value='';
   creativeImageData=null;
+  creativeFile=null;
   document.getElementById('creativeImageLabel').textContent='Banner Creative *';
   document.getElementById('creativeImageNote').textContent='Upload your ready-made banner design (JPG, PNG or WebP). It will be shown on the ad exactly as uploaded.';
   setNormalMode('common');
@@ -1070,14 +1072,10 @@ function mapsUrl(address){
 function adMarkup(a){
   if(a.adType==='creative'){
     const badge=(a.badge||'').trim();
-    const image=a.creativeImageUrl||a.creativeImageData||'';
-    if(!image){
+    if(!a.creativeImageUrl){
       return`<div class="ad-frame"><div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:16px">No creative uploaded</div></div>`;
     }
-    return`<div class="ad-frame">
-      ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
-      <img class="creative-preview-img" src="${esc(image)}" alt="${esc(a.businessName||'Business')}">
-    </div>`;
+    return`<div class="ad-frame">${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}<img class="creative-preview-img" src="${esc(a.creativeImageUrl)}" alt="${esc(a.businessName||'Business')}"></div>`;
   }
   const bg=a.backgroundColor||'#fff';
   const fg=a.textColor||contrast(bg);
@@ -1110,7 +1108,6 @@ function updatePreview(){
     if(tplLabel)tplLabel.textContent='Showing: Custom Creative Upload';
     return;
   }
-
   const bg=document.getElementById('fColor').value;
   const fg=contrast(bg);
   document.getElementById('contrastLabel').textContent='Automatic text: '+(fg==='#fff'?'White':'Black');
@@ -1163,38 +1160,6 @@ function chooseTemplate(id){
   updatePreview();
 }
 
-/* CREATIVE STORAGE */
-function creativeExtension(file){
-  const map={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'};
-  return map[file?.type]||'jpg';
-}
-
-function storagePathFromPublicUrl(url){
-  if(!url)return null;
-  const marker=`/storage/v1/object/public/${CREATIVE_BUCKET}/`;
-  const i=String(url).indexOf(marker);
-  if(i<0)return null;
-  return decodeURIComponent(String(url).slice(i+marker.length).split('?')[0]);
-}
-
-async function uploadCreativeToStorage(file,adId){
-  const ext=creativeExtension(file);
-  const path=`${adId}/${crypto.randomUUID()}.${ext}`;
-  const {error}=await supabaseClient.storage
-    .from(CREATIVE_BUCKET)
-    .upload(path,file,{contentType:file.type,upsert:false,cacheControl:'3600'});
-  if(error)throw error;
-  const {data}=supabaseClient.storage.from(CREATIVE_BUCKET).getPublicUrl(path);
-  return {url:data.publicUrl,path};
-}
-
-async function removeCreativeFromStorage(url){
-  const path=storagePathFromPublicUrl(url);
-  if(!path)return;
-  const {error}=await supabaseClient.storage.from(CREATIVE_BUCKET).remove([path]);
-  if(error)console.warn('Could not remove creative from storage:',error);
-}
-
 /* SAVE AD */
 async function saveAd(mode){
   const business=document.getElementById('fBusiness').value.trim();
@@ -1204,22 +1169,17 @@ async function saveAd(mode){
   const s=document.getElementById('fStart').value;
   const e=document.getElementById('fEnd').value;
   const adType=normalAdMode;
-  const creativeFile=document.getElementById('fCreativeImage').files[0];
   const existingAd=editingId?state.ads.find(a=>a.id===editingId):null;
 
   if(!business){ showToast('Business Name is required.'); return; }
   if(!cat){ showToast('Please select a Category.'); return; }
-
   if(adType==='creative'){
-    if(!creativeFile && !creativeImageData && !(existingAd&&existingAd.creativeImageUrl)){
-      showToast('Please upload a banner creative.'); return;
-    }
+    if(!creativeFile && !creativeImageData && !(existingAd&&existingAd.creativeImageUrl)){ showToast('Please upload a banner creative.'); return; }
     if(creativeFile){
       if(!['image/jpeg','image/png','image/webp'].includes(creativeFile.type)){ showToast('Use JPG, PNG or WebP.'); return; }
       if(creativeFile.size>2*1024*1024){ showToast('Keep the creative below 2 MB.'); return; }
     }
   }
-
   if(!address.addressLine){ showToast('Address Line is required.'); return; }
   if(!address.area){ showToast('Area / Locality is required.'); return; }
   if(!address.pin||address.pin.length!==6){ showToast('PIN / Area Code must be exactly 6 digits.'); return; }
@@ -1227,88 +1187,59 @@ async function saveAd(mode){
   if(!s||!e){ showToast('Start and End Date & Time are required.'); return; }
   if(new Date(e)<=new Date(s)){ showToast('End Date & Time must be after Start Date & Time.'); return; }
 
-  let adId=existingAd?.adId||null;
-  if(!editingId) adId=await generateNextAdId();
-
-  let uploaded=null;
-  let creativeUrl=null;
-  const oldCreativeUrl=existingAd?.creativeImageUrl||null;
-
-  try{
-    if(adType==='creative'){
-      if(creativeFile){
-        uploaded=await uploadCreativeToStorage(creativeFile,adId);
-        creativeUrl=uploaded.url;
-      }else{
-        creativeUrl=oldCreativeUrl||null;
-      }
-    }
-
-    const startAt=new Date(s).toISOString();
-    const endAt=new Date(e).toISOString();
-    const status=mode==='draft'?'draft':calculateStatus(startAt,endAt);
-
-    const payload={
-      business_name:business,
-      category_id:Number(cat),
-      ad_type:adType,
-      services:adType==='creative'?[]:getFormServices(),
-      address_line:address.addressLine,
-      area:address.area,
-      city:address.city,
-      state:address.state,
-      pin:address.pin,
-      phone:phone,
-      whatsapp:document.getElementById('fWhatsapp').value.trim()||null,
-      badge:document.getElementById('fBadge').value.trim()||null,
-      background_color:adType==='creative'?null:document.getElementById('fColor').value,
-      text_color:adType==='creative'?null:contrast(document.getElementById('fColor').value),
-      template_id:adType==='creative'?null:(selectedTemplateId||1),
-      creative_image_url:adType==='creative'?creativeUrl:null,
-      status,
-      start_at:startAt,
-      end_at:endAt,
-      updated_at:new Date().toISOString()
-    };
-
-    let error=null;
-
-    if(editingId){
-      const result=await supabaseClient
-        .from('ads')
-        .update(payload)
-        .eq('id',editingId)
-        .select('*')
-        .single();
-      error=result.error;
-    }else{
-      payload.ad_id=adId;
-      const result=await supabaseClient
-        .from('ads')
-        .insert(payload)
-        .select('*')
-        .single();
-      error=result.error;
-    }
-
-    if(error)throw error;
-
-    // Clean up the previous creative only after the database update succeeds.
-    if(oldCreativeUrl && oldCreativeUrl!==creativeUrl){
-      await removeCreativeFromStorage(oldCreativeUrl);
-    }
-
-    editingId=null;
-    creativeImageData=null;
-    await loadAdsFromSupabase();
-    renderAll();
-    showView('ads');
-    showToast(mode==='draft'?'Draft saved to Supabase.':'Advertisement saved to Supabase.');
-  }catch(error){
-    console.error('Save ad / creative storage error:',error);
-    if(uploaded?.url) await removeCreativeFromStorage(uploaded.url);
-    showToast('Could not save advertisement: '+(error?.message||error));
+  let creativeUrl=adType==='creative'?(existingAd?.creativeImageUrl||null):null;
+  if(adType==='creative' && creativeFile){
+    const ext=creativeFile.name.split('.').pop().toLowerCase();
+    const path=`${await generateNextAdId()}-${Date.now()}.${ext}`;
+    const upload=await supabaseClient.storage.from('ad-creatives').upload(path,creativeFile,{contentType:creativeFile.type,upsert:false});
+    if(upload.error){ console.error('Creative upload error:',upload.error); showToast('Could not upload creative: '+upload.error.message); return; }
+    const pub=supabaseClient.storage.from('ad-creatives').getPublicUrl(path);
+    creativeUrl=pub.data.publicUrl;
   }
+
+  const startAt=new Date(s).toISOString();
+  const endAt=new Date(e).toISOString();
+  const status=mode==='draft'?'draft':calculateStatus(startAt,endAt);
+  const payload={
+    business_name:business,
+    category_id:Number(cat),
+    ad_type:adType,
+    services:adType==='creative'?[]:getFormServices(),
+    address_line:address.addressLine,
+    area:address.area,
+    city:address.city,
+    state:address.state,
+    pin:address.pin,
+    phone:phone,
+    whatsapp:document.getElementById('fWhatsapp').value.trim()||null,
+    badge:document.getElementById('fBadge').value.trim()||null,
+    background_color:adType==='creative'?null:document.getElementById('fColor').value,
+    text_color:adType==='creative'?null:contrast(document.getElementById('fColor').value),
+    template_id:adType==='creative'?null:(selectedTemplateId||1),
+    creative_image_url:creativeUrl,
+    status,
+    start_at:startAt,
+    end_at:endAt,
+    updated_at:new Date().toISOString()
+  };
+
+  let error=null;
+  if(editingId){
+    const result=await supabaseClient.from('ads').update(payload).eq('id',editingId).select('*').single();
+    error=result.error;
+  }else{
+    payload.ad_id=await generateNextAdId();
+    const result=await supabaseClient.from('ads').insert(payload).select('*').single();
+    error=result.error;
+  }
+  if(error){ console.error('Save ad error:',error); showToast('Could not save advertisement: '+error.message); return; }
+  editingId=null;
+  creativeFile=null;
+  creativeImageData=null;
+  await loadAdsFromSupabase();
+  renderAll();
+  showView('ads');
+  showToast(mode==='draft'?'Draft saved to Supabase.':'Advertisement saved to Supabase.');
 }
 
 function calculateStatus(startAt,endAt){
@@ -1395,7 +1326,6 @@ function refreshStatuses(){
 
 async function deleteAd(id){
   if(!confirm('Delete this advertisement?'))return;
-  const ad=state.ads.find(a=>a.id===id);
 
   const {error}=await supabaseClient
     .from('ads')
@@ -1407,8 +1337,6 @@ async function deleteAd(id){
     showToast('Could not delete advertisement: '+error.message);
     return;
   }
-
-  if(ad?.creativeImageUrl) await removeCreativeFromStorage(ad.creativeImageUrl);
 
   await loadAdsFromSupabase();
   renderAll();
