@@ -228,10 +228,16 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 .banner-preview{width:100%;aspect-ratio:4.8/1;object-fit:cover;border-radius:10px;background:var(--paper)}
 
 .premium-section{margin-top:26px;margin-bottom:28px}
-.premium-banner-wrap{position:relative;width:100%;overflow:hidden;border-radius:16px;background:var(--forest-deep);border:1px solid var(--border)}
+.premium-section{margin-top:26px;margin-bottom:28px}
+.premium-banner-carousel{position:relative;display:grid;grid-template-columns:46px minmax(0,1fr) 46px;align-items:center;gap:10px}
+.premium-banner-wrap{position:relative;width:100%;overflow:hidden;border-radius:16px;background:var(--forest-deep);border:1px solid var(--border);min-width:0}
 .premium-banner-img{display:block;width:100%;aspect-ratio:4.8/1;object-fit:cover}
-.premium-banner-label{position:absolute;left:12px;top:12px;background:var(--gold);color:var(--forest-deep);padding:5px 9px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700}
+.premium-banner-label{position:absolute;left:12px;top:12px;background:var(--gold);color:#fff;padding:5px 9px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.35)}
 .premium-banner-business{position:absolute;left:14px;bottom:12px;background:rgba(5,42,30,.75);color:#fff;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700}
+.premium-nav{width:46px;height:46px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--forest-deep);font-size:27px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.10);transition:transform .15s ease,background .15s ease}
+.premium-nav:hover{transform:scale(1.05);background:var(--paper)}
+.premium-nav:disabled{opacity:.35;cursor:default;transform:none}
+.premium-counter{text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px}
 
 @media(max-width:1000px){
   .cards{grid-template-columns:repeat(3,1fr)}
@@ -633,6 +639,7 @@ let editingId=null;
 let editingPremiumId=null;
 let selectedTemplateId=1;
 let publicCategory='all';
+let premiumCarouselIndex=0;
 
 function esc(s){
   return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -1355,7 +1362,7 @@ function renderPublic(){
   const cats=[{id:'all',name:'All Categories'},...state.categories.filter(c=>c.active)];
 
   const chipsHtml=cats.map(c=>
-    `<button class="chip ${publicCategory===String(c.id)?'active':''}" onclick="publicCategory='${String(c.id)}';renderPublic()">${esc(c.name)}</button>`
+    `<button class="chip ${publicCategory===String(c.id)?'active':''}" onclick="publicCategory='${String(c.id)}';premiumCarouselIndex=0;renderPublic()">${esc(c.name)}</button>`
   ).join('');
   document.getElementById('categoryChips').innerHTML=chipsHtml;
   document.getElementById('categoryChipsSticky').innerHTML=chipsHtml;
@@ -1588,7 +1595,7 @@ async function deleteBanner(id){
   showToast('Premium banner deleted.');
 }
 
-/* PREMIUM PUBLIC DISPLAY */
+/* PREMIUM PUBLIC DISPLAY — one banner at a time with navigation */
 function renderAdminPublicPremium(){
   const section=document.getElementById('adminPublicPremium');
   const wrap=document.getElementById('adminPublicPremiumWrap');
@@ -1596,18 +1603,45 @@ function renderAdminPublicPremium(){
 
   premiumBanners.forEach(refreshPremiumStatus);
 
-  const arr=premiumBanners.filter(b=>b.status==='active' && (publicCategory==='all'||String(b.categoryId)===String(publicCategory)));
+  // All Categories shows every active premium banner. A selected category
+  // shows only banners belonging to that category.
+  const arr=premiumBanners.filter(b=>
+    b.status==='active' &&
+    (publicCategory==='all'||String(b.categoryId)===String(publicCategory))
+  );
 
-  if(!arr.length){ section.style.display='none'; wrap.innerHTML=''; return; }
+  if(!arr.length){
+    section.style.display='none';
+    wrap.innerHTML='';
+    premiumCarouselIndex=0;
+    return;
+  }
 
-  const b=arr[Math.floor(Math.random()*arr.length)];
+  if(premiumCarouselIndex>=arr.length)premiumCarouselIndex=0;
+  if(premiumCarouselIndex<0)premiumCarouselIndex=arr.length-1;
+
+  const b=arr[premiumCarouselIndex];
   const cat=state.categories.find(c=>String(c.id)===String(b.categoryId))?.name||'Other';
+  const hasMultiple=arr.length>1;
 
-  wrap.innerHTML=`<img class="premium-banner-img" src="${esc(b.imageData)}" alt="${esc(b.businessName)}">
-    <span class="premium-banner-label">PREMIUM</span>
-    <span class="premium-banner-business">${esc(b.businessName)} · ${esc(cat)}</span>`;
+  wrap.innerHTML=`
+    <div class="premium-banner-carousel">
+      <button class="premium-nav" aria-label="Previous premium banner" onclick="changePremiumBanner(-1)" ${hasMultiple?'':'disabled'}>‹</button>
+      <div class="premium-banner-wrap">
+        <img class="premium-banner-img" src="${esc(b.imageData)}" alt="${esc(b.businessName)}">
+        <span class="premium-banner-label">PREMIUM</span>
+        <span class="premium-banner-business">${esc(b.businessName)} · ${esc(cat)}</span>
+      </div>
+      <button class="premium-nav" aria-label="Next premium banner" onclick="changePremiumBanner(1)" ${hasMultiple?'':'disabled'}>›</button>
+    </div>
+    <div class="premium-counter">${premiumCarouselIndex+1} / ${arr.length}</div>`;
 
   section.style.display='block';
+}
+
+function changePremiumBanner(direction){
+  premiumCarouselIndex+=direction;
+  renderAdminPublicPremium();
 }
 
 /* RENDER ALL */
