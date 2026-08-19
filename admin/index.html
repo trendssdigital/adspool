@@ -114,12 +114,6 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 .serviceRow input{flex:1;min-width:0}
 .serviceRemove{width:38px;padding:0}
 
-.modeToggle{display:flex;gap:10px;flex-wrap:wrap}
-.modeOption{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;border:1.5px solid var(--border-strong);border-radius:9px;padding:9px 14px;background:var(--card)}
-.modeOption input{width:auto;margin:0;accent-color:var(--forest)}
-.modeOption:has(input:checked){border-color:var(--forest);background:var(--gold-soft);color:var(--forest-dark)}
-.creative-preview-img{display:block;width:100%;max-width:400px;border-radius:20px;box-shadow:0 10px 26px rgba(18,32,26,.08)}
-
 .creategrid{display:grid;grid-template-columns:minmax(330px,1fr) minmax(340px,420px);gap:20px;align-items:start}
 .createtabs{display:flex;gap:6px;margin:18px 0 22px;border-bottom:1.5px solid var(--border)}
 .createtab{padding:11px 20px;font-weight:700;font-size:13.5px;color:var(--muted);background:transparent;border:0;border-bottom:2.5px solid transparent;cursor:pointer;margin-bottom:-1.5px;display:flex;align-items:center;gap:7px}
@@ -236,7 +230,8 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 .premium-section{margin-top:26px;margin-bottom:28px}
 .premium-banner-wrap{position:relative;width:100%;overflow:hidden;border-radius:16px;background:var(--forest-deep);border:1px solid var(--border)}
 .premium-banner-img{display:block;width:100%;aspect-ratio:4.8/1;object-fit:cover}
-.premium-banner-label{position:absolute;left:12px;top:12px;background:var(--gold);color:#fff;padding:5px 9px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700}
+.premium-banner-label{position:absolute;left:12px;top:12px;background:var(--gold);color:var(--forest-deep);padding:5px 9px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700}
+.premium-banner-business{position:absolute;left:14px;bottom:12px;background:rgba(5,42,30,.75);color:#fff;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700}
 
 @media(max-width:1000px){
   .cards{grid-template-columns:repeat(3,1fr)}
@@ -380,21 +375,6 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
     <div class="panel">
       <div class="formgrid">
 
-        <div class="field full">
-          <label>Ad Type *</label>
-          <div class="modeToggle">
-            <label class="modeOption"><input type="radio" name="normalMode" value="common" checked onchange="switchNormalMode('common')">Common</label>
-            <label class="modeOption"><input type="radio" name="normalMode" value="creative" onchange="switchNormalMode('creative')">Creative</label>
-          </div>
-          <span class="hint">Common builds the ad from the fields below using one of our templates. Creative lets you upload your own ready-made banner design instead.</span>
-        </div>
-
-        <div class="field full" id="fieldCreativeUpload" style="display:none">
-          <label id="creativeImageLabel">Banner Creative *</label>
-          <input id="fCreativeImage" type="file" accept="image/jpeg,image/png,image/webp" onchange="handleCreativeImageChange(this)">
-          <div class="banner-note" id="creativeImageNote">Upload your ready-made banner design (JPG, PNG or WebP). It will be shown on the ad exactly as uploaded.</div>
-        </div>
-
         <div class="field">
           <label>Business Name *</label>
           <input id="fBusiness" maxlength="80" oninput="updatePreview()">
@@ -405,13 +385,13 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
           <select id="fCategory"></select>
         </div>
 
-        <div class="field full" id="fieldTemplate">
+        <div class="field full">
           <label>Ad Template *</label>
           <div id="templatePicker" class="tplpicker"></div>
           <span class="hint">The highlighted one is auto-suggested for variety — tap any card to pick that look instead.</span>
         </div>
 
-        <div class="field full" id="fieldServices">
+        <div class="field full">
           <label>Services</label>
           <div id="servicesContainer" class="servicesDynamic"></div>
           <button type="button" class="btn small" style="width:max-content;margin-top:8px" onclick="addService()">+ Add Service</button>
@@ -461,7 +441,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
           <span class="hint">Shows as a small round badge on the ad. Leave blank for none.</span>
         </div>
 
-        <div class="field full" id="fieldBgColor">
+        <div class="field full">
           <label>Background Color</label>
           <div class="colorrow">
             <div id="swatches" class="swatches"></div>
@@ -604,6 +584,18 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 
 <div id="toast" class="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = 'https://vezffgjnfsuhrbaqpepu.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'YOUR_SUPABASE_PUBLISHABLE_KEY';
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+</script>
+
 <script>
 const STORAGE='adspool_mvp_v1';
 const PREMIUM_STORAGE='adspool_premium_banners_v1';
@@ -642,8 +634,6 @@ let editingId=null;
 let editingPremiumId=null;
 let selectedTemplateId=1;
 let publicCategory='all';
-let normalAdMode='common';
-let creativeImageData=null;
 
 function esc(s){
   return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -693,22 +683,49 @@ function showToast(t){
   setTimeout(()=>{ e.classList.remove('show') },2200);
 }
 
-/* LOGIN */
-function login(){
+/* LOGIN — Supabase Auth + admin_users authorization */
+async function login(){
   const email=document.getElementById('loginEmail').value.trim();
   const password=document.getElementById('loginPassword').value;
-  if(email==='praveen@adspool.com' && password==='adspool123'){
-    sessionStorage.adspool='1';
-    document.getElementById('loginView').style.display='none';
-    document.getElementById('app').style.display='block';
-    load();
-  }else{
-    document.getElementById('loginError').textContent='Invalid admin credentials.';
+  const errorEl=document.getElementById('loginError');
+
+  errorEl.textContent='';
+
+  if(!email||!password){
+    errorEl.textContent='Please enter email and password.';
+    return;
   }
+
+  const {data,error}=await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if(error){
+    errorEl.textContent=error.message;
+    return;
+  }
+
+  const {data:adminUser,error:adminError}=await supabaseClient
+    .from('admin_users')
+    .select('user_id,email')
+    .eq('user_id',data.user.id)
+    .maybeSingle();
+
+  if(adminError||!adminUser){
+    await supabaseClient.auth.signOut();
+    errorEl.textContent='You are not authorized as an Adspool admin.';
+    return;
+  }
+
+  document.getElementById('loginView').style.display='none';
+  document.getElementById('app').style.display='block';
+  load();
 }
 
-function logout(){
-  sessionStorage.removeItem('adspool');
+async function logout(){
+  await supabaseClient.auth.signOut();
+
   document.getElementById('loginEmail').value='';
   document.getElementById('loginPassword').value='';
   document.getElementById('loginError').textContent='';
@@ -738,29 +755,6 @@ function switchCreateTab(tab){
   if(tab==='premium'){ premiumCategories(); setPremiumDefaultDates(); renderPremiumAdmin(); }
 }
 
-/* NORMAL ADS: Common vs Creative */
-function setNormalMode(mode){
-  normalAdMode=mode;
-  document.querySelectorAll('input[name="normalMode"]').forEach(r=>r.checked=(r.value===mode));
-  document.getElementById('fieldCreativeUpload').style.display=mode==='creative'?'':'none';
-  document.getElementById('fieldTemplate').style.display=mode==='creative'?'none':'';
-  document.getElementById('fieldServices').style.display=mode==='creative'?'none':'';
-  document.getElementById('fieldBgColor').style.display=mode==='creative'?'none':'';
-}
-
-function switchNormalMode(mode){
-  setNormalMode(mode);
-  updatePreview();
-}
-
-function handleCreativeImageChange(input){
-  const f=input.files[0];
-  if(!f)return;
-  if(!['image/jpeg','image/png','image/webp'].includes(f.type)){ showToast('Use JPG, PNG or WebP.'); input.value=''; return; }
-  if(f.size>2*1024*1024){ showToast('Keep the creative below 2 MB.'); input.value=''; return; }
-  fileData(f).then(data=>{ creativeImageData=data; updatePreview(); });
-}
-
 /* CREATE / EDIT */
 function startCreate(){
   editingId=null;
@@ -787,12 +781,6 @@ function editAd(id){
   selectedTemplateId=a.templateId||1;
   fillCategorySelects();
   renderTemplatePicker();
-
-  setNormalMode(a.adType==='creative'?'creative':'common');
-  creativeImageData=a.creativeImageData||null;
-  document.getElementById('fCreativeImage').value='';
-  document.getElementById('creativeImageLabel').textContent='Banner Creative (leave empty to keep current)';
-  document.getElementById('creativeImageNote').textContent='Upload a new file only if you want to replace the current creative.';
 
   document.getElementById('fBusiness').value=a.businessName||'';
   document.getElementById('fCategory').value=a.categoryId;
@@ -833,11 +821,6 @@ function clearForm(){
   document.getElementById('servicesContainer').innerHTML='';
   addService(); addService(); addService();
   document.getElementById('fColor').value='#ffffff';
-  document.getElementById('fCreativeImage').value='';
-  creativeImageData=null;
-  document.getElementById('creativeImageLabel').textContent='Banner Creative *';
-  document.getElementById('creativeImageNote').textContent='Upload your ready-made banner design (JPG, PNG or WebP). It will be shown on the ad exactly as uploaded.';
-  setNormalMode('common');
   setColor('#ffffff');
   const d=new Date();
   const e=new Date(Date.now()+30*86400000);
@@ -906,16 +889,6 @@ function mapsUrl(address){
 
 /* AD MARKUP */
 function adMarkup(a){
-  if(a.adType==='creative'){
-    const badge=(a.badge||'').trim();
-    if(!a.creativeImageData){
-      return`<div class="ad-frame"><div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:16px">No creative uploaded</div></div>`;
-    }
-    return`<div class="ad-frame">
-      ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
-      <img class="creative-preview-img" src="${esc(a.creativeImageData)}" alt="${esc(a.businessName||'Business')}">
-    </div>`;
-  }
   const bg=a.backgroundColor||'#fff';
   const fg=a.textColor||contrast(bg);
   const address=buildAddress(a);
@@ -937,17 +910,6 @@ function adMarkup(a){
 
 /* PREVIEW */
 function updatePreview(){
-  if(normalAdMode==='creative'){
-    const business=document.getElementById('fBusiness').value||'Business Name';
-    const badge=(document.getElementById('fBadge').value||'').trim();
-    document.getElementById('adPreview').innerHTML=creativeImageData?
-      `<div class="ad-frame">${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}<img class="creative-preview-img" src="${creativeImageData}" alt="${esc(business)}"></div>`:
-      `<div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:16px;padding:40px 16px">Choose a banner creative to preview it here.</div>`;
-    const tplLabel=document.getElementById('previewTemplateLabel');
-    if(tplLabel)tplLabel.textContent='Showing: Custom Creative Upload';
-    return;
-  }
-
   const bg=document.getElementById('fColor').value;
   const fg=contrast(bg);
   document.getElementById('contrastLabel').textContent='Automatic text: '+(fg==='#fff'?'White':'Black');
@@ -1001,28 +963,16 @@ function chooseTemplate(id){
 }
 
 /* SAVE AD */
-async function saveAd(mode){
+function saveAd(mode){
   const business=document.getElementById('fBusiness').value.trim();
   const cat=document.getElementById('fCategory').value;
   const address=getAddressData();
   const phone=document.getElementById('fPhone').value.trim();
   const s=document.getElementById('fStart').value;
   const e=document.getElementById('fEnd').value;
-  const adType=normalAdMode;
-  const creativeFile=document.getElementById('fCreativeImage').files[0];
-  const existingAd=editingId?state.ads.find(a=>a.id===editingId):null;
 
   if(!business){ showToast('Business Name is required.'); return; }
   if(!cat){ showToast('Please select a Category.'); return; }
-  if(adType==='creative'){
-    if(!creativeFile && !creativeImageData && !(existingAd&&existingAd.creativeImageData)){
-      showToast('Please upload a banner creative.'); return;
-    }
-    if(creativeFile){
-      if(!['image/jpeg','image/png','image/webp'].includes(creativeFile.type)){ showToast('Use JPG, PNG or WebP.'); return; }
-      if(creativeFile.size>2*1024*1024){ showToast('Keep the creative below 2 MB.'); return; }
-    }
-  }
   if(!address.addressLine){ showToast('Address Line is required.'); return; }
   if(!address.area){ showToast('Area / Locality is required.'); return; }
   if(!address.pin||address.pin.length!==6){ showToast('PIN / Area Code must be exactly 6 digits.'); return; }
@@ -1030,16 +980,10 @@ async function saveAd(mode){
   if(!s||!e){ showToast('Start and End Date & Time are required.'); return; }
   if(new Date(e)<=new Date(s)){ showToast('End Date & Time must be after Start Date & Time.'); return; }
 
-  let creativeData=null;
-  if(adType==='creative'){
-    creativeData=creativeFile?await fileData(creativeFile):(creativeImageData||(existingAd&&existingAd.creativeImageData)||null);
-  }
-
   const data={
     businessName:business,
     categoryId:Number(cat),
-    adType,
-    services:adType==='creative'?[]:getFormServices(),
+    services:getFormServices(),
     addressLine:address.addressLine,
     area:address.area,
     city:address.city,
@@ -1048,10 +992,9 @@ async function saveAd(mode){
     phone:phone,
     whatsapp:document.getElementById('fWhatsapp').value.trim(),
     badge:document.getElementById('fBadge').value.trim(),
-    backgroundColor:adType==='creative'?null:document.getElementById('fColor').value,
-    textColor:adType==='creative'?null:contrast(document.getElementById('fColor').value),
-    templateId:adType==='creative'?null:(selectedTemplateId||1),
-    creativeImageData:adType==='creative'?creativeData:null,
+    backgroundColor:document.getElementById('fColor').value,
+    textColor:contrast(document.getElementById('fColor').value),
+    templateId:selectedTemplateId||1,
     startAt:new Date(s).toISOString(),
     endAt:new Date(e).toISOString()
   };
@@ -1410,9 +1353,11 @@ function renderAdminPublicPremium(){
   if(!arr.length){ section.style.display='none'; wrap.innerHTML=''; return; }
 
   const b=arr[Math.floor(Math.random()*arr.length)];
+  const cat=state.categories.find(c=>String(c.id)===String(b.categoryId))?.name||'Other';
 
   wrap.innerHTML=`<img class="premium-banner-img" src="${esc(b.imageData)}" alt="${esc(b.businessName)}">
-    <span class="premium-banner-label">PREMIUM</span>`;
+    <span class="premium-banner-label">PREMIUM</span>
+    <span class="premium-banner-business">${esc(b.businessName)} · ${esc(cat)}</span>`;
 
   section.style.display='block';
 }
@@ -1445,6 +1390,26 @@ document.getElementById('loginEmail').value='';
 document.getElementById('loginPassword').value='';
 document.getElementById('loginView').style.display='flex';
 document.getElementById('app').style.display='none';
+
+/* Restore an existing Supabase session only if the user is still an admin. */
+(async function restoreSession(){
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  if(!session)return;
+
+  const {data:adminUser}=await supabaseClient
+    .from('admin_users')
+    .select('user_id,email')
+    .eq('user_id',session.user.id)
+    .maybeSingle();
+
+  if(adminUser){
+    document.getElementById('loginView').style.display='none';
+    document.getElementById('app').style.display='block';
+    load();
+  }else{
+    await supabaseClient.auth.signOut();
+  }
+})();
 
 /* ADMIN STICKY PREVIEW BAR — only active on the "Public Ads" tab, mirrors
    the sticky search+category behaviour added to the public site so the
