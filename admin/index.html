@@ -627,7 +627,6 @@ let state={
   nextId:1,
   templateCounter:0
 };
-sortCategories();
 
 let premiumBanners=[];
 let editingId=null;
@@ -639,13 +638,43 @@ function esc(s){
   return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 }
 
+function mapCategoryRow(c){
+  return {id:Number(c.id),name:c.name,active:Boolean(c.active),createdAt:c.created_at};
+}
+
+function mapAdRow(r){
+  return {
+    id:r.id,
+    adId:r.ad_id,
+    businessName:r.business_name,
+    categoryId:Number(r.category_id),
+    adType:r.ad_type||'common',
+    services:Array.isArray(r.services)?r.services:[],
+    addressLine:r.address_line,
+    area:r.area,
+    city:r.city,
+    state:r.state,
+    pin:r.pin,
+    phone:r.phone,
+    whatsapp:r.whatsapp||'',
+    badge:r.badge||'',
+    backgroundColor:r.background_color||'#ffffff',
+    textColor:r.text_color||contrast(r.background_color||'#ffffff'),
+    templateId:r.template_id||1,
+    creativeImageUrl:r.creative_image_url||'',
+    status:r.status||'draft',
+    startAt:r.start_at,
+    endAt:r.end_at,
+    createdAt:r.created_at,
+    updatedAt:r.updated_at
+  };
+}
+
 async function load(){
-  // Ads and premium banners remain on localStorage for now.
-  // Categories are now loaded from Supabase and are the source of truth.
-  try{ const x=JSON.parse(localStorage.getItem(STORAGE)); if(x)state=x; }catch(e){}
   try{ premiumBanners=JSON.parse(localStorage.getItem(PREMIUM_STORAGE))||[]; }catch(e){ premiumBanners=[]; }
 
   await loadCategoriesFromSupabase();
+  await loadAdsFromSupabase();
 
   normalize();
   premiumBanners.forEach(refreshPremiumStatus);
@@ -655,34 +684,47 @@ async function load(){
 }
 
 async function loadCategoriesFromSupabase(){
-  const { data, error } = await supabaseClient
+  const {data,error}=await supabaseClient
     .from('categories')
     .select('id,name,active,created_at')
-    .order('id', { ascending: true });
+    .order('id',{ascending:true});
 
   if(error){
-    console.error('Categories load error:', error);
-    showToast('Could not load categories from Supabase.');
+    console.error('Categories load error:',error);
+    showToast('Could not load categories: '+error.message);
     return;
   }
 
-  state.categories = (data || []).map(c => ({
-    id: Number(c.id),
-    name: c.name,
-    active: c.active
-  }));
-
+  state.categories=(data||[]).map(mapCategoryRow);
   sortCategories();
+}
+
+async function loadAdsFromSupabase(){
+  const {data,error}=await supabaseClient
+    .from('ads')
+    .select('*')
+    .order('created_at',{ascending:false});
+
+  if(error){
+    console.error('Ads load error:',error);
+    showToast('Could not load advertisements: '+error.message);
+    state.ads=[];
+    return;
+  }
+
+  state.ads=(data||[]).map(mapAdRow);
+  state.nextId=getNextAdNumber();
 }
 
 function normalize(){
   (state.ads||[]).forEach(refreshStatus);
-  if(!state.nextId)state.nextId=1;
+  if(typeof state.nextId!=='number')state.nextId=getNextAdNumber();
   if(typeof state.templateCounter!=='number')state.templateCounter=0;
   sortCategories();
 }
 
-function persist(){ localStorage.setItem(STORAGE,JSON.stringify(state)); }
+/* Ads and categories are now persisted in Supabase. Premium banners remain local until Step 4. */
+function persist(){}
 
 function contrast(hex){
   hex=(hex||'#ffffff').replace('#','');
@@ -998,7 +1040,7 @@ function chooseTemplate(id){
 }
 
 /* SAVE AD */
-function saveAd(mode){
+async function saveAd(mode){
   const business=document.getElementById('fBusiness').value.trim();
   const cat=document.getElementById('fCategory').value;
   const address=getAddressData();
@@ -1015,46 +1057,94 @@ function saveAd(mode){
   if(!s||!e){ showToast('Start and End Date & Time are required.'); return; }
   if(new Date(e)<=new Date(s)){ showToast('End Date & Time must be after Start Date & Time.'); return; }
 
-  const data={
-    businessName:business,
-    categoryId:Number(cat),
+  const startAt=new Date(s).toISOString();
+  const endAt=new Date(e).toISOString();
+  const status=mode==='draft'?'draft':calculateStatus(startAt,endAt);
+  const payload={
+    business_name:business,
+    category_id:Number(cat),
+    ad_type:'common',
     services:getFormServices(),
-    addressLine:address.addressLine,
+    address_line:address.addressLine,
     area:address.area,
     city:address.city,
     state:address.state,
     pin:address.pin,
     phone:phone,
-    whatsapp:document.getElementById('fWhatsapp').value.trim(),
-    badge:document.getElementById('fBadge').value.trim(),
-    backgroundColor:document.getElementById('fColor').value,
-    textColor:contrast(document.getElementById('fColor').value),
-    templateId:selectedTemplateId||1,
-    startAt:new Date(s).toISOString(),
-    endAt:new Date(e).toISOString()
+    whatsapp:document.getElementById('fWhatsapp').value.trim()||null,
+    badge:document.getElementById('fBadge').value.trim()||null,
+    background_color:document.getElementById('fColor').value,
+    text_color:contrast(document.getElementById('fColor').value),
+    template_id:selectedTemplateId||1,
+    creative_image_url:null,
+    status,
+    start_at:startAt,
+    end_at:endAt,
+    updated_at:new Date().toISOString()
   };
 
+  let error=null;
+
   if(editingId){
-    const existing=state.ads.find(a=>a.id===editingId);
-    Object.assign(existing,data);
-    if(mode==='draft')existing.status='draft';
-    else if(existing.status==='draft'||existing.status==='unpublished')refreshStatus(existing);
+    const result=await supabaseClient
+      .from('ads')
+      .update(payload)
+      .eq('id',editingId)
+      .select('*')
+      .single();
+    error=result.error;
   }else{
-    state.templateCounter++;
-    state.ads.unshift({
-      id:crypto.randomUUID(),
-      adId:'ADS-'+String(state.nextId++).padStart(6,'0'),
-      ...data,
-      status:mode==='draft'?'draft':'published',
-      createdAt:new Date().toISOString()
-    });
+    payload.ad_id=await generateNextAdId();
+    const result=await supabaseClient
+      .from('ads')
+      .insert(payload)
+      .select('*')
+      .single();
+    error=result.error;
+  }
+
+  if(error){
+    console.error('Save ad error:',error);
+    showToast('Could not save advertisement: '+error.message);
+    return;
   }
 
   editingId=null;
-  persist();
+  await loadAdsFromSupabase();
   renderAll();
   showView('ads');
-  showToast(mode==='draft'?'Draft saved.':'Advertisement published.');
+  showToast(mode==='draft'?'Draft saved to Supabase.':'Advertisement saved to Supabase.');
+}
+
+function calculateStatus(startAt,endAt){
+  const s=Date.parse(startAt),e=Date.parse(endAt),n=Date.now();
+  if(Number.isNaN(s)||Number.isNaN(e))return'published';
+  return n<s?'scheduled':n<=e?'published':'expired';
+}
+
+function getNextAdNumber(){
+  let max=0;
+  (state.ads||[]).forEach(a=>{
+    const m=String(a.adId||'').match(/^ADS-(\d+)$/i);
+    if(m)max=Math.max(max,Number(m[1]));
+  });
+  return max+1;
+}
+
+async function generateNextAdId(){
+  const {data,error}=await supabaseClient
+    .from('ads')
+    .select('ad_id')
+    .order('created_at',{ascending:false});
+  if(error){
+    console.warn('Could not calculate latest Ad ID:',error);
+  }
+  let max=getNextAdNumber();
+  (data||[]).forEach(a=>{
+    const m=String(a.ad_id||'').match(/^ADS-(\d+)$/i);
+    if(m)max=Math.max(max,Number(m[1])+1);
+  });
+  return'ADS-'+String(max).padStart(6,'0');
 }
 
 /* ADS */
@@ -1101,14 +1191,30 @@ function clearAdFilters(){
   renderAdsTable();
 }
 
-function refreshStatuses(){ state.ads.forEach(refreshStatus); persist(); }
+function refreshStatuses(){
+  state.ads.forEach(a=>{
+    if(a.status==='unpublished'||a.status==='draft')return;
+    a.status=calculateStatus(a.startAt,a.endAt);
+  });
+}
 
-function deleteAd(id){
-  if(confirm('Delete this advertisement?')){
-    state.ads=state.ads.filter(a=>a.id!==id);
-    persist();
-    renderAll();
+async function deleteAd(id){
+  if(!confirm('Delete this advertisement?'))return;
+
+  const {error}=await supabaseClient
+    .from('ads')
+    .delete()
+    .eq('id',id);
+
+  if(error){
+    console.error('Delete ad error:',error);
+    showToast('Could not delete advertisement: '+error.message);
+    return;
   }
+
+  await loadAdsFromSupabase();
+  renderAll();
+  showToast('Advertisement deleted.');
 }
 
 /* DASHBOARD */
@@ -1158,64 +1264,41 @@ function sortCategories(){
 async function addCategory(){
   const input=document.getElementById('newCategory');
   const n=input.value.trim();
+  if(!n){showToast('Category name is required.');return;}
 
-  if(!n){
-    showToast('Category name is required.');
-    return;
-  }
+  const duplicate=state.categories.some(c=>String(c.name).trim().toLowerCase()===n.toLowerCase());
+  if(duplicate){showToast('Category already exists.');return;}
 
-  const duplicate=state.categories.some(c =>
-    String(c.name || '').trim().toLowerCase() === n.toLowerCase()
-  );
-
-  if(duplicate){
-    showToast('A category with this name already exists.');
-    return;
-  }
-
-  const { data, error } = await supabaseClient
+  const {error}=await supabaseClient
     .from('categories')
-    .insert({
-      name:n,
-      active:true
-    })
-    .select('id,name,active,created_at')
-    .single();
+    .insert({name:n,active:true});
 
   if(error){
-    console.error('Add category error:', error);
-    showToast('Could not add category: ' + error.message);
+    console.error('Add category error:',error);
+    showToast('Could not add category: '+error.message);
     return;
   }
 
   input.value='';
-
   await loadCategoriesFromSupabase();
   fillCategorySelects();
   premiumCategories();
   renderCategories();
-
-  showToast('Category added successfully.');
+  showToast('Category added.');
 }
 
 async function toggleCategory(id){
-  const category=state.categories.find(c => Number(c.id) === Number(id));
+  const c=state.categories.find(x=>Number(x.id)===Number(id));
+  if(!c){showToast('Category not found.');return;}
 
-  if(!category){
-    showToast('Category not found.');
-    return;
-  }
-
-  const newActive=!category.active;
-
-  const { error } = await supabaseClient
+  const {error}=await supabaseClient
     .from('categories')
-    .update({ active:newActive })
+    .update({active:!c.active})
     .eq('id',id);
 
   if(error){
-    console.error('Toggle category error:', error);
-    showToast('Could not update category: ' + error.message);
+    console.error('Toggle category error:',error);
+    showToast('Could not update category: '+error.message);
     return;
   }
 
@@ -1223,11 +1306,9 @@ async function toggleCategory(id){
   fillCategorySelects();
   premiumCategories();
   renderCategories();
-
-  showToast(newActive ? 'Category activated.' : 'Category deactivated.');
+  showToast(c.active?'Category activated.':'Category deactivated.');
 }
 
-/* PUBLIC */
 function publicActive(){
   refreshStatuses();
   return state.ads.filter(a=>a.status==='published');
