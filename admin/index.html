@@ -229,14 +229,15 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 
 .premium-section{margin-top:26px;margin-bottom:28px}
 .premium-section{margin-top:26px;margin-bottom:28px}
-.premium-banner-carousel{position:relative;display:grid;grid-template-columns:46px minmax(0,1fr) 46px;align-items:center;gap:10px}
+.premium-banner-carousel{position:relative;width:100%}
 .premium-banner-wrap{position:relative;width:100%;overflow:hidden;border-radius:16px;background:var(--forest-deep);border:1px solid var(--border);min-width:0}
 .premium-banner-img{display:block;width:100%;aspect-ratio:4.8/1;object-fit:cover}
 .premium-banner-label{position:absolute;left:12px;top:12px;background:var(--gold);color:#fff;padding:5px 9px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.35)}
-.premium-banner-business{position:absolute;left:14px;bottom:12px;background:rgba(5,42,30,.75);color:#fff;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700}
-.premium-nav{width:46px;height:46px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--forest-deep);font-size:27px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.10);transition:transform .15s ease,background .15s ease}
-.premium-nav:hover{transform:scale(1.05);background:var(--paper)}
-.premium-nav:disabled{opacity:.35;cursor:default;transform:none}
+.premium-nav{position:absolute;top:50%;z-index:3;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:rgba(0,0,0,.42);color:#fff;font-size:28px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.22);transition:transform .15s ease,background .15s ease}
+.premium-nav.prev{left:12px}
+.premium-nav.next{right:12px}
+.premium-nav:hover{transform:translateY(-50%) scale(1.06);background:rgba(0,0,0,.62)}
+.premium-nav:disabled{opacity:.35;cursor:default}
 .premium-counter{text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px}
 
 @media(max-width:1000px){
@@ -1621,18 +1622,16 @@ function renderAdminPublicPremium(){
   if(premiumCarouselIndex<0)premiumCarouselIndex=arr.length-1;
 
   const b=arr[premiumCarouselIndex];
-  const cat=state.categories.find(c=>String(c.id)===String(b.categoryId))?.name||'Other';
   const hasMultiple=arr.length>1;
 
   wrap.innerHTML=`
     <div class="premium-banner-carousel">
-      <button class="premium-nav" aria-label="Previous premium banner" onclick="changePremiumBanner(-1)" ${hasMultiple?'':'disabled'}>‹</button>
       <div class="premium-banner-wrap">
-        <img class="premium-banner-img" src="${esc(b.imageData)}" alt="${esc(b.businessName)}">
+        <img class="premium-banner-img" src="${esc(b.imageData)}" alt="Premium advertisement">
         <span class="premium-banner-label">PREMIUM</span>
-        <span class="premium-banner-business">${esc(b.businessName)} · ${esc(cat)}</span>
+        <button class="premium-nav prev" aria-label="Previous premium banner" onclick="changePremiumBanner(-1)" ${hasMultiple?'':'disabled'}>‹</button>
+        <button class="premium-nav next" aria-label="Next premium banner" onclick="changePremiumBanner(1)" ${hasMultiple?'':'disabled'}>›</button>
       </div>
-      <button class="premium-nav" aria-label="Next premium banner" onclick="changePremiumBanner(1)" ${hasMultiple?'':'disabled'}>›</button>
     </div>
     <div class="premium-counter">${premiumCarouselIndex+1} / ${arr.length}</div>`;
 
