@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Adspool — Discover. Connect. Grow.</title>
-<meta name="description" content="Adspool is a local business directory for Bangalore. Browse active advertisements by category, or list your own business.">
+<title>Adspool — Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,440;0,9..144,600;0,9..144,700;1,9..144,500&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&family=Baloo+2:wght@600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Poppins:wght@500;600;700;800&family=Courier+Prime:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
@@ -31,145 +30,119 @@
   --tpl3-font:'Poppins',system-ui,sans-serif;
   --tpl4-font:'Courier Prime','Courier New',monospace;
   --tpl5-font:'Bebas Neue',Impact,sans-serif;
+  --sidebar-w:236px;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
 body{margin:0;font-family:var(--sans);background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
-button,input{font:inherit}
+button,input,select,textarea{font:inherit}
 button{cursor:pointer}
-a{text-decoration:none;color:inherit}
-img{max-width:100%}
+a{color:inherit}
 ::selection{background:var(--gold-soft);color:var(--forest-dark)}
 
-/* ---------- utility ---------- */
-.wrap{max-width:1240px;margin:0 auto;padding:0 5%}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;font-size:11.5px;font-weight:600;color:var(--forest)}
-.eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--gold)}
-.btn{border:1.5px solid var(--border-strong);background:var(--card);border-radius:10px;padding:11px 18px;font-weight:700;font-size:14px;color:var(--ink);display:inline-flex;align-items:center;gap:6px;transition:transform .15s ease,box-shadow .15s ease}
-.btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(18,32,26,.08)}
-.btn.primary{background:var(--forest);border-color:var(--forest);color:#fff}
-.btn.primary:hover{background:var(--forest-dark)}
-.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--forest-deep)}
-.btn.ghost{background:transparent;border-color:transparent;padding:11px 6px}
-
-/* ---------- brand mark ---------- */
-.brandmark{display:flex;align-items:center;gap:10px}
-.spool{height:34px;width:auto;flex:none;display:block}
-.brand{font-family:var(--serif);font-size:23px;font-weight:700;color:var(--forest-dark);letter-spacing:-.3px;display:flex;flex-direction:column;line-height:1}
-.brand small{font-family:var(--mono);font-size:9.5px;color:var(--muted);font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-top:4px}
+.app{min-height:100vh}
 
 /* ---------- topbar ---------- */
-.topbar{height:76px;background:rgba(250,246,236,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;position:sticky;top:0;z-index:40}
-.nav{display:flex;align-items:center;gap:30px}
-.navlinks{display:flex;gap:26px;font-size:14px;font-weight:600;color:#4b5a4f}
-.navlinks a{position:relative;padding-bottom:3px}
-.navlinks a:hover{color:var(--forest)}
+.topbar{height:66px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;z-index:20}
+.brandmark{display:flex;align-items:center;gap:10px}
+.spool{height:30px;width:auto;flex:none;display:block}
+.brand{font-family:var(--serif);font-size:19px;font-weight:700;color:var(--forest-dark);letter-spacing:-.2px;display:flex;flex-direction:column;line-height:1}
+.brand small{font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
 
-/* ---------- sticky search bar (appears under topbar on scroll) ---------- */
-.sticky-searchbar{position:fixed;left:0;right:0;top:76px;z-index:39;background:rgba(250,246,236,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);box-shadow:0 8px 24px rgba(18,32,26,.06);transform:translateY(-10px);opacity:0;pointer-events:none;transition:transform .22s ease,opacity .22s ease}
-.sticky-searchbar.show{transform:translateY(0);opacity:1;pointer-events:auto}
-.sticky-searchbar-inner{max-width:1240px;margin:auto;padding:12px 5%;display:flex;align-items:center;justify-content:space-between;gap:24px}
-.sticky-searchbox{background:var(--card);border:1.5px solid var(--border-strong);border-radius:12px;padding:6px;display:flex;gap:6px;box-shadow:0 8px 20px rgba(18,32,26,.08);flex:1;max-width:520px}
-.sticky-searchbox input{flex:1;border:0;outline:0;padding:10px 12px;font-size:14px;min-width:0;background:transparent;color:var(--ink)}
-.sticky-searchbox input::placeholder{color:#93a097}
-.sticky-searchbox .btn{padding:9px 16px;font-size:13px}
-.sticky-stats{display:flex;gap:22px;flex:none}
-.sticky-stats div{font-family:var(--mono)}
-.sticky-stats b{display:block;font-size:17px;color:var(--forest-dark);font-weight:600}
-.sticky-stats span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.sticky-chips-row{max-width:1240px;margin:auto;padding:0 5% 10px}
-.sticky-chips{display:flex;gap:8px;overflow-x:auto;padding:0;margin:0;scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent}
-.sticky-chips::-webkit-scrollbar{height:5px}
-.sticky-chips::-webkit-scrollbar-track{background:transparent}
-.sticky-chips::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:999px}
-.sticky-chips .chip{padding:7px 14px;font-size:12px}
+/* ---------- layout ---------- */
+.layout{display:flex;min-height:calc(100vh - 66px)}
+.sidebar{width:236px;background:var(--forest-deep);padding:20px 12px;flex:none;color:#dcece2}
+.navbtn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:0;border-left:3px solid transparent;border-radius:0 9px 9px 0;padding:10px 12px;margin:2px 0;color:#bcd4c6;font-size:13.5px;font-weight:600}
+.navbtn .ico{font-family:var(--mono);width:16px;text-align:center;flex:none;opacity:.85}
+.navbtn.active,.navbtn:hover{background:rgba(226,166,58,.12);color:#fff;border-left-color:var(--gold)}
+.navsection{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#5f8a72;padding:16px 12px 6px}
+.main{padding:28px;flex:1;min-width:0}
+.view{display:none}
+.view.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
-/* ---------- hero ---------- */
-.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
-.hero::before{content:"";position:absolute;inset:0;background:
-  radial-gradient(620px 380px at 88% -8%,rgba(226,166,58,.16),transparent 60%),
-  radial-gradient(720px 460px at -8% 12%,rgba(11,107,73,.10),transparent 60%);
-  pointer-events:none}
-.hero-inner{position:relative;max-width:1240px;margin:auto;padding:64px 5% 54px;display:grid;grid-template-columns:1.08fr .92fr;gap:48px;align-items:center}
-h1{font-family:var(--serif);font-size:clamp(38px,4.6vw,60px);line-height:1.03;letter-spacing:-1.6px;margin:14px 0 18px;font-weight:600}
-h1 em{font-style:italic;color:var(--forest);font-weight:500}
-.hero p.lede{font-size:17.5px;line-height:1.6;color:#4d5a51;max-width:540px;margin:0 0 26px}
-.searchbox{background:var(--card);border:1.5px solid var(--border-strong);border-radius:14px;padding:8px;display:flex;gap:8px;box-shadow:0 16px 40px rgba(18,32,26,.09);max-width:600px}
-.searchbox input{flex:1;border:0;outline:0;padding:13px 14px;font-size:15px;min-width:0;background:transparent;color:var(--ink)}
-.searchbox input::placeholder{color:#93a097}
-.hero-stats{display:flex;gap:26px;margin-top:28px}
-.hero-stats div{font-family:var(--mono)}
-.hero-stats b{display:block;font-size:20px;color:var(--forest-dark);font-weight:600}
-.hero-stats span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+h1{font-family:var(--serif);font-size:28px;margin:0 0 6px;font-weight:600;letter-spacing:-.4px}
+h2{font-family:var(--serif);font-size:19px;margin:0 0 14px;font-weight:600}
+.sub{color:var(--muted);margin:0 0 24px;font-size:14px}
+.eyebrow{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;font-size:10.5px;font-weight:600;color:var(--forest);margin-bottom:8px}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
 
-/* hero card fan */
-.hero-visual{position:relative;height:400px}
-.fan-card{position:absolute;width:270px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:0 20px 44px rgba(18,32,26,.14)}
-.fan-card .swatch-top{height:96px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--signage);font-weight:800;font-size:19px;text-align:center;padding:0 10px}
-.fan-card .swatch-tag{margin-top:12px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--muted);display:flex;justify-content:space-between}
-.fan-card .swatch-name{font-weight:700;font-size:14.5px;margin-top:9px;color:var(--ink)}
-.fan-1{top:8px;left:0;transform:rotate(-9deg);z-index:1}
-.fan-2{top:56px;left:150px;transform:rotate(7deg);z-index:2}
-.fan-3{top:190px;left:36px;transform:rotate(-3deg);z-index:3}
-.ring{position:absolute;width:190px;height:190px;border-radius:50%;border:2px dashed var(--gold);right:-30px;top:-30px;opacity:.55}
+/* ---------- cards / stats ---------- */
+.cards{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:12px;margin-bottom:22px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:17px}
+.card .label{font-size:11.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.card .num{font-family:var(--serif);font-size:29px;font-weight:600;margin-top:7px;color:var(--forest-dark)}
 
-/* ---------- section shell ---------- */
-.section{max-width:1240px;margin:auto;padding:56px 5%}
-.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
-.section-head h2{font-family:var(--serif);margin:6px 0 0;font-size:30px;letter-spacing:-.6px;font-weight:600}
-.section-head p{margin:6px 0 0;color:var(--muted);font-size:13.5px}
-.link{color:var(--forest);font-weight:700;font-size:13.5px;white-space:nowrap}
-.link:hover{text-decoration:underline}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
 
-/* ---------- category chips ---------- */
-.chips{display:flex;gap:9px;overflow-x:auto;padding:2px 0 12px;margin-bottom:14px;scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent}
-.chips::-webkit-scrollbar{height:6px}
-.chips::-webkit-scrollbar-track{background:var(--border);border-radius:999px}
-.chips::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:999px}
-.chips::-webkit-scrollbar-thumb:hover{background:var(--gold-deep)}
-.chip{border:1.5px solid var(--border-strong);background:var(--card);padding:9px 16px;border-radius:999px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#3f4c43;flex:none}
-.chip.active{background:var(--forest);color:#fff;border-color:var(--forest)}
+input,select,textarea{border:1.5px solid var(--border-strong);border-radius:9px;padding:10px 11px;background:var(--card);color:var(--ink);width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--forest);box-shadow:0 0 0 3px rgba(11,107,73,.12)}
+input[readonly]{background:#f4f1e6;color:var(--muted)}
+.search{min-width:260px}
 
-/* ---------- premium banner (ticket) ---------- */
-.premium-section{margin-bottom:30px}
-.premium-banner-wrap{position:relative;width:100%;overflow:hidden;border-radius:16px;background:var(--forest-deep);border:1px solid var(--border)}
-.premium-banner-img{display:block;width:100%;aspect-ratio:4.8/1;object-fit:cover}
-.premium-banner-label{position:absolute;left:14px;top:14px;background:var(--gold);color:#fff;padding:5px 10px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em}
-.premium-banner-business{display:none}
-.premium-banner-controls{display:flex;justify-content:space-between;align-items:center;margin-top:9px}
-.premium-banner-dots{display:flex;gap:5px}
-.premium-dot{width:7px;height:7px;border-radius:50%;background:var(--border-strong)}
-.premium-dot.active{background:var(--gold-deep)}
-.premium-banner-arrow{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(5,42,30,.55);border:1px solid rgba(255,255,255,.35);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:6;transition:background .15s ease,transform .15s ease;padding:0}
-.premium-banner-arrow:hover{background:rgba(5,42,30,.82);transform:translateY(-50%) scale(1.06)}
-.premium-banner-arrow:active{transform:translateY(-50%) scale(.96)}
-.premium-banner-arrow svg{width:18px;height:18px;display:block}
-.premium-banner-arrow.prev{left:14px}
-.premium-banner-arrow.next{right:14px}
-@media (max-width:640px){.premium-banner-arrow{width:34px;height:34px}.premium-banner-arrow svg{width:15px;height:15px}}
+.btn{border:1.5px solid var(--border-strong);background:var(--card);border-radius:9px;padding:10px 14px;font-weight:700;font-size:13.5px;color:var(--ink);transition:transform .12s ease,box-shadow .12s ease}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(18,32,26,.08)}
+.btn.primary{background:var(--forest);border-color:var(--forest);color:#fff}
+.btn.primary:hover{background:var(--forest-dark)}
+.btn.secondary{background:var(--paper)}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--forest-deep)}
+.btn.danger{background:#fbeceb;border-color:#f0c6c1;color:var(--danger)}
+.btn.small{padding:7px 10px;font-size:12px}
 
-/* ---------- ad ticket card ---------- */
-.ads-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
-.ad-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 3px 14px rgba(18,32,26,.05);position:relative;transition:transform .15s ease,box-shadow .15s ease}
-.ad-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(18,32,26,.10)}
-.ad-mini{padding:14px}
-.ad-perf{position:relative;height:0;border-top:2px dashed var(--border-strong);margin:0 14px}
-.ad-perf::before,.ad-perf::after{content:"";position:absolute;top:-8px;width:16px;height:16px;border-radius:50%;background:var(--paper)}
-.ad-perf::before{left:-22px}
-.ad-perf::after{right:-22px}
+.tablewrap{overflow:auto}
+.table{width:100%;border-collapse:collapse;min-width:900px}
+.table th,.table td{padding:12px 10px;border-bottom:1px solid var(--border);text-align:left;font-size:13px;vertical-align:middle}
+.table th{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--paper)}
+.table td.mono{font-family:var(--mono);font-size:12.5px}
 
-.ad{position:relative;width:100%;min-height:225px;border:2px solid currentColor;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;text-align:center;font-family:var(--signage)}
-.ad-frame{position:relative;width:100%}
-.creative-preview-img{display:block;width:100%;border-radius:16px;border:2px solid var(--border);object-fit:cover}
-.promo-badge{position:absolute;top:-10px;right:-10px;width:52px;height:52px;background:#ff0000;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--sans);font-weight:800;font-size:8.5px;line-height:1.12;letter-spacing:.01em;text-transform:uppercase;box-shadow:0 6px 14px rgba(0,0,0,.22);z-index:5;padding:4px;overflow:hidden;clip-path:polygon(50.00% 0.00%, 61.39% 7.50%, 75.00% 6.70%, 81.11% 18.89%, 93.30% 25.00%, 92.50% 38.61%, 100.00% 50.00%, 92.50% 61.39%, 93.30% 75.00%, 81.11% 81.11%, 75.00% 93.30%, 61.39% 92.50%, 50.00% 100.00%, 38.61% 92.50%, 25.00% 93.30%, 18.89% 81.11%, 6.70% 75.00%, 7.50% 61.39%, 0.00% 50.00%, 7.50% 38.61%, 6.70% 25.00%, 18.89% 18.89%, 25.00% 6.70%, 38.61% 7.50%)}
-.ad .adhead{flex:0 0 auto;padding:14px 12px 10px;border-bottom:2px solid currentColor;font-size:22px;font-weight:800;line-height:1.08;min-height:56px;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere}
-.ad .adbody{flex:1;padding:12px 16px 10px;display:flex;flex-direction:column;justify-content:center;gap:10px}
-.servicesline{font-size:14.5px;font-weight:700;line-height:1.25;word-break:break-word;overflow-wrap:anywhere}
-.address{font-family:var(--sans);font-weight:500;font-size:12.5px;line-height:1.3;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}
-.ad .adphone{flex:0 0 auto;min-height:48px;border-top:2px solid currentColor;padding:8px;font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere;font-family:var(--mono)}
+.badge{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:10.5px;font-weight:700;font-family:var(--mono);text-transform:uppercase;letter-spacing:.03em}
+.published{background:#e2f4e9;color:#0a6b3f}
+.scheduled{background:#e8effa;color:#2c58a8}
+.draft{background:#eeece2;color:#5d5a4b}
+.expired{background:#fbe9e6;color:#a8402f}
+.unpublished{background:#f2e9f6;color:#6f3f96}
 
-/* ---------- ad templates (must mirror the admin panel exactly) ---------- */
-/* Template 1 — Classic Signage (default) uses the base .ad rules above */
+/* ---------- forms ---------- */
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12px;font-weight:700;color:#495a4d}
+.full{grid-column:1/-1}
+.hint{font-size:11.5px;color:var(--muted)}
+.address-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+.servicesDynamic{display:flex;flex-direction:column;gap:8px}
+.serviceRow{display:flex;gap:8px}
+.serviceRow input{flex:1;min-width:0}
+.serviceRemove{width:38px;padding:0}
+.modeToggle{display:flex;gap:10px;flex-wrap:wrap}
+.modeOption{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;border:1.5px solid var(--border-strong);border-radius:9px;padding:9px 14px;background:var(--card)}
+.modeOption input{width:auto;margin:0;accent-color:var(--forest)}
+.modeOption:has(input:checked){border-color:var(--forest);background:var(--gold-soft);color:var(--forest-dark)}
+.creative-preview-img{display:block;width:100%;max-width:400px;border-radius:20px;box-shadow:0 10px 26px rgba(18,32,26,.08);object-fit:cover}
+
+.creategrid{display:grid;grid-template-columns:minmax(330px,1fr) minmax(340px,420px);gap:20px;align-items:start}
+.createtabs{display:flex;gap:6px;margin:18px 0 22px;border-bottom:1.5px solid var(--border)}
+.createtab{padding:11px 20px;font-weight:700;font-size:13.5px;color:var(--muted);background:transparent;border:0;border-bottom:2.5px solid transparent;cursor:pointer;margin-bottom:-1.5px;display:flex;align-items:center;gap:7px}
+.createtab .tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--border);color:var(--muted);padding:2px 7px;border-radius:999px}
+.createtab.active{color:var(--forest-dark);border-bottom-color:var(--gold)}
+.createtab.active .tag{background:var(--gold);color:var(--forest-deep)}
+.createtabpanel{display:none}
+.createtabpanel.active{display:block}
+.sticky{position:sticky;top:90px}
+.previewwrap{display:flex;justify-content:center;padding:6px}
+
+/* ---------- ticket ad preview (shared visual language with public site) ---------- */
+.ad{position:relative;width:100%;max-width:400px;min-height:240px;height:auto;border:2px solid currentColor;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;text-align:center;font-family:var(--signage);box-shadow:0 10px 26px rgba(18,32,26,.08)}
+.ad-frame{position:relative;width:100%;max-width:400px}
+.promo-badge{position:absolute;top:-12px;right:-12px;width:62px;height:62px;background:#ff0000;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--sans);font-weight:800;font-size:11px;line-height:1.12;letter-spacing:.01em;text-transform:uppercase;box-shadow:0 6px 14px rgba(0,0,0,.22);z-index:5;padding:6px;overflow:hidden;clip-path:polygon(50.00% 0.00%, 61.39% 7.50%, 75.00% 6.70%, 81.11% 18.89%, 93.30% 25.00%, 92.50% 38.61%, 100.00% 50.00%, 92.50% 61.39%, 93.30% 75.00%, 81.11% 81.11%, 75.00% 93.30%, 61.39% 92.50%, 50.00% 100.00%, 38.61% 92.50%, 25.00% 93.30%, 18.89% 81.11%, 6.70% 75.00%, 7.50% 61.39%, 0.00% 50.00%, 7.50% 38.61%, 6.70% 25.00%, 18.89% 18.89%, 25.00% 6.70%, 38.61% 7.50%)}
+.ad .adhead{flex:0 0 auto;padding:15px 12px 10px;border-bottom:2px solid currentColor;font-size:25px;font-weight:800;line-height:1.06;min-height:60px;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere}
+.ad .adbody{flex:1;padding:13px 18px 10px;display:flex;flex-direction:column;justify-content:center;gap:11px}
+.servicesline{font-size:16px;font-weight:700;line-height:1.22;word-break:break-word}
+.address{font-family:var(--sans);font-weight:500;font-size:14px;line-height:1.3;white-space:pre-wrap;word-break:break-word}
+.ad .adphone{flex:0 0 auto;min-height:54px;border-top:2px solid currentColor;padding:7px 8px 10px;font-size:24px;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:var(--mono)}
+.directionBtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin-top:2px;border:0;border-radius:8px;padding:8px 12px;background:var(--forest);color:#fff;font-size:12px;font-weight:700;text-decoration:none;font-family:var(--sans)}
+
+/* ---------- ad templates (rotate per ad, kept consistent between admin preview & public site) ---------- */
+/* Template 1 — Classic Signage (default, unchanged) uses the base .ad rules above */
 
 /* Template 2 — Editorial Serif */
 .ad.tpl-2{font-family:var(--tpl2-font);border-radius:6px}
@@ -178,7 +151,7 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 .ad.tpl-2 .adphone{font-family:var(--tpl2-font);font-style:italic;font-weight:700}
 
 /* Template 3 — Modern Sans */
-.ad.tpl-3{font-family:var(--tpl3-font);border-radius:22px}
+.ad.tpl-3{font-family:var(--tpl3-font);border-radius:26px}
 .ad.tpl-3 .adhead{text-transform:uppercase;letter-spacing:.05em;font-weight:800}
 .ad.tpl-3 .adbody,.ad.tpl-3 .servicesline{font-family:var(--tpl3-font)}
 .ad.tpl-3 .adphone{font-family:var(--tpl3-font);letter-spacing:.04em;font-weight:700}
@@ -191,408 +164,898 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 
 /* Template 5 — Bold Billboard */
 .ad.tpl-5{font-family:var(--tpl5-font);border-radius:10px}
-.ad.tpl-5 .adhead{letter-spacing:.03em;text-transform:uppercase}
+.ad.tpl-5 .adhead{font-size:32px;letter-spacing:.03em;text-transform:uppercase}
 .ad.tpl-5 .adbody,.ad.tpl-5 .servicesline{font-family:var(--tpl5-font);letter-spacing:.02em}
-.ad.tpl-5 .adphone{font-family:var(--tpl5-font);font-size:24px;letter-spacing:.04em}
+.ad.tpl-5 .adphone{font-family:var(--tpl5-font);font-size:28px;letter-spacing:.04em}
 
-.ad-info{padding:12px 16px 16px}
-.ad-name{font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:3px}
-.ad-category{font-size:11.5px;color:var(--forest);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
-.ad-id{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:3px}
-.ad-actions{display:flex;gap:7px;margin-top:13px;flex-wrap:wrap}
-.ad-actions .btn{flex:1;text-align:center;justify-content:center;padding:9px 8px;font-size:12px;min-width:64px}
+.colorrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.swatches{display:flex;gap:7px;flex-wrap:wrap}
+.swatch{width:28px;height:28px;border-radius:8px;border:2px solid #fff;box-shadow:0 0 0 1px var(--border-strong)}
+.colorinput{width:44px;height:38px;padding:2px}
 
-.empty{grid-column:1/-1;background:var(--card);border:1.5px dashed var(--border-strong);border-radius:16px;padding:60px 20px;text-align:center;color:var(--muted)}
-.empty strong{display:block;color:var(--ink);font-family:var(--serif);font-size:19px;font-weight:600;margin-bottom:6px}
+.tplpicker{display:flex;gap:8px;flex-wrap:wrap}
+.tplchip{border:1.5px solid var(--border-strong);background:var(--card);border-radius:12px;padding:9px 13px;text-align:left;display:flex;flex-direction:column;gap:3px;min-width:128px}
+.tplchip .tplchip-name{font-size:12.5px;font-weight:700;color:var(--ink);font-family:var(--sans)}
+.tplchip .tplchip-sample{font-size:15px;line-height:1}
+.tplchip.active{border-color:var(--forest);background:var(--gold-soft);box-shadow:0 0 0 3px rgba(2,169,214,.15)}
 
-/* ---------- features ---------- */
-.features{background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-.feature-grid{max-width:1240px;margin:auto;padding:34px 5%;display:grid;grid-template-columns:repeat(4,1fr);gap:0}
-.feature{padding:6px 26px;border-right:1px solid var(--border)}
-.feature:first-child{padding-left:0}
-.feature:last-child{border-right:0}
-.feature-icon{width:40px;height:40px;border-radius:11px;background:var(--forest);color:var(--gold-soft);display:flex;align-items:center;justify-content:center;font-weight:800;margin-bottom:12px;font-family:var(--mono);font-size:15px}
-.feature h3{font-family:var(--serif);font-size:15.5px;margin:0 0 6px;font-weight:600}
-.feature p{font-size:12.5px;color:var(--muted);line-height:1.55;margin:0}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
+.empty{padding:40px;text-align:center;color:var(--muted)}
 
-/* ---------- about ---------- */
-.about{background:linear-gradient(180deg,#f2ede0,var(--paper))}
-.about-inner{max-width:820px;margin:auto;text-align:center}
-.about .eyebrow{justify-content:center;margin-bottom:14px}
-.about h2{font-family:var(--serif);font-size:32px;margin:0 0 14px;font-weight:600;letter-spacing:-.5px}
-.about p{color:#4d5a51;line-height:1.7;margin:0 auto 22px;max-width:640px;font-size:15.5px}
+.publicbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.categorychips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--border-strong);background:var(--card);padding:8px 13px;border-radius:999px;font-size:12px;font-weight:600}
+.chip.active{background:var(--forest);color:#fff;border-color:var(--forest)}
+.publicgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.publicad{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
+.publicmeta{font-size:12px;color:var(--muted);margin:8px 0}
 
-/* ---------- footer ---------- */
-.footer{background:var(--forest-deep);color:#eaf1f7;padding:36px 5% 26px}
-.footer-inner{max-width:1240px;margin:auto;display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
-.footer .brand{color:#fff}
-.footer .brand small{color:#9db8d1}
-.footer-tagline{font-size:12.5px;color:#9db8d1;margin-top:10px;max-width:260px;line-height:1.6}
-.footer-links{display:flex;gap:22px;font-size:13px;font-weight:600;color:#d8e6f0}
-.footer-links a:hover{color:var(--gold)}
-.footer-bottom{max-width:1240px;margin:26px auto 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);font-family:var(--mono);font-size:11px;color:#7d97b3}
+/* ---------- admin sticky preview bar (Public Ads tab only) ---------- */
+.admin-sticky-bar{position:fixed;top:66px;left:var(--sidebar-w);right:0;z-index:15;background:rgba(245,247,249,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);box-shadow:0 8px 20px rgba(18,32,26,.06);transform:translateY(-8px);opacity:0;pointer-events:none;transition:transform .2s ease,opacity .2s ease,left .15s ease}
+.admin-sticky-bar.show{transform:translateY(0);opacity:1;pointer-events:auto}
+.admin-sticky-bar-inner{padding:12px 28px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.admin-sticky-bar-inner input{max-width:280px}
+.admin-sticky-chips{display:flex;gap:7px;flex-wrap:nowrap;overflow-x:auto;padding:0 28px 10px;scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent}
+.admin-sticky-chips::-webkit-scrollbar{height:5px}
+.admin-sticky-chips::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:999px}
+.admin-sticky-chips .chip{white-space:nowrap;flex:none}
 
-/* ---------- modal ---------- */
-.modal-backdrop{position:fixed;inset:0;background:rgba(5,20,14,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
-.modal-backdrop.show{display:flex}
-.modal{width:min(560px,100%);max-height:90vh;overflow:auto;background:var(--card);border-radius:20px;padding:22px;box-shadow:0 30px 80px rgba(0,0,0,.3)}
-.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
-.modal-head h2{margin:0;font-family:var(--serif);font-size:21px;font-weight:600}
-.close{border:0;background:var(--paper);border-radius:50%;width:34px;height:34px;font-size:19px;color:var(--muted)}
-.modal-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:14px}
+/* ---------- categories list ---------- */
+.catrow{display:flex;justify-content:space-between;align-items:center;padding:13px 2px;border-bottom:1px solid var(--border)}
+.catrow:last-child{border-bottom:0}
+.catname{display:flex;align-items:center;gap:10px;font-weight:700}
+.catstatus{width:8px;height:8px;border-radius:50%;background:var(--forest)}
+.catrow.inactive .catstatus{background:var(--border-strong)}
+.catrow.inactive .catname{color:var(--muted)}
 
-/* ---------- toast ---------- */
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(12px);background:var(--forest-deep);color:#fff;padding:12px 18px;border-radius:11px;font-size:13px;font-weight:600;box-shadow:0 14px 34px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:120}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ---------- login ---------- */
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:
+  radial-gradient(600px 380px at 85% -10%,rgba(226,166,58,.14),transparent 60%),
+  radial-gradient(700px 460px at -10% 10%,rgba(11,107,73,.16),transparent 60%),
+  var(--paper)}
+.loginbox{width:min(400px,92vw);background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;box-shadow:0 24px 60px rgba(18,32,26,.12)}
+.loginbox .field{margin:15px 0}
+.error{color:var(--danger);font-size:12px;min-height:16px;font-weight:600}
+.loginhint{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:16px;line-height:1.7;background:var(--paper);border:1px dashed var(--border-strong);border-radius:10px;padding:10px 12px}
 
-@media(max-width:950px){
-  .hero-inner{grid-template-columns:1fr}
-  .hero-visual{display:none}
-  .ads-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .feature-grid{grid-template-columns:repeat(2,1fr);gap:24px}
-  .feature{border-right:0;padding:0}
+.toast{position:fixed;right:20px;bottom:20px;background:var(--forest-deep);color:#fff;padding:13px 17px;border-radius:11px;display:none;z-index:100;font-size:13px;font-weight:600;box-shadow:0 14px 34px rgba(0,0,0,.25)}
+.toast.show{display:block;animation:toastin .2s ease}
+@keyframes toastin{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+
+.banner-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.banner-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.banner-card img{width:100%;aspect-ratio:4.8/1;object-fit:cover;background:var(--paper);display:block}
+.banner-info{padding:14px}
+.banner-meta{font-size:12px;color:var(--muted);line-height:1.65;margin-top:6px}
+.banner-actions{display:flex;gap:8px;margin-top:13px}
+.banner-actions .btn{flex:1}
+.banner-note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:6px}
+.banner-preview{width:100%;aspect-ratio:4.8/1;object-fit:cover;border-radius:10px;background:var(--paper)}
+
+.premium-section{margin-top:26px;margin-bottom:28px}
+.premium-section{margin-top:26px;margin-bottom:28px}
+.premium-banner-carousel{position:relative;width:100%}
+.premium-banner-wrap{position:relative;width:100%;overflow:hidden;border-radius:16px;background:var(--forest-deep);border:1px solid var(--border);min-width:0}
+.premium-banner-img{display:block;width:100%;aspect-ratio:4.8/1;object-fit:cover}
+.premium-banner-label{position:absolute;left:12px;top:12px;background:var(--gold);color:#fff;padding:5px 9px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.premium-nav{position:absolute;top:50%;z-index:3;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:rgba(0,0,0,.42);color:#fff;font-size:28px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.22);transition:transform .15s ease,background .15s ease}
+.premium-nav.prev{left:12px}
+.premium-nav.next{right:12px}
+.premium-nav:hover{transform:translateY(-50%) scale(1.06);background:rgba(0,0,0,.62)}
+.premium-nav:disabled{opacity:.35;cursor:default}
+.premium-counter{text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px}
+
+@media(max-width:1000px){
+  .cards{grid-template-columns:repeat(3,1fr)}
+  .creategrid{grid-template-columns:1fr}
+  .sticky{position:static}
+  .banner-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-@media(max-width:700px){
-  .topbar{padding:0 5%}
-  .navlinks{display:none}
-  .hero-inner{padding:40px 5% 36px}
-  .searchbox{display:block}
-  .searchbox .btn{width:100%;margin-top:7px}
-  .sticky-searchbar-inner{flex-direction:column;align-items:stretch;gap:10px;padding:10px 5%}
-  .sticky-stats{justify-content:space-between;gap:14px}
-  .sticky-searchbox{max-width:none}
-  .section{padding:38px 5%}
-  .ads-grid{grid-template-columns:1fr}
-  .feature-grid{grid-template-columns:1fr}
-  .footer-inner{flex-direction:column}
-  .footer-links{flex-wrap:wrap}
+@media(max-width:720px){
+  :root{--sidebar-w:64px}
+  .sidebar{width:64px;padding:14px 6px}
+  .navbtn{justify-content:center}
+  .navbtn span.label{display:none}
+  .navsection{display:none}
+  .main{padding:16px}
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .formgrid{grid-template-columns:1fr}
+  .full{grid-column:auto}
+  .address-grid{grid-template-columns:1fr}
+  .topbar{padding:0 14px}
+  .banner-grid{grid-template-columns:1fr}
+  .search{min-width:0;width:100%}
+  .ad .adhead{font-size:21px}
+  .ad .adphone{font-size:21px}
 }
 </style>
 </head>
 <body>
 
-<header class="topbar">
-  <a href="#" class="brandmark">
-    <img class="spool" src="../adspool-logo.png" alt="Adspool">
-  </a>
-  <nav class="nav">
-    <div class="navlinks">
-      <a href="#ads">Ads</a>
-      <a href="#categories">Categories</a>
-      <a href="#about">About</a>
+<!-- LOGIN -->
+<div id="loginView" class="login">
+  <div class="loginbox">
+    <span class="brandmark">
+      <img class="spool" src="../adspool-logo.png" alt="Adspool">
+      <span class="brand"><small>Admin</small></span>
+    </span>
+    <h1 style="margin-top:22px;font-size:24px">Sign in</h1>
+    <p class="sub" style="margin-bottom:6px">Local business advertising control panel.</p>
+    <div class="field">
+      <label>Email</label>
+      <input id="loginEmail" type="email" autocomplete="username" placeholder="you@business.com">
     </div>
-  </nav>
-</header>
-
-<div id="stickySearchbar" class="sticky-searchbar">
-  <div class="sticky-searchbar-inner">
-    <div class="sticky-searchbox">
-      <input id="searchInputSticky" type="search" placeholder="Search business name, Ad ID, service or location…" autocomplete="off" oninput="syncSearch(this.value)">
-      <button class="btn primary" onclick="document.getElementById('ads').scrollIntoView({behavior:'smooth'})">Search</button>
+    <div class="field">
+      <label>Password</label>
+      <input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••">
     </div>
-    <div class="sticky-stats">
-      <div><b id="statTotalSticky">—</b><span>Active ads</span></div>
-      <div><b id="statCatsSticky">—</b><span>Categories</span></div>
-      <div><b>Free</b><span>To browse</span></div>
-    </div>
-  </div>
-  <div class="sticky-chips-row">
-    <div id="categoriesSticky" class="chips sticky-chips"></div>
+    <div id="loginError" class="error"></div>
+    <button class="btn primary" style="width:100%" onclick="login()">Sign in</button>
   </div>
 </div>
 
-<section class="hero">
-  <div class="hero-inner">
-    <div>
-      <span class="eyebrow"><span class="dot"></span>Bangalore · Karnataka</span>
-      <h1>Local businesses, <em>one spool</em> of listings away.</h1>
-      <p class="lede">Adspool gathers active advertisements from businesses near you — search by name, service or locality, and connect directly with the ones that fit.</p>
-      <div class="searchbox">
-        <input id="searchInput" type="search" placeholder="Search business name, Ad ID, service or location…" autocomplete="off" oninput="syncSearch(this.value)">
-        <button class="btn primary" onclick="document.getElementById('ads').scrollIntoView({behavior:'smooth'})">Search</button>
-      </div>
-      <div class="hero-stats">
-        <div><b id="statTotal">—</b><span>Active ads</span></div>
-        <div><b id="statCats">—</b><span>Categories</span></div>
-        <div><b>Free</b><span>To browse</span></div>
-      </div>
-    </div>
-    <div class="hero-visual">
-      <div class="ring"></div>
-      <div class="fan-card fan-1">
-        <div class="swatch-top" style="background:#e4f7e8;color:#0b6b49">Green Leaf Cafe</div>
-        <div class="swatch-name">Green Leaf Cafe</div>
-        <div class="swatch-tag"><span>RESTAURANTS</span><span>ADS-000241</span></div>
-      </div>
-      <div class="fan-card fan-2">
-        <div class="swatch-top" style="background:#173a67;color:#fff">Nova Interiors</div>
-        <div class="swatch-name">Nova Interiors</div>
-        <div class="swatch-tag"><span>INTERIOR</span><span>ADS-000198</span></div>
-      </div>
-      <div class="fan-card fan-3">
-        <div class="swatch-top" style="background:#fff6bf;color:#7a5b00">Metro Auto Care</div>
-        <div class="swatch-name">Metro Auto Care</div>
-        <div class="swatch-tag"><span>AUTOMOBILE</span><span>ADS-000156</span></div>
-      </div>
-    </div>
+<!-- ADMIN -->
+<div id="app" class="app" style="display:none">
+<header class="topbar">
+  <span class="brandmark">
+    <img class="spool" src="../adspool-logo.png" alt="Adspool">
+    <span class="brand"><small>Admin</small></span>
+  </span>
+  <div style="display:flex;gap:8px">
+    <a class="btn small" href="../" target="_blank">Public Website ↗</a>
+    <button class="btn small" onclick="logout()">Logout</button>
   </div>
-</section>
+</header>
 
-<div id="stickySpacer" style="height:0;transition:height .22s ease"></div>
-
-<section class="section" id="ads">
-  <div class="section-head">
-    <div>
-      <span class="eyebrow"><span class="dot"></span>Live listings</span>
-      <h2>Featured ads</h2>
-      <p>Browse advertisements that are currently active.</p>
-    </div>
-    <a class="link" href="#ads" onclick="viewAllAds(event)">View all ads →</a>
+<div id="adminStickyBar" class="admin-sticky-bar">
+  <div class="admin-sticky-bar-inner">
+    <input id="publicSearchSticky" class="search" placeholder="Search business, service or location…" oninput="syncPublicSearch(this.value)">
   </div>
-  <div id="categories" class="chips"></div>
-  <div id="premiumSection" class="premium-section" style="display:none">
-    <div class="section-head" style="margin-bottom:12px">
+  <div id="categoryChipsSticky" class="categorychips admin-sticky-chips"></div>
+</div>
+
+<div class="layout">
+<aside class="sidebar">
+  <button class="navbtn active" data-view="dashboard" onclick="showView('dashboard')"><span class="ico">▣</span><span class="label">Dashboard</span></button>
+  <button class="navbtn" data-view="ads" onclick="showView('ads')"><span class="ico">▤</span><span class="label">Advertisements</span></button>
+  <button class="navbtn" data-view="create" onclick="startCreate()"><span class="ico">＋</span><span class="label">Create Ad</span></button>
+  <div class="navsection">Views</div>
+  <button class="navbtn" data-view="published" onclick="setAdStatusFilter('published')"><span class="ico">●</span><span class="label">Published</span></button>
+  <button class="navbtn" data-view="scheduled" onclick="setAdStatusFilter('scheduled')"><span class="ico">◷</span><span class="label">Scheduled</span></button>
+  <button class="navbtn" data-view="drafts" onclick="setAdStatusFilter('draft')"><span class="ico">◌</span><span class="label">Drafts</span></button>
+  <button class="navbtn" data-view="expired" onclick="setAdStatusFilter('expired')"><span class="ico">○</span><span class="label">Expired</span></button>
+  <button class="navbtn" data-view="categories" onclick="showView('categories')"><span class="ico">☷</span><span class="label">Categories</span></button>
+  <button class="navbtn" data-view="public" onclick="showView('public')"><span class="ico">↗</span><span class="label">Public Ads</span></button>
+</aside>
+
+<main class="main">
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="view active">
+  <span class="eyebrow"><span class="dot"></span>Overview</span>
+  <h1>Dashboard</h1>
+  <p class="sub">Manage local business advertisements.</p>
+  <div id="dashCards" class="cards"></div>
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
       <div>
-        <span class="eyebrow"><span class="dot"></span>Spotlight</span>
-        <h2 style="font-size:22px">Premium banners</h2>
+        <h2>Recently created</h2>
+        <p class="sub" style="margin:0">Latest advertisements in your system.</p>
+      </div>
+      <button class="btn primary" onclick="startCreate()">+ Create Advertisement</button>
+    </div>
+    <div id="recentAds" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- ADS -->
+<section id="ads" class="view">
+  <span class="eyebrow"><span class="dot"></span>Manage</span>
+  <h1>Advertisements</h1>
+  <p class="sub">Search, filter, edit and publish your ads.</p>
+  <div class="panel">
+    <div class="toolbar">
+      <input id="adSearch" class="search" placeholder="Search Ad ID, business, phone…" oninput="renderAdsTable()">
+      <select id="adCategoryFilter" onchange="renderAdsTable()"></select>
+      <select id="adStatusFilter" onchange="renderAdsTable()">
+        <option value="all">All statuses</option>
+        <option value="draft">Draft</option>
+        <option value="scheduled">Scheduled</option>
+        <option value="published">Published</option>
+        <option value="expired">Expired</option>
+        <option value="unpublished">Unpublished</option>
+      </select>
+      <button class="btn" onclick="clearAdFilters()">Clear</button>
+    </div>
+    <div id="adsTable"></div>
+  </div>
+</section>
+
+<!-- CREATE -->
+<section id="create" class="view">
+  <span class="eyebrow"><span class="dot"></span>Listing builder</span>
+  <h1 id="formTitle">Create Advertisement</h1>
+  <p class="sub" id="formSub">Enter the details and watch the advertisement update live.</p>
+
+  <div class="createtabs">
+    <button type="button" class="createtab active" data-tab="normal" onclick="switchCreateTab('normal')"><span class="tag">1</span>Normal Ads</button>
+    <button type="button" class="createtab" data-tab="premium" onclick="switchCreateTab('premium')"><span class="tag">2</span>Premium Ads</button>
+  </div>
+
+  <div id="tabNormalAds" class="createtabpanel active">
+  <div class="creategrid">
+    <div class="panel">
+      <div class="formgrid">
+
+        <div class="field full">
+          <label>Ad Type *</label>
+          <div class="modeToggle">
+            <label class="modeOption"><input type="radio" name="normalMode" value="common" checked onchange="switchNormalMode('common')">Common</label>
+            <label class="modeOption"><input type="radio" name="normalMode" value="creative" onchange="switchNormalMode('creative')">Creative</label>
+          </div>
+          <span class="hint">Common builds the ad from the fields below using one of our templates. Creative lets you upload your own ready-made banner design instead.</span>
+        </div>
+
+        <div class="field full" id="fieldCreativeUpload" style="display:none">
+          <label id="creativeImageLabel">Banner Creative *</label>
+          <input id="fCreativeImage" type="file" accept="image/jpeg,image/png,image/webp" onchange="handleCreativeImageChange(this)">
+          <div class="banner-note" id="creativeImageNote">Upload your ready-made banner design (JPG, PNG or WebP). It will be shown on the ad exactly as uploaded.</div>
+        </div>
+
+        <div class="field">
+          <label>Business Name *</label>
+          <input id="fBusiness" maxlength="80" oninput="updatePreview()">
+        </div>
+
+        <div class="field">
+          <label>Category *</label>
+          <select id="fCategory"></select>
+        </div>
+
+        <div class="field full" id="fieldTemplate">
+          <label>Ad Template *</label>
+          <div id="templatePicker" class="tplpicker"></div>
+          <span class="hint">The highlighted one is auto-suggested for variety — tap any card to pick that look instead.</span>
+        </div>
+
+        <div class="field full" id="fieldServices">
+          <label>Services</label>
+          <div id="servicesContainer" class="servicesDynamic"></div>
+          <button type="button" class="btn small" style="width:max-content;margin-top:8px" onclick="addService()">+ Add Service</button>
+        </div>
+
+        <div class="field full">
+          <label>Address *</label>
+          <div class="address-grid">
+            <div class="field">
+              <label>Address Line</label>
+              <input id="fAddressLine" maxlength="150" placeholder="House / Shop / Street" oninput="updatePreview()">
+            </div>
+            <div class="field">
+              <label>Area / Locality</label>
+              <input id="fArea" maxlength="80" placeholder="Area" oninput="updatePreview()">
+            </div>
+            <div class="field">
+              <label>PIN / Area Code</label>
+              <input id="fPin" inputmode="numeric" maxlength="6" placeholder="560001" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6);updatePreview()">
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>City *</label>
+          <input id="fCity" value="Bangalore" readonly>
+        </div>
+
+        <div class="field">
+          <label>State *</label>
+          <input id="fState" value="Karnataka" readonly>
+        </div>
+
+        <div class="field">
+          <label>Phone *</label>
+          <input id="fPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digit mobile number" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10);updatePreview()">
+        </div>
+
+        <div class="field">
+          <label>WhatsApp (optional)</label>
+          <input id="fWhatsapp" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digit WhatsApp number" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
+        </div>
+
+        <div class="field">
+          <label>Promo Badge (optional)</label>
+          <input id="fBadge" maxlength="12" placeholder="e.g. 10% OFF" oninput="updatePreview()">
+          <span class="hint">Shows as a small round badge on the ad. Leave blank for none.</span>
+        </div>
+
+        <div class="field full" id="fieldBgColor">
+          <label>Background Color</label>
+          <div class="colorrow">
+            <div id="swatches" class="swatches"></div>
+            <input id="fColor" class="colorinput" type="color" value="#ffffff" onchange="setColor(this.value)">
+            <span id="contrastLabel" class="hint"></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Start Date & Time *</label>
+          <input id="fStart" type="datetime-local">
+        </div>
+
+        <div class="field">
+          <label>End Date & Time *</label>
+          <input id="fEnd" type="datetime-local">
+        </div>
+
+      </div>
+
+      <div class="actions">
+        <button class="btn" onclick="cancelCreate()">Cancel</button>
+        <button class="btn" onclick="saveAd('draft')">Save Draft</button>
+        <button class="btn primary" onclick="saveAd('publish')">Publish</button>
       </div>
     </div>
-    <div id="premiumBannerWrap" class="premium-banner-wrap"></div>
-    <div class="premium-banner-controls">
-      <div id="premiumBannerDots" class="premium-banner-dots"></div>
-      <div id="premiumBannerMeta" style="font-family:var(--mono);font-size:11px;color:var(--muted)"></div>
+
+    <!-- PREVIEW -->
+    <div class="sticky">
+      <div class="panel">
+        <h2>Live Preview</h2>
+        <div id="previewTemplateLabel" class="hint" style="text-align:center;margin-bottom:10px"></div>
+        <div class="previewwrap"><div id="adPreview"></div></div>
+        <div id="previewId" class="hint" style="text-align:center;margin-top:10px"></div>
+      </div>
     </div>
   </div>
-  <div id="adsGrid" class="ads-grid"></div>
-</section>
-
-<section class="features">
-  <div class="feature-grid">
-    <div class="feature"><div class="feature-icon">▣</div><h3>Top businesses</h3><p>Discover useful local businesses and services near you.</p></div>
-    <div class="feature"><div class="feature-icon">%</div><h3>Great offers</h3><p>Find promotions and advertisements in one place.</p></div>
-    <div class="feature"><div class="feature-icon">✓</div><h3>Easy to explore</h3><p>Search by business, category or location in seconds.</p></div>
-    <div class="feature"><div class="feature-icon">↗</div><h3>Easy to connect</h3><p>Call, WhatsApp or get directions directly from a listing.</p></div>
   </div>
-</section>
 
-<section class="section about" id="about">
-  <div class="about-inner">
-    <span class="eyebrow"><span class="dot"></span>Why Adspool</span>
-    <h2>One place for local discovery.</h2>
-    <p>Adspool gives businesses a simple way to get discovered, and gives visitors a simple way to find businesses, services and offers around them — no clutter, just active listings.</p>
-  </div>
-</section>
+  <div id="tabPremiumAds" class="createtabpanel">
+    <div class="panel">
+      <h2 id="premiumFormTitle">Upload Premium Banner</h2>
+      <div class="formgrid">
 
-<footer class="footer">
-  <div class="footer-inner">
-    <div>
-      <span class="brandmark">
-        <img class="spool" src="../adspool-logo.png" alt="Adspool" style="filter:brightness(0) invert(1)">
-      </span>
-      <div class="footer-tagline">A local business directory built for Bangalore's neighbourhoods.</div>
+        <div class="field">
+          <label id="premiumImageLabel">Banner Creative *</label>
+          <input id="premiumImage" type="file" accept="image/jpeg,image/png,image/webp">
+          <div class="banner-note" id="premiumImageNote">Recommended: <strong>1920 × 400 px</strong> (4.8:1). Create the artwork separately; this portal is only for uploading and scheduling it.</div>
+        </div>
+
+        <div class="field">
+          <label>Business / Brand Name *</label>
+          <input id="premiumBusiness" maxlength="100" placeholder="Example: ABC Automobiles">
+        </div>
+
+        <div class="field">
+          <label>Category *</label>
+          <select id="premiumCategory"></select>
+        </div>
+
+        <div class="field">
+          <label>Start Date & Time *</label>
+          <input id="premiumStart" type="datetime-local">
+        </div>
+
+        <div class="field">
+          <label>Expiry Date & Time *</label>
+          <input id="premiumEnd" type="datetime-local">
+        </div>
+
+        <div class="field full">
+          <label>Preview</label>
+          <div id="premiumPreview">
+            <div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:10px">Choose a banner to preview it here.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="premiumCancelEditBtn" onclick="clearPremiumForm()" style="display:none">Cancel Edit</button>
+        <button class="btn" onclick="clearPremiumForm()">Clear</button>
+        <button class="btn primary" id="premiumSubmitBtn" onclick="savePremiumBanner()">Upload & Schedule</button>
+      </div>
     </div>
-    <div class="footer-links">
-      <a href="#about">About</a><a href="#ads">Ads</a><a href="#categories">Categories</a>
+
+    <div class="panel">
+      <div class="toolbar">
+        <h2 style="margin:0;flex:1">Uploaded Premium Banners</h2>
+        <select id="premiumFilter" onchange="renderPremiumAdmin()">
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+      <div id="premiumAdminGrid" class="banner-grid"></div>
     </div>
   </div>
-  <div class="footer-bottom wrap">© 2026 Adspool. All rights reserved.</div>
-</footer>
+</section>
 
-<div id="modalBackdrop" class="modal-backdrop" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="modal-head"><h2 id="modalTitle">Advertisement</h2><button class="close" onclick="closeModal()">×</button></div>
-    <div id="modalContent"></div>
+<!-- CATEGORIES -->
+<section id="categories" class="view">
+  <span class="eyebrow"><span class="dot"></span>Taxonomy</span>
+  <h1>Categories</h1>
+  <p class="sub">Manage the categories available while creating advertisements.</p>
+  <div class="panel">
+    <div class="toolbar">
+      <input id="newCategory" placeholder="New category name">
+      <button class="btn primary" onclick="addCategory()">Add Category</button>
+    </div>
+    <div id="categoryList"></div>
   </div>
+</section>
+
+<!-- PUBLIC -->
+<section id="public" class="view">
+  <span class="eyebrow"><span class="dot"></span>Preview</span>
+  <h1>Public Ads</h1>
+  <p class="sub">Visitor-facing view.</p>
+
+
+  <div class="publicbar">
+    <input id="publicSearch" class="search" placeholder="Search business, service or location…" oninput="syncPublicSearch(this.value)">
+    <div id="categoryChips" class="categorychips"></div>
+  </div>
+  <div id="publicStickySpacer" style="height:0;transition:height .2s ease"></div>
+
+  <div id="adminPublicPremium" class="premium-section" style="display:none">
+    <div style="margin-bottom:10px"><h2 style="font-size:18px">Premium Banners</h2></div>
+    <div id="adminPublicPremiumWrap" class="premium-banner-wrap"></div>
+  </div>
+
+  <div id="publicGrid" class="publicgrid"></div>
+</section>
+
+</main>
+</div>
 </div>
 
 <div id="toast" class="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 const SUPABASE_URL = 'https://vezffgjnfsuhrbaqpepu.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_QyQhdXbm55VV1nRNlUuH2A_I2iyS56n';
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-let state={ads:[],categories:[]};
-let selectedCategory='all';
-let premiumBanners=[];let premiumIndex=0;let premiumTimer=null;
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+</script>
 
-async function load(){
-  try{
-    const [catResult,adsResult,bannerResult]=await Promise.all([
-      supabaseClient.from('categories').select('*').order('id',{ascending:true}),
-      supabaseClient.from('ads').select('*').order('created_at',{ascending:false}),
-      supabaseClient.from('premium_banners').select('*').order('created_at',{ascending:false})
-    ]);
-    if(catResult.error) throw new Error('Categories: '+catResult.error.message);
-    if(adsResult.error) throw new Error('Ads: '+adsResult.error.message);
-    if(bannerResult.error) throw new Error('Premium banners: '+bannerResult.error.message);
-    state.categories=(catResult.data||[]).map(mapCategoryRow);
-    state.ads=(adsResult.data||[]).map(mapAdRow);
-    premiumBanners=(bannerResult.data||[]).map(mapPremiumRow);
-    state.ads.forEach(refreshStatus);
-    premiumBanners.forEach(refreshPremiumStatus);
-    renderCategories();
-    renderPremiumBanner();
-    renderAds();
-    updateStats();
-  }catch(e){
-    console.error('Public site load error:',e);
-    showToast('Could not load live listings. Please refresh.');
-    state={ads:[],categories:[]};
-    premiumBanners=[];
-    renderCategories();renderPremiumBanner();renderAds();updateStats();
-  }
+<script>
+const STORAGE='adspool_mvp_v1';
+const PREMIUM_STORAGE='adspool_premium_banners_v1';
+const CREATIVE_BUCKET='ad-creatives';
+
+const defaultCategories=[
+'Automobile','Lawyers','Doctors & Clinics','Salons & Beauty','Restaurants & Food','Shops & Retail',
+'Real Estate','Education & Training','Hotels & Travel','Home Services','Finance & Insurance',
+'IT & Digital Services','Construction','Interior Design','Electrical & Plumbing','Health & Fitness',
+'Wedding & Events','Manufacturers','Professional Services','Other'
+];
+
+const swatches=['#ffffff','#f2f4f7','#dff3ff','#e4f7e8','#fff6bf','#ffe6c7','#ffe1ea','#173a67','#155b3a','#4b2a72','#7c1d1d','#111111'];
+
+/* Each new ad is suggested the next template in rotation for variety, but the
+   admin can always pick any of these 5 typography templates instead — whatever
+   is picked/shown in the admin live preview is exactly what renders on the
+   public site once published. */
+const adTemplates=[
+  {id:1,name:'Classic Signage',cssVar:'var(--signage)'},
+  {id:2,name:'Editorial Serif',cssVar:'var(--tpl2-font)'},
+  {id:3,name:'Modern Sans',cssVar:'var(--tpl3-font)'},
+  {id:4,name:'Classified Typewriter',cssVar:'var(--tpl4-font)'},
+  {id:5,name:'Bold Billboard',cssVar:'var(--tpl5-font)'}
+];
+
+let state={
+  ads:[],
+  categories:defaultCategories.map((name,i)=>({id:i+1,name,active:true})),
+  nextId:1,
+  templateCounter:0
+};
+
+let premiumBanners=[];
+let editingId=null;
+let editingPremiumId=null;
+let selectedTemplateId=1;
+let publicCategory='all';
+let premiumCarouselIndex=0;
+let normalAdMode='common';
+let creativeImageData=null;
+
+function esc(s){
+  return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 }
 
-function mapCategoryRow(r){
-  return {id:r.id,name:r.name,active:r.active!==false};
+function mapCategoryRow(c){
+  return {id:Number(c.id),name:c.name,active:Boolean(c.active),createdAt:c.created_at};
 }
 
 function mapAdRow(r){
   return {
-    id:r.id,adId:r.ad_id,businessName:r.business_name,categoryId:r.category_id,
-    adType:r.ad_type||'common',services:Array.isArray(r.services)?r.services:[],
-    addressLine:r.address_line,area:r.area,city:r.city,state:r.state,pin:r.pin,
-    phone:r.phone,whatsapp:r.whatsapp||'',badge:r.badge||'',
-    backgroundColor:r.background_color||'#ffffff',textColor:r.text_color||contrast(r.background_color||'#ffffff'),
-    templateId:r.template_id||1,creativeImageUrl:r.creative_image_url||'',
-    creativeImageData:r.creative_image_url||'',status:r.status||'draft',
-    startAt:r.start_at,endAt:r.end_at,createdAt:r.created_at,updatedAt:r.updated_at
+    id:r.id,
+    adId:r.ad_id,
+    businessName:r.business_name,
+    categoryId:Number(r.category_id),
+    adType:r.ad_type||'common',
+    services:Array.isArray(r.services)?r.services:[],
+    addressLine:r.address_line,
+    area:r.area,
+    city:r.city,
+    state:r.state,
+    pin:r.pin,
+    phone:r.phone,
+    whatsapp:r.whatsapp||'',
+    badge:r.badge||'',
+    backgroundColor:r.background_color||'#ffffff',
+    textColor:r.text_color||contrast(r.background_color||'#ffffff'),
+    templateId:r.template_id||1,
+    creativeImageUrl:r.creative_image_url||'',
+    status:r.status||'draft',
+    startAt:r.start_at,
+    endAt:r.end_at,
+    createdAt:r.created_at,
+    updatedAt:r.updated_at
   };
 }
 
-function mapPremiumRow(r){
-  return {id:r.id,businessName:r.business_name,categoryId:r.category_id,imageData:r.image_url,
-    startAt:r.start_at,endAt:r.end_at,status:r.status||'scheduled',createdAt:r.created_at,updatedAt:r.updated_at};
+async function load(){
+  await loadCategoriesFromSupabase();
+  await loadAdsFromSupabase();
+  await loadPremiumBannersFromSupabase();
+
+  normalize();
+  premiumBanners.forEach(refreshPremiumStatus);
+  renderAll();
+  premiumCategories();
+  renderPremiumAdmin();
 }
 
-function activePremiumBanners(){
-  const now=Date.now();
-  return premiumBanners.filter(b=>{
-    const start=Date.parse(b.startAt), end=Date.parse(b.endAt);
-    const active = b.status==='active' || (Number.isFinite(start) && Number.isFinite(end) && now>=start && now<=end);
-    if(active) b.status='active';
-    return active;
-  });
-}
+async function loadCategoriesFromSupabase(){
+  const {data,error}=await supabaseClient
+    .from('categories')
+    .select('id,name,active,created_at')
+    .order('id',{ascending:true});
 
-function currentPremiumArr(){
-  return activePremiumBanners().filter(b=>
-    selectedCategory==='all' || String(b.categoryId)===String(selectedCategory)
-  );
-}
-
-function renderPremiumBanner(){
-  const section=document.getElementById('premiumSection');
-  const wrap=document.getElementById('premiumBannerWrap');
-  const dots=document.getElementById('premiumBannerDots');
-  const meta=document.getElementById('premiumBannerMeta');
-  if(!section||!wrap)return;
-
-  const arr=currentPremiumArr();
-
-  if(!arr.length){
-    section.style.display='none';
-    wrap.innerHTML='';
-    if(dots)dots.innerHTML='';
-    if(meta)meta.textContent='';
-    if(premiumTimer){clearInterval(premiumTimer);premiumTimer=null;}
+  if(error){
+    console.error('Categories load error:',error);
+    showToast('Could not load categories: '+error.message);
     return;
   }
 
-  if(premiumIndex>=arr.length)premiumIndex=0;
-
-  const b=arr[premiumIndex];
-  section.style.display='block';
-
-  const arrows=arr.length>1?`
-    <button type="button" class="premium-banner-arrow prev" aria-label="Previous banner" onclick="premiumPrev()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-    </button>
-    <button type="button" class="premium-banner-arrow next" aria-label="Next banner" onclick="premiumNext()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-    </button>`:'';
-
-  wrap.innerHTML=`
-    <img class="premium-banner-img" src="${esc(b.imageData||'')}" alt="Premium banner">
-    <span class="premium-banner-label">PREMIUM</span>
-    ${arrows}`;
-
-  if(dots)dots.innerHTML=arr.map((x,i)=>`<span class="premium-dot ${i===premiumIndex?'active':''}"></span>`).join('');
-  if(meta)meta.textContent=`${premiumIndex+1} of ${arr.length}`;
-
-  if(premiumTimer)clearInterval(premiumTimer);
-  premiumTimer=arr.length>1?setInterval(()=>{
-    const current=currentPremiumArr();
-    if(!current.length){renderPremiumBanner();return;}
-    premiumIndex=(premiumIndex+1)%current.length;
-    renderPremiumBanner();
-  },5000):null;
+  state.categories=(data||[]).map(mapCategoryRow);
+  sortCategories();
 }
 
-function premiumNext(){
-  const arr=currentPremiumArr();
-  if(!arr.length)return;
-  premiumIndex=(premiumIndex+1)%arr.length;
-  renderPremiumBanner();
+async function loadAdsFromSupabase(){
+  const {data,error}=await supabaseClient
+    .from('ads')
+    .select('*')
+    .order('created_at',{ascending:false});
+
+  if(error){
+    console.error('Ads load error:',error);
+    showToast('Could not load advertisements: '+error.message);
+    state.ads=[];
+    return;
+  }
+
+  state.ads=(data||[]).map(mapAdRow);
+  state.nextId=getNextAdNumber();
 }
 
-function premiumPrev(){
-  const arr=currentPremiumArr();
-  if(!arr.length)return;
-  premiumIndex=(premiumIndex-1+arr.length)%arr.length;
-  renderPremiumBanner();
+function normalize(){
+  (state.ads||[]).forEach(refreshStatus);
+  if(typeof state.nextId!=='number')state.nextId=getNextAdNumber();
+  if(typeof state.templateCounter!=='number')state.templateCounter=0;
+  sortCategories();
 }
 
-function updateStats(){
-  const total=activeAds().length;
-  const cats=state.categories.filter(c=>c.active).length;
-  document.getElementById('statTotal').textContent=total;
-  document.getElementById('statCats').textContent=cats;
-  document.getElementById('statTotalSticky').textContent=total;
-  document.getElementById('statCatsSticky').textContent=cats;
+/* Categories, Ads and Premium Banners are persisted in Supabase. */
+function persist(){}
+
+function mapPremiumRow(r){
+  return {
+    id:r.id,
+    businessName:r.business_name,
+    categoryId:Number(r.category_id),
+    imageData:r.image_url,
+    startAt:r.start_at,
+    endAt:r.end_at,
+    status:r.status||'scheduled',
+    createdAt:r.created_at,
+    updatedAt:r.updated_at
+  };
 }
 
-function syncSearch(val){
-  document.getElementById('searchInput').value=val;
-  document.getElementById('searchInputSticky').value=val;
-  renderAds();
+async function loadPremiumBannersFromSupabase(){
+  const {data,error}=await supabaseClient
+    .from('premium_banners')
+    .select('*')
+    .order('created_at',{ascending:false});
+
+  if(error){
+    console.error('Premium banners load error:',error);
+    showToast('Could not load premium banners: '+error.message);
+    premiumBanners=[];
+    return;
+  }
+
+  premiumBanners=(data||[]).map(mapPremiumRow);
+}
+
+function contrast(hex){
+  hex=(hex||'#ffffff').replace('#','');
+  const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
+  return(.299*r+.587*g+.114*b)>155?'#111827':'#fff';
 }
 
 function refreshStatus(a){
-  if(a.status==='unpublished'||a.status==='draft')return a.status;
-  const start=Date.parse(a.startAt),end=Date.parse(a.endAt),now=Date.now();
-  if(Number.isNaN(start)||Number.isNaN(end))return a.status;
-  if(now<start)a.status='scheduled';
-  else if(now<=end)a.status='published';
-  else a.status='expired';
-  return a.status;
+  if(a.status==='unpublished'||a.status==='draft')return;
+  const s=Date.parse(a.startAt),e=Date.parse(a.endAt),n=Date.now();
+  if(Number.isNaN(s)||Number.isNaN(e))return;
+  a.status=n<s?'scheduled':n<=e?'published':'expired';
 }
 
-function activeAds(){
-  return state.ads.filter(a=>{
-    refreshStatus(a);
-    return a.status==='published' && new Date(a.startAt)<=new Date() && new Date(a.endAt)>=new Date();
-  });
-}
-
-function esc(s){
-  return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+function refreshPremiumStatus(b){
+  const s=Date.parse(b.startAt),e=Date.parse(b.endAt),n=Date.now();
+  b.status=Number.isNaN(s)||Number.isNaN(e)?b.status:(n<s?'scheduled':n<=e?'active':'expired');
 }
 
 function showToast(t){
   const e=document.getElementById('toast');
   e.textContent=t;
   e.classList.add('show');
-  clearTimeout(showToast._t);
-  showToast._t=setTimeout(()=>{ e.classList.remove('show') },2400);
+  setTimeout(()=>{ e.classList.remove('show') },2200);
 }
 
-function contrast(hex){
-  hex=(hex||'#fff').replace('#','');
-  const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
-  return (0.299*r+0.587*g+0.114*b)>155?'#111827':'#fff';
+/* LOGIN — Supabase Auth + admin_users authorization */
+async function login(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  const errorEl=document.getElementById('loginError');
+
+  errorEl.textContent='';
+
+  if(!email||!password){
+    errorEl.textContent='Please enter email and password.';
+    return;
+  }
+
+  const {data,error}=await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if(error){
+    errorEl.textContent=error.message;
+    return;
+  }
+
+  const {data:adminUser,error:adminError}=await supabaseClient
+    .from('admin_users')
+    .select('user_id,email')
+    .eq('user_id',data.user.id)
+    .maybeSingle();
+
+  if(adminError || !adminUser){
+    console.log('AUTH USER:', data.user);
+    console.log('AUTH USER ID:', data.user?.id);
+    console.log('ADMIN USER:', adminUser);
+    console.log('ADMIN ERROR:', adminError);
+
+    errorEl.textContent =
+        'Admin check failed. User ID: ' +
+        (data.user?.id || 'NO USER ID') +
+        ' | Error: ' +
+        (adminError?.message || 'No admin record returned');
+
+    return;
+}
+
+  document.getElementById('loginView').style.display='none';
+  document.getElementById('app').style.display='block';
+  await load();
+}
+
+async function logout(){
+  await supabaseClient.auth.signOut();
+
+  document.getElementById('loginEmail').value='';
+  document.getElementById('loginPassword').value='';
+  document.getElementById('loginError').textContent='';
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginView').style.display='flex';
+}
+
+/* NAVIGATION */
+function showView(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.getElementById(v).classList.add('active');
+  document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
+
+  if(v==='dashboard')renderDashboard();
+  if(v==='ads')renderAdsTable();
+  if(['published','scheduled','drafts','expired'].includes(v))renderAdsTable();
+  if(v==='categories')renderCategories();
+  if(v==='public')renderPublic();
+
+  updateAdminStickyBar();
+}
+
+function switchCreateTab(tab){
+  document.querySelectorAll('.createtab').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));
+  document.getElementById('tabNormalAds').classList.toggle('active',tab==='normal');
+  document.getElementById('tabPremiumAds').classList.toggle('active',tab==='premium');
+  if(tab==='premium'){ premiumCategories(); setPremiumDefaultDates(); renderPremiumAdmin(); }
+}
+
+/* NORMAL ADS: Common vs Creative */
+function setNormalMode(mode){
+  normalAdMode=mode;
+  document.querySelectorAll('input[name="normalMode"]').forEach(r=>r.checked=(r.value===mode));
+  document.getElementById('fieldCreativeUpload').style.display=mode==='creative'?'':'';
+  document.getElementById('fieldTemplate').style.display=mode==='creative'?'none':'';
+  document.getElementById('fieldServices').style.display=mode==='creative'?'none':'';
+  document.getElementById('fieldBgColor').style.display=mode==='creative'?'none':'';
+}
+
+function switchNormalMode(mode){
+  setNormalMode(mode);
+  updatePreview();
+}
+
+function handleCreativeImageChange(input){
+  const f=input.files[0];
+  if(!f)return;
+  if(!['image/jpeg','image/png','image/webp'].includes(f.type)){
+    showToast('Use JPG, PNG or WebP.');
+    input.value='';
+    return;
+  }
+  if(f.size>2*1024*1024){
+    showToast('Keep the creative below 2 MB.');
+    input.value='';
+    return;
+  }
+  fileData(f).then(data=>{ creativeImageData=data; updatePreview(); });
+}
+
+/* CREATE / EDIT */
+function startCreate(){
+  editingId=null;
+  selectedTemplateId=(state.templateCounter%adTemplates.length)+1;
+  fillCategorySelects();
+  clearForm();
+  renderTemplatePicker();
+  document.getElementById('formTitle').textContent='Create Advertisement';
+  document.getElementById('formSub').textContent='Enter the details and watch the advertisement update live.';
+  document.getElementById('previewId').textContent='';
+  showView('create');
+  switchCreateTab('normal');
+}
+
+function startCreatePremium(){
+  showView('create');
+  switchCreateTab('premium');
+}
+
+function editAd(id){
+  const a=state.ads.find(x=>x.id===id);
+  if(!a)return;
+  editingId=id;
+  selectedTemplateId=a.templateId||1;
+  fillCategorySelects();
+  renderTemplatePicker();
+
+  setNormalMode(a.adType==='creative'?'creative':'common');
+  creativeImageData=a.creativeImageUrl||null;
+  document.getElementById('fCreativeImage').value='';
+  document.getElementById('creativeImageLabel').textContent='Banner Creative (leave empty to keep current)';
+  document.getElementById('creativeImageNote').textContent='Upload a new file only if you want to replace the current creative.';
+
+  document.getElementById('fBusiness').value=a.businessName||'';
+  document.getElementById('fCategory').value=a.categoryId;
+  document.getElementById('fAddressLine').value=a.addressLine||'';
+  document.getElementById('fArea').value=a.area||'';
+  document.getElementById('fPin').value=a.pin||'';
+  document.getElementById('fCity').value=a.city||'Bangalore';
+  document.getElementById('fState').value=a.state||'Karnataka';
+  document.getElementById('fPhone').value=a.phone||'';
+  document.getElementById('fWhatsapp').value=a.whatsapp||'';
+  document.getElementById('fBadge').value=a.badge||'';
+  document.getElementById('fColor').value=a.backgroundColor||'#ffffff';
+
+  document.getElementById('servicesContainer').innerHTML='';
+  const services=(a.services&&a.services.length)?a.services:[''];
+  services.forEach(s=>addService(s));
+
+  document.getElementById('fStart').value=toLocalInput(new Date(a.startAt));
+  document.getElementById('fEnd').value=toLocalInput(new Date(a.endAt));
+
+  setColor(a.backgroundColor||'#ffffff');
+  document.getElementById('formTitle').textContent='Edit Advertisement';
+  document.getElementById('formSub').textContent='Enter the details and watch the advertisement update live.';
+  document.getElementById('previewId').textContent=a.adId?('Editing '+a.adId):'';
+  showView('create');
+  switchCreateTab('normal');
+}
+
+function cancelCreate(){
+  editingId=null;
+  showView('ads');
+}
+
+function clearForm(){
+  ['fBusiness','fAddressLine','fArea','fPin','fPhone','fWhatsapp','fBadge'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fCity').value='Bangalore';
+  document.getElementById('fState').value='Karnataka';
+  document.getElementById('servicesContainer').innerHTML='';
+  addService(); addService(); addService();
+  document.getElementById('fColor').value='#ffffff';
+  document.getElementById('fCreativeImage').value='';
+  creativeImageData=null;
+  document.getElementById('creativeImageLabel').textContent='Banner Creative *';
+  document.getElementById('creativeImageNote').textContent='Upload your ready-made banner design (JPG, PNG or WebP). It will be shown on the ad exactly as uploaded.';
+  setNormalMode('common');
+  setColor('#ffffff');
+  const d=new Date();
+  const e=new Date(Date.now()+30*86400000);
+  document.getElementById('fStart').value=toLocalInput(d);
+  document.getElementById('fEnd').value=toLocalInput(e);
+  updatePreview();
+}
+
+function toLocalInput(d){
+  const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);
+  return x.toISOString().slice(0,16);
+}
+
+function fillCategorySelects(){
+  const active=state.categories.filter(c=>c.active);
+  document.getElementById('fCategory').innerHTML=active.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  document.getElementById('adCategoryFilter').innerHTML='<option value="all">All categories</option>'+state.categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+}
+
+function premiumCategories(){
+  const e=document.getElementById('premiumCategory');
+  if(!e)return;
+  e.innerHTML='<option value="">Select category</option>'+state.categories.filter(c=>c.active).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+}
+
+function getFormServices(){
+  return[...document.querySelectorAll('#servicesContainer .serviceInput')].map(x=>x.value.trim()).filter(Boolean);
+}
+
+function addService(value=''){
+  const box=document.getElementById('servicesContainer');
+  const row=document.createElement('div');
+  row.className='serviceRow';
+  const input=document.createElement('input');
+  input.className='serviceInput';
+  input.placeholder='Service';
+  input.value=value;
+  input.oninput=updatePreview;
+  const remove=document.createElement('button');
+  remove.className='btn serviceRemove';
+  remove.type='button';
+  remove.textContent='×';
+  remove.onclick=()=>{ row.remove(); updatePreview(); };
+  row.append(input,remove);
+  box.append(row);
+}
+
+/* ADDRESS */
+function getAddressData(){
+  return{
+    addressLine:document.getElementById('fAddressLine').value.trim(),
+    area:document.getElementById('fArea').value.trim(),
+    city:document.getElementById('fCity').value.trim(),
+    state:document.getElementById('fState').value.trim(),
+    pin:document.getElementById('fPin').value.trim()
+  };
 }
 
 function buildAddress(a){
@@ -603,224 +1066,816 @@ function mapsUrl(address){
   return'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(address);
 }
 
-function getSizing(a,address){
-  const services=(a.services||[]).filter(Boolean);
-  const chars=services.reduce((n,x)=>n+x.length,0);
-  let serviceSize=14.5;
-  if(services.length>=4)serviceSize=13;
-  if(services.length>=8)serviceSize=12;
-  if(chars>120)serviceSize=12;
-  let addressSize=12.5;
-  if((address||'').length>90)addressSize=11.5;
-  let nameSize=22;
-  const name=(a.businessName||'Business').length;
-  if(name>24)nameSize=19;
-  if(name>38)nameSize=17;
-  return {serviceSize,addressSize,nameSize};
-}
-
+/* AD MARKUP */
 function adMarkup(a){
   if(a.adType==='creative'){
     const badge=(a.badge||'').trim();
-    if(!a.creativeImageData){
-      return`<div class="ad-frame"><div class="empty" style="padding:24px"><strong>Creative not available</strong></div></div>`;
+    const image=a.creativeImageUrl||a.creativeImageData||'';
+    if(!image){
+      return`<div class="ad-frame"><div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:16px">No creative uploaded</div></div>`;
     }
     return`<div class="ad-frame">
       ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
-      <img class="creative-preview-img" src="${esc(a.creativeImageData)}" alt="${esc(a.businessName||'Business')}">
+      <img class="creative-preview-img" src="${esc(image)}" alt="${esc(a.businessName||'Business')}">
     </div>`;
   }
-  const bg=a.backgroundColor||'#fff',fg=a.textColor||contrast(bg);
+  const bg=a.backgroundColor||'#fff';
+  const fg=a.textColor||contrast(bg);
   const address=buildAddress(a);
-  const s=getSizing(a,address);
-  const services=(a.services||[]).filter(Boolean);
-  const serviceHtml=services.length?services.map(esc).join(' <span>•</span> '):'Local business services';
   const tpl=a.templateId||1;
   const badge=(a.badge||'').trim();
-  return `<div class="ad-frame">
+  return`<div class="ad-frame">
     ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
     <div class="ad tpl-${tpl}" style="color:${fg};background:${esc(bg)}">
-      <div class="adhead" style="font-size:${s.nameSize}px">${esc(a.businessName||'Business Name')}</div>
+      <div class="adhead">${esc(a.businessName||'Business Name')}</div>
       <div class="adbody">
-        <div class="servicesline" style="font-size:${s.serviceSize}px">${serviceHtml}</div>
-        <div class="address" style="font-size:${s.addressSize}px">📍 ${esc(address||'')}</div>
+        <div class="servicesline">${(a.services||[]).map(esc).join(' • ')}</div>
+        <div class="address">📍 ${esc(address||'Address')}</div>
+        ${address?`<a class="directionBtn" href="${mapsUrl(address)}" target="_blank" rel="noopener">📍 Share Directions</a>`:''}
       </div>
-      <div class="adphone" style="font-size:20px">${esc(a.phone||'')}</div>
+      <div class="adphone">${esc(a.phone||'')}</div>
     </div>
   </div>`;
 }
 
-function loadPremiumBanners(){
-  premiumBanners.forEach(refreshPremiumStatus);
-}
-function refreshPremiumStatus(b){
-  const s=Date.parse(b.startAt),e=Date.parse(b.endAt),n=Date.now();
-  if(Number.isNaN(s)||Number.isNaN(e))return;
-  b.status=(n<s?'scheduled':n<=e?'active':'expired');
-}
-function activePremiumBanners(){
-  loadPremiumBanners();
-  return premiumBanners.filter(b=>b.status==='active');
-}
-
-function currentPremiumArr(){
-  return activePremiumBanners().filter(x=>selectedCategory==='all'||String(x.categoryId)===String(selectedCategory));
-}
-function premiumNext(){
-  const arr=currentPremiumArr();
-  if(!arr.length)return;
-  premiumIndex=(premiumIndex+1)%arr.length;
-  renderPremiumBanner();
-}
-function premiumPrev(){
-  const arr=currentPremiumArr();
-  if(!arr.length)return;
-  premiumIndex=(premiumIndex-1+arr.length)%arr.length;
-  renderPremiumBanner();
-}
-
-function renderCategories(){
-  const cats=state.categories.filter(c=>c.active);
-  const html=`<button class="chip ${selectedCategory==='all'?'active':''}" onclick="setCategory('all')">All Categories</button>`+
-    cats.map(c=>`<button class="chip ${String(selectedCategory)===String(c.id)?'active':''}" onclick="setCategory('${c.id}')">${esc(c.name)}</button>`).join('');
-  document.getElementById('categories').innerHTML=html;
-  document.getElementById('categoriesSticky').innerHTML=html;
-}
-
-function setCategory(id){selectedCategory=id;premiumIndex=0;renderCategories();renderPremiumBanner();renderAds()}
-
-function resetFilters(){
-  selectedCategory='all';
-  document.getElementById('searchInput').value='';
-  document.getElementById('searchInputSticky').value='';
-  renderCategories();renderPremiumBanner();renderAds();
-  document.getElementById('categories').scrollLeft=0;
-  document.getElementById('categoriesSticky').scrollLeft=0;
-}
-
-function viewAllAds(e){
-  if(e)e.preventDefault();
-  const hadFilter=selectedCategory!=='all'||(document.getElementById('searchInput').value||'').trim()!=='';
-  resetFilters();
-  const bar=document.getElementById('stickySearchbar');
-  const topbarH=document.querySelector('.topbar')?.offsetHeight||0;
-  const stickyH=bar&&bar.classList.contains('show')?bar.offsetHeight:0;
-  const target=document.getElementById('ads');
-  const y=target.getBoundingClientRect().top+window.pageYOffset-(topbarH+stickyH+14);
-  window.scrollTo({top:y,behavior:'smooth'});
-  if(hadFilter)showToast('Filters cleared — showing all ads.');
-}
-
-function renderAds(){
-  const q=(document.getElementById('searchInput').value||'').trim().toLowerCase();
-  const arr=activeAds().filter(a=>{
-    const category=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
-    const hay=[a.businessName,a.adId,buildAddress(a),(a.services||[]).join(' '),category].join(' ').toLowerCase();
-    return (!q||hay.includes(q)) && (selectedCategory==='all'||String(a.categoryId)===String(selectedCategory));
-  });
-
-  const grid=document.getElementById('adsGrid');
-  if(!arr.length){
-    grid.innerHTML=`<div class="empty"><strong>No active advertisements found.</strong>New or currently active business ads will appear here.</div>`;
+/* PREVIEW */
+function updatePreview(){
+  if(normalAdMode==='creative'){
+    const business=document.getElementById('fBusiness').value||'Business Name';
+    const badge=(document.getElementById('fBadge').value||'').trim();
+    document.getElementById('adPreview').innerHTML=creativeImageData?
+      `<div class="ad-frame">${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}<img class="creative-preview-img" src="${esc(creativeImageData)}" alt="${esc(business)}"></div>`:
+      `<div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:16px;padding:40px 16px">Choose a banner creative to preview it here.</div>`;
+    const tplLabel=document.getElementById('previewTemplateLabel');
+    if(tplLabel)tplLabel.textContent='Showing: Custom Creative Upload';
     return;
   }
 
-  grid.innerHTML=arr.map(a=>{
-    const cat=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
-    const phone=(a.phone||'').replace(/\s/g,'');
-    const wa=(a.whatsapp||'').replace(/\D/g,'');
-    const address=buildAddress(a);
-    return `<article class="ad-card">
-      <div class="ad-mini">${adMarkup(a)}</div>
-      <div class="ad-perf"></div>
-      <div class="ad-info">
-        <div class="ad-name">${esc(a.businessName)}</div>
-        <div class="ad-category">${esc(cat)}</div>
-        <div class="ad-id">${esc(a.adId||'Adspool Ad')}</div>
-        <div class="ad-actions">
-          <a class="btn primary" href="tel:${esc(phone)}">Call</a>
-          ${wa?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}">WhatsApp</a>`:''}
-          ${address?`<a class="btn" target="_blank" rel="noopener" href="${mapsUrl(address)}">Directions</a>`:''}
-          <button class="btn" onclick="shareAd('${esc(a.id)}')">Share</button>
+  const bg=document.getElementById('fColor').value;
+  const fg=contrast(bg);
+  document.getElementById('contrastLabel').textContent='Automatic text: '+(fg==='#fff'?'White':'Black');
+
+  const a={
+    businessName:document.getElementById('fBusiness').value||'Business Name',
+    services:getFormServices(),
+    addressLine:document.getElementById('fAddressLine').value||'Address',
+    area:document.getElementById('fArea').value,
+    city:document.getElementById('fCity').value,
+    state:document.getElementById('fState').value,
+    pin:document.getElementById('fPin').value,
+    phone:document.getElementById('fPhone').value||'+91 9001009001',
+    backgroundColor:bg,
+    textColor:fg,
+    templateId:selectedTemplateId,
+    badge:document.getElementById('fBadge').value
+  };
+
+  document.getElementById('adPreview').innerHTML=adMarkup(a);
+  const tplLabel=document.getElementById('previewTemplateLabel');
+  if(tplLabel){
+    const tpl=adTemplates[selectedTemplateId-1]||adTemplates[0];
+    tplLabel.textContent='Showing: '+tpl.name;
+  }
+}
+
+function setColor(c){
+  document.getElementById('fColor').value=c;
+  updatePreview();
+}
+
+function renderSwatches(){
+  document.getElementById('swatches').innerHTML=swatches.map(c=>`<button type="button" class="swatch" style="background:${c}" onclick="setColor('${c}')"></button>`).join('');
+}
+
+function renderTemplatePicker(){
+  const box=document.getElementById('templatePicker');
+  if(!box)return;
+  box.innerHTML=adTemplates.map(t=>`
+    <button type="button" class="tplchip ${t.id===selectedTemplateId?'active':''}" onclick="chooseTemplate(${t.id})">
+      <span class="tplchip-name">${esc(t.name)}</span>
+      <span class="tplchip-sample" style="font-family:${t.cssVar}">Aa Bb 123</span>
+    </button>`).join('');
+}
+
+function chooseTemplate(id){
+  selectedTemplateId=id;
+  renderTemplatePicker();
+  updatePreview();
+}
+
+/* CREATIVE STORAGE */
+function creativeExtension(file){
+  const map={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'};
+  return map[file?.type]||'jpg';
+}
+
+function storagePathFromPublicUrl(url){
+  if(!url)return null;
+  const marker=`/storage/v1/object/public/${CREATIVE_BUCKET}/`;
+  const i=String(url).indexOf(marker);
+  if(i<0)return null;
+  return decodeURIComponent(String(url).slice(i+marker.length).split('?')[0]);
+}
+
+async function uploadCreativeToStorage(file,adId){
+  const ext=creativeExtension(file);
+  const path=`${adId}/${crypto.randomUUID()}.${ext}`;
+  const {error}=await supabaseClient.storage
+    .from(CREATIVE_BUCKET)
+    .upload(path,file,{contentType:file.type,upsert:false,cacheControl:'3600'});
+  if(error)throw error;
+  const {data}=supabaseClient.storage.from(CREATIVE_BUCKET).getPublicUrl(path);
+  return {url:data.publicUrl,path};
+}
+
+async function removeCreativeFromStorage(url){
+  const path=storagePathFromPublicUrl(url);
+  if(!path)return;
+  const {error}=await supabaseClient.storage.from(CREATIVE_BUCKET).remove([path]);
+  if(error)console.warn('Could not remove creative from storage:',error);
+}
+
+/* SAVE AD */
+async function saveAd(mode){
+  const business=document.getElementById('fBusiness').value.trim();
+  const cat=document.getElementById('fCategory').value;
+  const address=getAddressData();
+  const phone=document.getElementById('fPhone').value.trim();
+  const s=document.getElementById('fStart').value;
+  const e=document.getElementById('fEnd').value;
+  const adType=normalAdMode;
+  const creativeFile=document.getElementById('fCreativeImage').files[0];
+  const existingAd=editingId?state.ads.find(a=>a.id===editingId):null;
+
+  if(!business){ showToast('Business Name is required.'); return; }
+  if(!cat){ showToast('Please select a Category.'); return; }
+
+  if(adType==='creative'){
+    if(!creativeFile && !creativeImageData && !(existingAd&&existingAd.creativeImageUrl)){
+      showToast('Please upload a banner creative.'); return;
+    }
+    if(creativeFile){
+      if(!['image/jpeg','image/png','image/webp'].includes(creativeFile.type)){ showToast('Use JPG, PNG or WebP.'); return; }
+      if(creativeFile.size>2*1024*1024){ showToast('Keep the creative below 2 MB.'); return; }
+    }
+  }
+
+  if(!address.addressLine){ showToast('Address Line is required.'); return; }
+  if(!address.area){ showToast('Area / Locality is required.'); return; }
+  if(!address.pin||address.pin.length!==6){ showToast('PIN / Area Code must be exactly 6 digits.'); return; }
+  if(!phone||phone.length!==10){ showToast('Phone must be exactly 10 digits.'); return; }
+  if(!s||!e){ showToast('Start and End Date & Time are required.'); return; }
+  if(new Date(e)<=new Date(s)){ showToast('End Date & Time must be after Start Date & Time.'); return; }
+
+  let adId=existingAd?.adId||null;
+  if(!editingId) adId=await generateNextAdId();
+
+  let uploaded=null;
+  let creativeUrl=null;
+  const oldCreativeUrl=existingAd?.creativeImageUrl||null;
+
+  try{
+    if(adType==='creative'){
+      if(creativeFile){
+        uploaded=await uploadCreativeToStorage(creativeFile,adId);
+        creativeUrl=uploaded.url;
+      }else{
+        creativeUrl=oldCreativeUrl||null;
+      }
+    }
+
+    const startAt=new Date(s).toISOString();
+    const endAt=new Date(e).toISOString();
+    const status=mode==='draft'?'draft':calculateStatus(startAt,endAt);
+
+    const payload={
+      business_name:business,
+      category_id:Number(cat),
+      ad_type:adType,
+      services:adType==='creative'?[]:getFormServices(),
+      address_line:address.addressLine,
+      area:address.area,
+      city:address.city,
+      state:address.state,
+      pin:address.pin,
+      phone:phone,
+      whatsapp:document.getElementById('fWhatsapp').value.trim()||null,
+      badge:document.getElementById('fBadge').value.trim()||null,
+      background_color:adType==='creative'?null:document.getElementById('fColor').value,
+      text_color:adType==='creative'?null:contrast(document.getElementById('fColor').value),
+      template_id:adType==='creative'?null:(selectedTemplateId||1),
+      creative_image_url:adType==='creative'?creativeUrl:null,
+      status,
+      start_at:startAt,
+      end_at:endAt,
+      updated_at:new Date().toISOString()
+    };
+
+    let error=null;
+
+    if(editingId){
+      const result=await supabaseClient
+        .from('ads')
+        .update(payload)
+        .eq('id',editingId)
+        .select('*')
+        .single();
+      error=result.error;
+    }else{
+      payload.ad_id=adId;
+      const result=await supabaseClient
+        .from('ads')
+        .insert(payload)
+        .select('*')
+        .single();
+      error=result.error;
+    }
+
+    if(error)throw error;
+
+    // Clean up the previous creative only after the database update succeeds.
+    if(oldCreativeUrl && oldCreativeUrl!==creativeUrl){
+      await removeCreativeFromStorage(oldCreativeUrl);
+    }
+
+    editingId=null;
+    creativeImageData=null;
+    await loadAdsFromSupabase();
+    renderAll();
+    showView('ads');
+    showToast(mode==='draft'?'Draft saved to Supabase.':'Advertisement saved to Supabase.');
+  }catch(error){
+    console.error('Save ad / creative storage error:',error);
+    if(uploaded?.url) await removeCreativeFromStorage(uploaded.url);
+    showToast('Could not save advertisement: '+(error?.message||error));
+  }
+}
+
+function calculateStatus(startAt,endAt){
+  const s=Date.parse(startAt),e=Date.parse(endAt),n=Date.now();
+  if(Number.isNaN(s)||Number.isNaN(e))return'published';
+  return n<s?'scheduled':n<=e?'published':'expired';
+}
+
+function getNextAdNumber(){
+  let max=0;
+  (state.ads||[]).forEach(a=>{
+    const m=String(a.adId||'').match(/^ADS-(\d+)$/i);
+    if(m)max=Math.max(max,Number(m[1]));
+  });
+  return max+1;
+}
+
+async function generateNextAdId(){
+  const {data,error}=await supabaseClient
+    .from('ads')
+    .select('ad_id')
+    .order('created_at',{ascending:false});
+  if(error){
+    console.warn('Could not calculate latest Ad ID:',error);
+  }
+  let max=getNextAdNumber();
+  (data||[]).forEach(a=>{
+    const m=String(a.ad_id||'').match(/^ADS-(\d+)$/i);
+    if(m)max=Math.max(max,Number(m[1])+1);
+  });
+  return'ADS-'+String(max).padStart(6,'0');
+}
+
+/* ADS */
+function setAdStatusFilter(s){
+  document.getElementById('adStatusFilter').value=s;
+  showView('ads');
+  renderAdsTable();
+}
+
+function renderAdsTable(){
+  refreshStatuses();
+  const q=(document.getElementById('adSearch')?.value||'').toLowerCase();
+  const cat=document.getElementById('adCategoryFilter')?.value||'all';
+  const st=document.getElementById('adStatusFilter')?.value||'all';
+
+  const arr=state.ads.filter(a=>
+    (!q||(a.adId+' '+a.businessName+' '+a.phone).toLowerCase().includes(q)) &&
+    (cat==='all'||String(a.categoryId)===cat) &&
+    (st==='all'||a.status===st)
+  );
+
+  document.getElementById('adsTable').innerHTML=arr.length?`<div class="tablewrap"><table class="table"><thead><tr>
+      <th>Ad ID</th><th>Business</th><th>Category</th><th>Start</th><th>End</th><th>Status</th><th>Actions</th>
+    </tr></thead><tbody>
+    ${arr.map(a=>`<tr>
+      <td class="mono">${esc(a.adId)}</td>
+      <td>${esc(a.businessName)}</td>
+      <td>${esc(state.categories.find(c=>c.id===a.categoryId)?.name||'Other')}</td>
+      <td>${new Date(a.startAt).toLocaleString()}</td>
+      <td>${new Date(a.endAt).toLocaleString()}</td>
+      <td><span class="badge ${a.status}">${a.status}</span></td>
+      <td style="display:flex;gap:6px">
+        <button class="btn small" onclick="editAd('${a.id}')">Edit</button>
+        <button class="btn small danger" onclick="deleteAd('${a.id}')">Delete</button>
+      </td>
+    </tr>`).join('')}
+    </tbody></table></div>`:'<div class="empty">No advertisements found.</div>';
+}
+
+function clearAdFilters(){
+  document.getElementById('adSearch').value='';
+  document.getElementById('adCategoryFilter').value='all';
+  document.getElementById('adStatusFilter').value='all';
+  renderAdsTable();
+}
+
+function refreshStatuses(){
+  state.ads.forEach(a=>{
+    if(a.status==='unpublished'||a.status==='draft')return;
+    a.status=calculateStatus(a.startAt,a.endAt);
+  });
+}
+
+async function deleteAd(id){
+  if(!confirm('Delete this advertisement?'))return;
+  const ad=state.ads.find(a=>a.id===id);
+
+  const {error}=await supabaseClient
+    .from('ads')
+    .delete()
+    .eq('id',id);
+
+  if(error){
+    console.error('Delete ad error:',error);
+    showToast('Could not delete advertisement: '+error.message);
+    return;
+  }
+
+  if(ad?.creativeImageUrl) await removeCreativeFromStorage(ad.creativeImageUrl);
+
+  await loadAdsFromSupabase();
+  renderAll();
+  showToast('Advertisement deleted.');
+}
+
+/* DASHBOARD */
+function renderDashboard(){
+  refreshStatuses();
+  const c={published:0,scheduled:0,draft:0,expired:0};
+  state.ads.forEach(a=>c[a.status]=(c[a.status]||0)+1);
+
+  document.getElementById('dashCards').innerHTML=[
+    ['Total Ads',state.ads.length],['Published',c.published],['Scheduled',c.scheduled],['Drafts',c.draft],['Expired',c.expired]
+  ].map(x=>`<div class="card"><div class="label">${x[0]}</div><div class="num">${x[1]}</div></div>`).join('');
+
+  const recent=state.ads.slice(0,5);
+  document.getElementById('recentAds').innerHTML=recent.length?`<div class="tablewrap"><table class="table"><thead><tr>
+      <th>Ad ID</th><th>Business</th><th>Category</th><th>Status</th><th>Actions</th>
+    </tr></thead><tbody>
+    ${recent.map(a=>`<tr>
+      <td class="mono">${esc(a.adId)}</td>
+      <td>${esc(a.businessName)}</td>
+      <td>${esc(state.categories.find(c=>c.id===a.categoryId)?.name||'Other')}</td>
+      <td><span class="badge ${a.status}">${a.status}</span></td>
+      <td><button class="btn small" onclick="editAd('${a.id}')">Edit</button></td>
+    </tr>`).join('')}
+    </tbody></table></div>`:'<div class="empty">No ads yet.</div>';
+}
+
+/* CATEGORIES */
+function renderCategories(){
+  document.getElementById('categoryList').innerHTML=state.categories.map(c=>`
+    <div class="catrow ${c.active?'':'inactive'}">
+      <span class="catname"><span class="catstatus"></span>${esc(c.name)}</span>
+      <button class="btn small" onclick="toggleCategory(${c.id})">${c.active?'Deactivate':'Activate'}</button>
+    </div>`).join('');
+}
+
+/* Keeps categories A→Z, with "Other" always pinned last regardless of when it was added */
+function sortCategories(){
+  state.categories.sort((a,b)=>{
+    const aOther=(a.name||'').trim().toLowerCase()==='other';
+    const bOther=(b.name||'').trim().toLowerCase()==='other';
+    if(aOther&&!bOther)return 1;
+    if(bOther&&!aOther)return-1;
+    return(a.name||'').localeCompare(b.name||'',undefined,{sensitivity:'base'});
+  });
+}
+
+async function addCategory(){
+  const input=document.getElementById('newCategory');
+  const n=input.value.trim();
+  if(!n){showToast('Category name is required.');return;}
+
+  const duplicate=state.categories.some(c=>String(c.name).trim().toLowerCase()===n.toLowerCase());
+  if(duplicate){showToast('Category already exists.');return;}
+
+  const {error}=await supabaseClient
+    .from('categories')
+    .insert({name:n,active:true});
+
+  if(error){
+    console.error('Add category error:',error);
+    showToast('Could not add category: '+error.message);
+    return;
+  }
+
+  input.value='';
+  await loadCategoriesFromSupabase();
+  fillCategorySelects();
+  premiumCategories();
+  renderCategories();
+  showToast('Category added.');
+}
+
+async function toggleCategory(id){
+  const c=state.categories.find(x=>Number(x.id)===Number(id));
+  if(!c){showToast('Category not found.');return;}
+
+  const {error}=await supabaseClient
+    .from('categories')
+    .update({active:!c.active})
+    .eq('id',id);
+
+  if(error){
+    console.error('Toggle category error:',error);
+    showToast('Could not update category: '+error.message);
+    return;
+  }
+
+  await loadCategoriesFromSupabase();
+  fillCategorySelects();
+  premiumCategories();
+  renderCategories();
+  showToast(c.active?'Category activated.':'Category deactivated.');
+}
+
+function publicActive(){
+  refreshStatuses();
+  return state.ads.filter(a=>a.status==='published');
+}
+
+function syncPublicSearch(val){
+  document.getElementById('publicSearch').value=val;
+  document.getElementById('publicSearchSticky').value=val;
+  renderPublic();
+}
+
+function renderPublic(){
+  const arr=publicActive();
+  const q=(document.getElementById('publicSearch')?.value||'').toLowerCase();
+  const cats=[{id:'all',name:'All Categories'},...state.categories.filter(c=>c.active)];
+
+  const chipsHtml=cats.map(c=>
+    `<button class="chip ${publicCategory===String(c.id)?'active':''}" onclick="publicCategory='${String(c.id)}';premiumCarouselIndex=0;renderPublic()">${esc(c.name)}</button>`
+  ).join('');
+  document.getElementById('categoryChips').innerHTML=chipsHtml;
+  document.getElementById('categoryChipsSticky').innerHTML=chipsHtml;
+
+  const filtered=arr.filter(a=>
+    (publicCategory==='all'||String(a.categoryId)===publicCategory) &&
+    (!q||(a.businessName+' '+(a.services||[]).join(' ')+' '+buildAddress(a)).toLowerCase().includes(q))
+  );
+
+  document.getElementById('publicGrid').innerHTML=filtered.length?filtered.map(a=>`
+    <div class="publicad">
+      <div class="mini">${adMarkup(a)}</div>
+      <div class="publicmeta"><strong>${esc(a.businessName)}</strong></div>
+    </div>`).join(''):'<div class="empty">No active advertisements found.</div>';
+
+  renderAdminPublicPremium();
+}
+
+/* PREMIUM */
+function fileData(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result);
+    r.onerror=rej;
+    r.readAsDataURL(file);
+  });
+}
+
+function setPremiumDefaultDates(){
+  const s=document.getElementById('premiumStart');
+  const e=document.getElementById('premiumEnd');
+  if(!s||!e)return;
+  const now=new Date();
+  const end=new Date(Date.now()+30*86400000);
+  if(!s.value)s.value=toLocalInput(now);
+  if(!e.value)e.value=toLocalInput(end);
+}
+
+function clearPremiumForm(){
+  ['premiumImage','premiumBusiness','premiumCategory'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('premiumPreview').innerHTML=`<div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:10px">Choose a banner to preview it here.</div>`;
+  document.getElementById('premiumStart').value='';
+  document.getElementById('premiumEnd').value='';
+  setPremiumDefaultDates();
+  editingPremiumId=null;
+  document.getElementById('premiumFormTitle').textContent='Upload Premium Banner';
+  document.getElementById('premiumImageLabel').textContent='Banner Creative *';
+  document.getElementById('premiumImageNote').innerHTML='Recommended: <strong>1920 × 400 px</strong> (4.8:1). Create the artwork separately; this portal is only for uploading and scheduling it.';
+  document.getElementById('premiumSubmitBtn').textContent='Upload & Schedule';
+  document.getElementById('premiumCancelEditBtn').style.display='none';
+}
+
+document.getElementById('premiumImage').addEventListener('change',function(){
+  const f=this.files[0];
+  if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    document.getElementById('premiumPreview').innerHTML=`<img class="banner-preview" src="${r.result}" alt="Premium banner preview">`;
+  };
+  r.readAsDataURL(f);
+});
+
+async function savePremiumBanner(){
+  const f=document.getElementById('premiumImage').files[0];
+  const name=document.getElementById('premiumBusiness').value.trim();
+  const cat=document.getElementById('premiumCategory').value;
+  const s=document.getElementById('premiumStart').value;
+  const e=document.getElementById('premiumEnd').value;
+
+  const editing=editingPremiumId?premiumBanners.find(b=>String(b.id)===String(editingPremiumId)):null;
+
+  if(!name||!cat||!s||!e||(!editing&&!f)){
+    showToast('Complete all premium banner fields.');
+    return;
+  }
+
+  if(f){
+    if(!['image/jpeg','image/png','image/webp'].includes(f.type)){
+      showToast('Use JPG, PNG or WebP.');
+      return;
+    }
+    if(f.size>2*1024*1024){
+      showToast('Keep banner below 2 MB.');
+      return;
+    }
+  }
+
+  if(new Date(e)<=new Date(s)){
+    showToast('Expiry must be after start.');
+    return;
+  }
+
+  const imageData=f?await fileData(f):(editing?editing.imageData:'');
+  const startAt=new Date(s).toISOString();
+  const endAt=new Date(e).toISOString();
+  const status=new Date(startAt)>new Date()? 'scheduled' : (new Date(endAt)>=new Date()?'active':'expired');
+
+  let error=null;
+
+  if(editing){
+    const payload={
+      business_name:name,
+      category_id:Number(cat),
+      image_url:imageData,
+      start_at:startAt,
+      end_at:endAt,
+      status,
+      updated_at:new Date().toISOString()
+    };
+
+    const result=await supabaseClient
+      .from('premium_banners')
+      .update(payload)
+      .eq('id',editing.id)
+      .select('*')
+      .single();
+
+    error=result.error;
+  }else{
+    const payload={
+      business_name:name,
+      category_id:Number(cat),
+      image_url:imageData,
+      start_at:startAt,
+      end_at:endAt,
+      status,
+      updated_at:new Date().toISOString()
+    };
+
+    const result=await supabaseClient
+      .from('premium_banners')
+      .insert(payload)
+      .select('*')
+      .single();
+
+    error=result.error;
+  }
+
+  if(error){
+    console.error('Save premium banner error:',error);
+    showToast('Could not save premium banner: '+error.message);
+    return;
+  }
+
+  editingPremiumId=null;
+  await loadPremiumBannersFromSupabase();
+  clearPremiumForm();
+  renderPremiumAdmin();
+  renderAdminPublicPremium();
+  showToast(editing?'Premium banner updated successfully.':'Premium banner uploaded successfully.');
+}
+
+function renderPremiumAdmin(){
+  premiumBanners.forEach(refreshPremiumStatus);
+  const filter=document.getElementById('premiumFilter').value;
+  const arr=premiumBanners.filter(b=>filter==='all'||b.status===filter);
+
+  document.getElementById('premiumAdminGrid').innerHTML=arr.length?arr.map(b=>{
+    const c=state.categories.find(x=>String(x.id)===String(b.categoryId));
+    return`<article class="banner-card">
+      <img src="${esc(b.imageData)}" alt="${esc(b.businessName)}">
+      <div class="banner-info">
+        <b>${esc(b.businessName)}</b>
+        <div class="banner-meta">
+          Category: ${esc(c?.name||'Unknown')}<br>
+          Start: ${new Date(b.startAt).toLocaleString()}<br>
+          Expiry: ${new Date(b.endAt).toLocaleString()}<br>
+          Status: <span class="badge ${b.status==='active'?'published':b.status==='scheduled'?'scheduled':'expired'}">${b.status}</span>
+        </div>
+        <div class="banner-actions">
+          <button class="btn small" onclick="previewBanner('${b.id}')">Preview</button>
+          <button class="btn small" onclick="editBanner('${b.id}')">Edit</button>
+          <button class="btn small danger" onclick="deleteBanner('${b.id}')">Delete</button>
         </div>
       </div>
     </article>`;
-  }).join('');
+  }).join(''):'<div class="empty" style="grid-column:1/-1">No premium banners uploaded.</div>';
 }
 
-function shareAd(id){
-  const a=activeAds().find(x=>x.id===id);if(!a)return;
-  const u=new URL(window.location.href);u.searchParams.set('ad',a.id);
-  const message=`${a.businessName} on Adspool: ${u.href}`;
-  if(navigator.share)navigator.share({title:`${a.businessName} on Adspool`,text:message,url:u.href}).catch(()=>{});
-  else if(navigator.clipboard)navigator.clipboard.writeText(message).then(()=>showToast('Link copied to clipboard.')).catch(()=>prompt('Copy this Adspool link:',message));
-  else prompt('Copy this Adspool link:',message);
+function previewBanner(id){
+  const b=premiumBanners.find(x=>x.id===id);
+  if(!b)return;
+  document.getElementById('premiumPreview').innerHTML=`<img class="banner-preview" src="${esc(b.imageData)}" alt="${esc(b.businessName)}">`;
+  startCreatePremium();
 }
 
-function viewAd(id){
-  const a=activeAds().find(x=>x.id===id);
-  if(!a)return;
-  const cat=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
-  const phone=(a.phone||'').replace(/\s/g,'');
-  const wa=(a.whatsapp||'').replace(/\D/g,'');
-  document.getElementById('modalTitle').textContent=a.businessName||'Advertisement';
-  document.getElementById('modalContent').innerHTML=`
-    ${adMarkup(a)}
-    <div style="margin-top:15px;font-size:13px">
-      <b>Category:</b> ${esc(cat)}<br>
-      <b>Business:</b> ${esc(a.businessName)}<br>
-      <b>Location:</b> ${esc(buildAddress(a))}
+function toLocalInputFromISO(iso){
+  const d=new Date(iso);
+  return toLocalInput(d);
+}
+
+function editBanner(id){
+  const b=premiumBanners.find(x=>x.id===id);
+  if(!b)return;
+  editingPremiumId=id;
+  premiumCategories();
+  document.getElementById('premiumImage').value='';
+  document.getElementById('premiumBusiness').value=b.businessName;
+  document.getElementById('premiumCategory').value=b.categoryId;
+  document.getElementById('premiumStart').value=toLocalInputFromISO(b.startAt);
+  document.getElementById('premiumEnd').value=toLocalInputFromISO(b.endAt);
+  document.getElementById('premiumPreview').innerHTML=`<img class="banner-preview" src="${esc(b.imageData)}" alt="${esc(b.businessName)}">`;
+  document.getElementById('premiumFormTitle').textContent='Edit Premium Banner';
+  document.getElementById('premiumImageLabel').textContent='Banner Creative (leave empty to keep current)';
+  document.getElementById('premiumImageNote').textContent='Upload a new file only if you want to replace the current creative.';
+  document.getElementById('premiumSubmitBtn').textContent='Save Changes';
+  document.getElementById('premiumCancelEditBtn').style.display='';
+  startCreatePremium();
+  document.getElementById('tabPremiumAds').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+async function deleteBanner(id){
+  if(!confirm('Delete this premium banner?'))return;
+
+  const {error}=await supabaseClient
+    .from('premium_banners')
+    .delete()
+    .eq('id',id);
+
+  if(error){
+    console.error('Delete premium banner error:',error);
+    showToast('Could not delete premium banner: '+error.message);
+    return;
+  }
+
+  if(editingPremiumId===id)clearPremiumForm();
+  await loadPremiumBannersFromSupabase();
+  renderPremiumAdmin();
+  renderAdminPublicPremium();
+  showToast('Premium banner deleted.');
+}
+
+/* PREMIUM PUBLIC DISPLAY — one banner at a time with navigation */
+function renderAdminPublicPremium(){
+  const section=document.getElementById('adminPublicPremium');
+  const wrap=document.getElementById('adminPublicPremiumWrap');
+  if(!section||!wrap)return;
+
+  premiumBanners.forEach(refreshPremiumStatus);
+
+  // All Categories shows every active premium banner. A selected category
+  // shows only banners belonging to that category.
+  const arr=premiumBanners.filter(b=>
+    b.status==='active' &&
+    (publicCategory==='all'||String(b.categoryId)===String(publicCategory))
+  );
+
+  if(!arr.length){
+    section.style.display='none';
+    wrap.innerHTML='';
+    premiumCarouselIndex=0;
+    return;
+  }
+
+  if(premiumCarouselIndex>=arr.length)premiumCarouselIndex=0;
+  if(premiumCarouselIndex<0)premiumCarouselIndex=arr.length-1;
+
+  const b=arr[premiumCarouselIndex];
+  const hasMultiple=arr.length>1;
+
+  wrap.innerHTML=`
+    <div class="premium-banner-carousel">
+      <div class="premium-banner-wrap">
+        <img class="premium-banner-img" src="${esc(b.imageData)}" alt="Premium advertisement">
+        <span class="premium-banner-label">PREMIUM</span>
+        <button class="premium-nav prev" aria-label="Previous premium banner" onclick="changePremiumBanner(-1)" ${hasMultiple?'':'disabled'}>‹</button>
+        <button class="premium-nav next" aria-label="Next premium banner" onclick="changePremiumBanner(1)" ${hasMultiple?'':'disabled'}>›</button>
+      </div>
     </div>
-    <div class="ad-actions" style="margin-top:15px">
-      <a class="btn primary" href="tel:${esc(phone)}">Call Business</a>
-      ${wa?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}">WhatsApp</a>`:''}
-      <a class="btn" target="_blank" rel="noopener" href="${mapsUrl(buildAddress(a))}">Directions</a>
-      <button class="btn" onclick="shareAd('${esc(a.id)}')">Share</button>
-    </div>
-    <div class="modal-note">Adspool displays advertisements that are currently active in the Adspool system.</div>`;
-  document.getElementById('modalBackdrop').classList.add('show');
+    <div class="premium-counter">${premiumCarouselIndex+1} / ${arr.length}</div>`;
+
+  section.style.display='block';
 }
 
-function closeModal(){document.getElementById('modalBackdrop').classList.remove('show')}
+function changePremiumBanner(direction){
+  premiumCarouselIndex+=direction;
+  renderAdminPublicPremium();
+}
+
+/* RENDER ALL */
+function renderAll(){
+  fillCategorySelects();
+  renderSwatches();
+  renderDashboard();
+  renderAdsTable();
+  renderCategories();
+  updatePreview();
+  setPremiumDefaultDates();
+}
+
+document.getElementById('fCategory').addEventListener('change',updatePreview);
 
 setInterval(()=>{
-  renderCategories();
-  renderAds();
-  updateStats();
+  refreshStatuses();
+  premiumBanners.forEach(refreshPremiumStatus);
+  renderDashboard();
+  if(document.getElementById('tabPremiumAds').classList.contains('active')){
+    renderPremiumAdmin();
+  }
 },30000);
 
-window.addEventListener('focus',()=>{load();});
-setInterval(()=>{load();},30000);
+/* INITIAL LOGIN */
+document.getElementById('loginEmail').value='';
+document.getElementById('loginPassword').value='';
+document.getElementById('loginView').style.display='flex';
+document.getElementById('app').style.display='none';
 
-function openSharedAd(){
-  const id=new URLSearchParams(window.location.search).get('ad');
-  if(id){setTimeout(()=>{if(activeAds().some(a=>a.id===id))viewAd(id)},150)}
-}
+/* Restore an existing Supabase session only if the user is still an admin. */
+(async function restoreSession(){
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  if(!session)return;
 
-load();
-openSharedAd();
+  const {data:adminUser}=await supabaseClient
+    .from('admin_users')
+    .select('user_id,email')
+    .eq('user_id',session.user.id)
+    .maybeSingle();
 
-/* Show the sticky search bar once the hero's own search box has scrolled
-   out of view under the fixed header; hide it again once back at top. */
-(function initStickySearch(){
-  const bar=document.getElementById('stickySearchbar');
-  const spacer=document.getElementById('stickySpacer');
-  const heroBox=document.querySelector('.hero .searchbox');
-  const topbar=document.querySelector('.topbar');
-  const inlineChips=document.getElementById('categories');
-  if(!bar||!heroBox)return;
-  function onScroll(){
-    const headerH=topbar?topbar.offsetHeight:0;
-    const r=heroBox.getBoundingClientRect();
-    const shouldShow=r.bottom<headerH;
-    bar.classList.toggle('show',shouldShow);
-    if(spacer)spacer.style.height=shouldShow?bar.offsetHeight+'px':'0px';
-    if(inlineChips)inlineChips.style.visibility=shouldShow?'hidden':'visible';
+  if(adminUser){
+    document.getElementById('loginView').style.display='none';
+    document.getElementById('app').style.display='block';
+    await load();
+  }else{
+    await supabaseClient.auth.signOut();
   }
-  window.addEventListener('scroll',onScroll,{passive:true});
-  window.addEventListener('resize',onScroll);
-  onScroll();
 })();
+
+/* ADMIN STICKY PREVIEW BAR — only active on the "Public Ads" tab, mirrors
+   the sticky search+category behaviour added to the public site so the
+   admin preview matches what visitors now see. */
+function updateAdminStickyBar(){
+  const bar=document.getElementById('adminStickyBar');
+  const spacer=document.getElementById('publicStickySpacer');
+  const inlineBar=document.querySelector('#public .publicbar');
+  const topbar=document.querySelector('.topbar');
+  if(!bar||!spacer||!inlineBar)return;
+
+  const isPublicView=document.getElementById('public').classList.contains('active');
+  if(!isPublicView){
+    bar.classList.remove('show');
+    spacer.style.height='0px';
+    return;
+  }
+  const headerH=topbar?topbar.offsetHeight:0;
+  const r=inlineBar.getBoundingClientRect();
+  const shouldShow=r.bottom<headerH;
+  bar.classList.toggle('show',shouldShow);
+  spacer.style.height=shouldShow?bar.offsetHeight+'px':'0px';
+}
+window.addEventListener('scroll',updateAdminStickyBar,{passive:true});
+window.addEventListener('resize',updateAdminStickyBar);
 </script>
 </body>
 </html>
