@@ -640,25 +640,39 @@ function esc(s){
 }
 
 async function load(){
-  // Keep existing localStorage handling temporarily for Ads/Premium.
-  // Categories will now come from Supabase.
-
-  try{
-    premiumBanners =
-      JSON.parse(localStorage.getItem(PREMIUM_STORAGE)) || [];
-  }catch(e){
-    premiumBanners=[];
-  }
+  // Ads and premium banners remain on localStorage for now.
+  // Categories are now loaded from Supabase and are the source of truth.
+  try{ const x=JSON.parse(localStorage.getItem(STORAGE)); if(x)state=x; }catch(e){}
+  try{ premiumBanners=JSON.parse(localStorage.getItem(PREMIUM_STORAGE))||[]; }catch(e){ premiumBanners=[]; }
 
   await loadCategoriesFromSupabase();
 
   normalize();
-
   premiumBanners.forEach(refreshPremiumStatus);
-
   renderAll();
   premiumCategories();
   renderPremiumAdmin();
+}
+
+async function loadCategoriesFromSupabase(){
+  const { data, error } = await supabaseClient
+    .from('categories')
+    .select('id,name,active,created_at')
+    .order('id', { ascending: true });
+
+  if(error){
+    console.error('Categories load error:', error);
+    showToast('Could not load categories from Supabase.');
+    return;
+  }
+
+  state.categories = (data || []).map(c => ({
+    id: Number(c.id),
+    name: c.name,
+    active: c.active
+  }));
+
+  sortCategories();
 }
 
 function normalize(){
@@ -741,7 +755,7 @@ async function login(){
 
   document.getElementById('loginView').style.display='none';
   document.getElementById('app').style.display='block';
-  load();
+  await load();
 }
 
 async function logout(){
@@ -1141,25 +1155,76 @@ function sortCategories(){
   });
 }
 
-function addCategory(){
-  const n=document.getElementById('newCategory').value.trim();
-  if(!n)return;
-  state.categories.push({id:Date.now(),name:n,active:true});
-  sortCategories();
-  document.getElementById('newCategory').value='';
-  persist();
+async function addCategory(){
+  const input=document.getElementById('newCategory');
+  const n=input.value.trim();
+
+  if(!n){
+    showToast('Category name is required.');
+    return;
+  }
+
+  const duplicate=state.categories.some(c =>
+    String(c.name || '').trim().toLowerCase() === n.toLowerCase()
+  );
+
+  if(duplicate){
+    showToast('A category with this name already exists.');
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from('categories')
+    .insert({
+      name:n,
+      active:true
+    })
+    .select('id,name,active,created_at')
+    .single();
+
+  if(error){
+    console.error('Add category error:', error);
+    showToast('Could not add category: ' + error.message);
+    return;
+  }
+
+  input.value='';
+
+  await loadCategoriesFromSupabase();
   fillCategorySelects();
   premiumCategories();
   renderCategories();
+
+  showToast('Category added successfully.');
 }
 
-function toggleCategory(id){
-  const c=state.categories.find(x=>x.id===id);
-  if(c)c.active=!c.active;
-  persist();
+async function toggleCategory(id){
+  const category=state.categories.find(c => Number(c.id) === Number(id));
+
+  if(!category){
+    showToast('Category not found.');
+    return;
+  }
+
+  const newActive=!category.active;
+
+  const { error } = await supabaseClient
+    .from('categories')
+    .update({ active:newActive })
+    .eq('id',id);
+
+  if(error){
+    console.error('Toggle category error:', error);
+    showToast('Could not update category: ' + error.message);
+    return;
+  }
+
+  await loadCategoriesFromSupabase();
   fillCategorySelects();
   premiumCategories();
   renderCategories();
+
+  showToast(newActive ? 'Category activated.' : 'Category deactivated.');
 }
 
 /* PUBLIC */
@@ -1426,7 +1491,7 @@ document.getElementById('app').style.display='none';
   if(adminUser){
     document.getElementById('loginView').style.display='none';
     document.getElementById('app').style.display='block';
-    load();
+    await load();
   }else{
     await supabaseClient.auth.signOut();
   }
