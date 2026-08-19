@@ -712,11 +712,20 @@ async function login(){
     .eq('user_id',data.user.id)
     .maybeSingle();
 
-  if(adminError||!adminUser){
-    await supabaseClient.auth.signOut();
-    errorEl.textContent='You are not authorized as an Adspool admin.';
+  if(adminError || !adminUser){
+    console.log('AUTH USER:', data.user);
+    console.log('AUTH USER ID:', data.user?.id);
+    console.log('ADMIN USER:', adminUser);
+    console.log('ADMIN ERROR:', adminError);
+
+    errorEl.textContent =
+        'Admin check failed. User ID: ' +
+        (data.user?.id || 'NO USER ID') +
+        ' | Error: ' +
+        (adminError?.message || 'No admin record returned');
+
     return;
-  }
+}
 
   document.getElementById('loginView').style.display='none';
   document.getElementById('app').style.display='block';
