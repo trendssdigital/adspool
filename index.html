@@ -140,7 +140,7 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 .premium-section{margin-bottom:30px}
 .premium-banner-wrap{position:relative;width:100%;overflow:hidden;border-radius:16px;background:var(--forest-deep);border:1px solid var(--border)}
 .premium-banner-img{display:block;width:100%;aspect-ratio:4.8/1;object-fit:cover}
-.premium-banner-link{display:block;line-height:0}
+.premium-banner-link{display:block;line-height:0;cursor:pointer}.premium-banner-link:hover .premium-banner-img{filter:brightness(.96)}
 .premium-banner-label{position:absolute;left:14px;top:14px;background:var(--gold);color:#fff;padding:5px 10px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em}
 .premium-banner-business{display:none}
 .premium-banner-controls{display:flex;justify-content:space-between;align-items:center;margin-top:9px}
@@ -416,7 +416,6 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 <script>
 const SUPABASE_URL = 'https://vezffgjnfsuhrbaqpepu.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_QyQhdXbm55VV1nRNlUuH2A_I2iyS56n';
-const PREMIUM_BANNER_FIELDS='id,business_name,category_id,image_url,youtube_link,website_link,start_at,end_at,status,created_at,updated_at';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 let state={ads:[],categories:[]};
@@ -429,9 +428,9 @@ async function load(){
   // Keep each data source independent. A problem with Hero Videos or one
   // optional table must never hide the existing advertisements.
   const [catResult, adsResult, bannerResult] = await Promise.allSettled([
-    supabaseClient.from('categories').select('id,name,active').order('id',{ascending:true}),
+    supabaseClient.from('categories').select('*').order('id',{ascending:true}),
     supabaseClient.from('ads').select('*').order('created_at',{ascending:false}),
-    supabaseClient.from('premium_banners').select(PREMIUM_BANNER_FIELDS).order('created_at',{ascending:false})
+    supabaseClient.from('premium_banners').select('*').order('created_at',{ascending:false})
   ]);
 
   if(catResult.status==='fulfilled' && !catResult.value.error){
@@ -600,9 +599,18 @@ function renderPremiumBanner(){
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
     </button>`:'';
 
-  const premiumUrl=(b.youtubeLink||b.websiteLink||'').trim();
+  // A premium banner may have ONE optional destination: YouTube or Website.
+  // The admin saves these in youtube_link / website_link. Make the whole banner clickable
+  // only when a valid http(s) destination exists; otherwise keep it as a plain image.
+  const rawPremiumUrl=(b.youtubeLink||b.websiteLink||'').trim();
+  let premiumUrl='';
+  try{
+    const u=new URL(rawPremiumUrl);
+    if(u.protocol==='http:'||u.protocol==='https:') premiumUrl=u.href;
+  }catch(e){}
   const premiumImage=`<img class="premium-banner-img" src="${esc(b.imageData||'')}" alt="Premium banner">`;
-  const premiumTarget=premiumUrl?`<a class="premium-banner-link" href="${esc(premiumUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open premium advertisement">${premiumImage}</a>`:premiumImage;
+  const premiumLabel=b.youtubeLink?'Open YouTube advertisement':'Open website advertisement';
+  const premiumTarget=premiumUrl?`<a class="premium-banner-link" href="${esc(premiumUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${premiumLabel}" title="${premiumLabel}">${premiumImage}</a>`:premiumImage;
   wrap.innerHTML=`
     ${premiumTarget}
     <span class="premium-banner-label">PREMIUM</span>
@@ -892,10 +900,8 @@ setInterval(()=>{
   updateStats();
 },30000);
 
-// No automatic Supabase reload loop here. Re-fetching the entire listings
-// every 30 seconds was causing unnecessary PostgREST egress. The page loads
-// once on startup; users can use the browser refresh when they need fresh data.
-
+window.addEventListener('focus',()=>{load();});
+setInterval(()=>{load();},30000);
 
 async function openSharedAd(){
   const id=new URLSearchParams(window.location.search).get('ad');
@@ -911,7 +917,7 @@ async function openSharedAd(){
   // Fallback: fetch the exact ad directly from Supabase.
   // This makes shared links reliable even if the initial listing load is slow.
   try{
-    const {data,error}=await supabaseClient.from('ads').select('id,ad_id,business_name,category_id,ad_type,services,address_line,area,city,state,pin,phone,whatsapp,instagram_id,badge,background_color,text_color,template_id,creative_image_url,status,start_at,end_at,created_at,updated_at').eq('id',id).maybeSingle();
+    const {data,error}=await supabaseClient.from('ads').select('*').eq('id',id).maybeSingle();
     if(error) throw error;
     if(!data){
       console.warn('Shared ad not found:',id);
@@ -920,7 +926,7 @@ async function openSharedAd(){
     const ad=mapAdRow(data);
     const cat=state.categories.find(c=>String(c.id)===String(ad.categoryId));
     if(!cat){
-      const {data:catRow}=await supabaseClient.from('categories').select('id,name,active').eq('id',ad.categoryId).maybeSingle();
+      const {data:catRow}=await supabaseClient.from('categories').select('*').eq('id',ad.categoryId).maybeSingle();
       if(catRow) state.categories.push(mapCategoryRow(catRow));
     }
     viewAdByObject(ad);
