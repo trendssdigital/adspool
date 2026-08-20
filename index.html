@@ -457,27 +457,49 @@ async function load(){
   }
 
   // Hero videos are optional and isolated from the core ads load.
-  heroVideos=[];
+  // IMPORTANT: this function re-runs on a timer and on window focus, so we
+  // must NOT blindly overwrite heroVideos / reset heroVideoIndex / re-render
+  // the iframe every time - that was restarting whatever video was playing
+  // and snapping the carousel back to video 1. We only touch the player if
+  // the list of active videos has actually changed.
   try{
     const heroVideoResult=await supabaseClient.from('hero_videos').select('*').eq('status','active')
       .order('sort_order',{ascending:true}).order('created_at',{ascending:true});
     if(heroVideoResult.error){
       console.warn('Hero videos unavailable; continuing without them:',heroVideoResult.error.message);
     }else{
-      heroVideos=heroVideoResult.data||[];
+      const freshVideos=heroVideoResult.data||[];
+      if(!heroVideosEqual(heroVideos,freshVideos)){
+        // Try to keep playing the same video (by id) at its new position;
+        // only fall back to index 0 if that video is gone or this is the
+        // very first load.
+        const currentId=(heroVideos[heroVideoIndex]||{}).id;
+        heroVideos=freshVideos;
+        const keepIndex=currentId!=null?heroVideos.findIndex(v=>v.id===currentId):-1;
+        heroVideoIndex=keepIndex>=0?keepIndex:0;
+        renderHeroVideo();
+      }
+      // else: nothing changed, leave the currently playing video alone.
     }
   }catch(e){
     console.warn('Hero videos unavailable; continuing without them:',e);
   }
 
-  heroVideoIndex=0;
   state.ads.forEach(refreshStatus);
   premiumBanners.forEach(refreshPremiumStatus);
   renderCategories();
   renderPremiumBanner();
-  renderHeroVideo();
   renderAds();
   updateStats();
+}
+function heroVideosEqual(a,b){
+  const arrA=a||[],arrB=b||[];
+  if(arrA.length!==arrB.length)return false;
+  for(let i=0;i<arrA.length;i++){
+    const x=arrA[i],y=arrB[i];
+    if(x.id!==y.id||x.youtube_url!==y.youtube_url||x.title!==y.title||x.sort_order!==y.sort_order||x.status!==y.status)return false;
+  }
+  return true;
 }
 function youtubeVideoId(value){
   try{
@@ -491,7 +513,11 @@ function youtubeVideoId(value){
   }catch(e){}
   return null;
 }
-function youtubeEmbedUrl(value){const id=youtubeVideoId(value);return id?'https://www.youtube.com/embed/'+encodeURIComponent(id):'';}
+function youtubeEmbedUrl(value){
+  const id=youtubeVideoId(value); if(!id)return'';
+  const origin=(typeof window!=='undefined'&&window.location&&window.location.origin)?window.location.origin:'';
+  return 'https://www.youtube.com/embed/'+encodeURIComponent(id)+(origin?'?origin='+encodeURIComponent(origin):'');
+}
 function renderHeroVideo(){
   const wrap=document.getElementById('heroVideoWrap'); if(!wrap)return;
   const arr=(heroVideos||[]).filter(v=>v.status==='active'&&youtubeEmbedUrl(v.youtube_url));
@@ -499,7 +525,7 @@ function renderHeroVideo(){
   if(heroVideoIndex>=arr.length)heroVideoIndex=0;
   const v=arr[heroVideoIndex], embed=youtubeEmbedUrl(v.youtube_url);
   const nav=arr.length>1?`<div class="hero-video-nav"><button type="button" onclick="heroVideoPrev()" aria-label="Previous video">‹</button><button type="button" onclick="heroVideoNext()" aria-label="Next video">›</button></div>`:'';
-  wrap.innerHTML=`<div class="hero-video-frame"><iframe src="${esc(embed)}" title="${esc(v.title||'Adspool hero video')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div><div class="hero-video-caption"><span>${esc(v.title||'Adspool')}</span><span>${nav}</span></div>`;
+  wrap.innerHTML=`<div class="hero-video-frame"><iframe src="${esc(embed)}" title="${esc(v.title||'Adspool hero video')}" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div><div class="hero-video-caption"><span>${esc(v.title||'Adspool')}</span><span>${nav}</span></div>`;
 }
 function heroVideoNext(){const arr=heroVideos.filter(v=>v.status==='active'&&youtubeEmbedUrl(v.youtube_url));if(!arr.length)return;heroVideoIndex=(heroVideoIndex+1)%arr.length;renderHeroVideo();}
 function heroVideoPrev(){const arr=heroVideos.filter(v=>v.status==='active'&&youtubeEmbedUrl(v.youtube_url));if(!arr.length)return;heroVideoIndex=(heroVideoIndex-1+arr.length)%arr.length;renderHeroVideo();}
