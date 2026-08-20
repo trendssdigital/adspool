@@ -108,13 +108,6 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 .field label{font-size:12px;font-weight:700;color:#495a4d}
 .full{grid-column:1/-1}
 .hint{font-size:11.5px;color:var(--muted)}
-
-.modeToggle{display:flex;gap:10px;flex-wrap:wrap}
-.modeOption{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;border:1.5px solid var(--border-strong);border-radius:9px;padding:9px 14px;background:var(--card)}
-.modeOption input{width:auto;margin:0;accent-color:var(--forest)}
-.modeOption:has(input:checked){border-color:var(--forest);background:var(--gold-soft);color:var(--forest-dark)}
-.creative-preview-img{display:block;width:100%;max-width:400px;border-radius:20px;box-shadow:0 10px 26px rgba(18,32,26,.08)}
-.banner-note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:6px}
 .address-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
 .servicesDynamic{display:flex;flex-direction:column;gap:8px}
 .serviceRow{display:flex;gap:8px}
@@ -328,7 +321,6 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
   <button class="navbtn" data-view="expired" onclick="setAdStatusFilter('expired')"><span class="ico">○</span><span class="label">Expired</span></button>
   <button class="navbtn" data-view="categories" onclick="showView('categories')"><span class="ico">☷</span><span class="label">Categories</span></button>
   <button class="navbtn" data-view="public" onclick="showView('public')"><span class="ico">↗</span><span class="label">Public Ads</span></button>
-  <button class="navbtn" data-view="heroVideos" onclick="showView('heroVideos')"><span class="ico">▶</span><span class="label">Hero Videos</span></button>
 </aside>
 
 <main class="main">
@@ -390,22 +382,6 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
     <div class="panel">
       <div class="formgrid">
 
-        <div class="field full">
-          <label>Ad Type *</label>
-          <div class="modeToggle">
-            <label class="modeOption"><input type="radio" name="normalMode" value="common" checked onchange="switchNormalMode('common')">Common</label>
-            <label class="modeOption"><input type="radio" name="normalMode" value="creative" onchange="switchNormalMode('creative')">Creative</label>
-          </div>
-          <span class="hint" id="commonModeHint">Common builds the ad from the fields below using one of our templates.</span>
-          <span class="hint" id="creativeModeHint" style="display:none">Creative lets you upload your own ready-made banner design instead.</span>
-        </div>
-
-        <div class="field full" id="fieldCreativeUpload" style="display:none">
-          <label id="creativeImageLabel">Banner Creative *</label>
-          <input id="fCreativeImage" type="file" accept="image/jpeg,image/png,image/webp" onchange="handleCreativeImageChange(this)">
-          <div class="banner-note" id="creativeImageNote">Upload your ready-made banner design (JPG, PNG or WebP). It will be shown on the ad exactly as uploaded.</div>
-        </div>
-
         <div class="field">
           <label>Business Name *</label>
           <input id="fBusiness" maxlength="80" oninput="updatePreview()">
@@ -416,13 +392,13 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
           <select id="fCategory"></select>
         </div>
 
-        <div class="field full" id="fieldTemplate">
+        <div class="field full">
           <label>Ad Template *</label>
           <div id="templatePicker" class="tplpicker"></div>
           <span class="hint">The highlighted one is auto-suggested for variety — tap any card to pick that look instead.</span>
         </div>
 
-        <div class="field full" id="fieldServices">
+        <div class="field full">
           <label>Services</label>
           <div id="servicesContainer" class="servicesDynamic"></div>
           <button type="button" class="btn small" style="width:max-content;margin-top:8px" onclick="addService()">+ Add Service</button>
@@ -472,13 +448,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
           <span class="hint">Shows as a small round badge on the ad. Leave blank for none.</span>
         </div>
 
-        <div class="field">
-          <label>Instagram ID (optional)</label>
-          <input id="fInstagram" maxlength="80" placeholder="e.g. yourbusiness">
-          <span class="hint">Optional Instagram username/ID. Clicking the public ad opens this Instagram profile.</span>
-        </div>
-
-        <div class="field full" id="fieldBgColor">
+        <div class="field full">
           <label>Background Color</label>
           <div class="colorrow">
             <div id="swatches" class="swatches"></div>
@@ -549,18 +519,6 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
           <input id="premiumEnd" type="datetime-local">
         </div>
 
-        <div class="field">
-          <label>YouTube Link (optional)</label>
-          <input id="premiumYoutube" type="url" maxlength="500" placeholder="https://www.youtube.com/watch?v=...">
-          <span class="hint">Add this OR a Website Link. Clicking the public premium banner opens the destination.</span>
-        </div>
-
-        <div class="field">
-          <label>Website Link (optional)</label>
-          <input id="premiumWebsite" type="url" maxlength="500" placeholder="https://www.example.com">
-          <span class="hint">Add this OR a YouTube Link. Use the full URL.</span>
-        </div>
-
         <div class="field full">
           <label>Preview</label>
           <div id="premiumPreview">
@@ -589,47 +547,6 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
       </div>
       <div id="premiumAdminGrid" class="banner-grid"></div>
     </div>
-  </div>
-</section>
-
-<!-- HERO VIDEOS -->
-<section id="heroVideos" class="view">
-  <span class="eyebrow"><span class="dot"></span>Hero content</span>
-  <h1>Hero Videos</h1>
-  <p class="sub">Add YouTube videos one by one. Active videos appear in the public website hero.</p>
-  <div class="panel">
-    <div class="formgrid">
-      <div class="field">
-        <label>Video Title (optional)</label>
-        <input id="heroVideoTitle" maxlength="120" placeholder="e.g. Welcome to Adspool">
-      </div>
-      <div class="field">
-        <label>YouTube Link *</label>
-        <input id="heroVideoUrl" type="url" maxlength="500" placeholder="https://www.youtube.com/watch?v=...">
-        <span class="hint">You can paste a youtube.com/watch or youtu.be link. Adspool converts it to an embedded player.</span>
-      </div>
-      <div class="field">
-        <label>Display Order</label>
-        <input id="heroVideoOrder" type="number" min="1" step="1" value="1">
-      </div>
-      <div class="field">
-        <label>Status</label>
-        <select id="heroVideoStatus"><option value="active">Active</option><option value="inactive">Inactive</option></select>
-      </div>
-    </div>
-    <div class="actions">
-      <button class="btn" onclick="clearHeroVideoForm()">Clear</button>
-      <button class="btn primary" id="heroVideoSaveBtn" onclick="saveHeroVideo()">Add Video</button>
-    </div>
-  </div>
-  <div class="panel">
-    <div class="toolbar">
-      <h2 style="margin:0;flex:1">Hero Video Library</h2>
-      <select id="heroVideoFilter" onchange="renderHeroVideosAdmin()">
-        <option value="all">All</option><option value="active">Active</option><option value="inactive">Inactive</option>
-      </select>
-    </div>
-    <div id="heroVideosAdminGrid" class="banner-grid"></div>
   </div>
 </section>
 
@@ -679,8 +596,6 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 <script>
 const SUPABASE_URL = 'https://vezffgjnfsuhrbaqpepu.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_QyQhdXbm55VV1nRNlUuH2A_I2iyS56n';
-const PREMIUM_BANNER_BUCKET='premium-banners';
-const PREMIUM_BANNER_FIELDS='id,business_name,category_id,image_url,youtube_link,website_link,start_at,end_at,status,created_at,updated_at';
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
@@ -721,16 +636,11 @@ let state={
 };
 
 let premiumBanners=[];
-let heroVideos=[];
-let editingHeroVideoId=null;
 let editingId=null;
 let editingPremiumId=null;
 let selectedTemplateId=1;
 let publicCategory='all';
 let premiumCarouselIndex=0;
-let normalAdMode='common';
-let creativeImageData=null;
-let creativeFile=null;
 
 function esc(s){
   return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -738,38 +648,6 @@ function esc(s){
 
 function mapCategoryRow(c){
   return {id:Number(c.id),name:c.name,active:Boolean(c.active),createdAt:c.created_at};
-}
-
-function isValidHttpUrl(value){
-  try{const u=new URL(value);return u.protocol==='https:'||u.protocol==='http:';}catch(e){return false;}
-}
-function youtubeVideoId(value){
-  try{
-    const u=new URL(String(value||'').trim());
-    if(u.hostname==='youtu.be') return u.pathname.replace(/^\//,'').split('/')[0]||null;
-    if(/(^|\.)youtube\.com$/i.test(u.hostname)){
-      if(u.pathname==='/watch') return u.searchParams.get('v')||null;
-      const m=u.pathname.match(/^\/(?:embed|shorts|live)\/([^/?]+)/i);
-      return m?m[1]:null;
-    }
-  }catch(e){}
-  return null;
-}
-function youtubeEmbedUrl(value){
-  const id=youtubeVideoId(value);
-  return id?'https://www.youtube.com/embed/'+encodeURIComponent(id):'';
-}
-
-function normalizeInstagramId(value){
-  let v=String(value||'').trim();
-  if(!v)return null;
-  v=v.replace(/^@/,'');
-  v=v.replace(/^https?:\/\/(www\.)?instagram\.com\//i,'').split(/[?#/]/)[0];
-  return v||null;
-}
-function instagramUrl(id){
-  const v=normalizeInstagramId(id);
-  return v?'https://www.instagram.com/'+encodeURIComponent(v)+'/':'';
 }
 
 function mapAdRow(r){
@@ -788,7 +666,6 @@ function mapAdRow(r){
     phone:r.phone,
     whatsapp:r.whatsapp||'',
     badge:r.badge||'',
-    instagramId:r.instagram_id||'',
     backgroundColor:r.background_color||'#ffffff',
     textColor:r.text_color||contrast(r.background_color||'#ffffff'),
     templateId:r.template_id||1,
@@ -805,8 +682,6 @@ async function load(){
   await loadCategoriesFromSupabase();
   await loadAdsFromSupabase();
   await loadPremiumBannersFromSupabase();
-  await migrateLegacyPremiumImages();
-  await loadHeroVideosFromSupabase();
 
   normalize();
   premiumBanners.forEach(refreshPremiumStatus);
@@ -864,8 +739,6 @@ function mapPremiumRow(r){
     businessName:r.business_name,
     categoryId:Number(r.category_id),
     imageData:r.image_url,
-    youtubeLink:r.youtube_link||'',
-    websiteLink:r.website_link||'',
     startAt:r.start_at,
     endAt:r.end_at,
     status:r.status||'scheduled',
@@ -877,7 +750,7 @@ function mapPremiumRow(r){
 async function loadPremiumBannersFromSupabase(){
   const {data,error}=await supabaseClient
     .from('premium_banners')
-    .select(PREMIUM_BANNER_FIELDS)
+    .select('*')
     .order('created_at',{ascending:false});
 
   if(error){
@@ -888,16 +761,6 @@ async function loadPremiumBannersFromSupabase(){
   }
 
   premiumBanners=(data||[]).map(mapPremiumRow);
-}
-
-async function loadHeroVideosFromSupabase(){
-  const {data,error}=await supabaseClient.from('hero_videos').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true});
-  if(error){
-    console.error('Hero videos load error:',error);
-    heroVideos=[];
-    return;
-  }
-  heroVideos=data||[];
 }
 
 function contrast(hex){
@@ -995,7 +858,6 @@ function showView(v){
   if(['published','scheduled','drafts','expired'].includes(v))renderAdsTable();
   if(v==='categories')renderCategories();
   if(v==='public')renderPublic();
-  if(v==='heroVideos')renderHeroVideosAdmin();
 
   updateAdminStickyBar();
 }
@@ -1005,34 +867,6 @@ function switchCreateTab(tab){
   document.getElementById('tabNormalAds').classList.toggle('active',tab==='normal');
   document.getElementById('tabPremiumAds').classList.toggle('active',tab==='premium');
   if(tab==='premium'){ premiumCategories(); setPremiumDefaultDates(); renderPremiumAdmin(); }
-}
-
-/* NORMAL ADS: Common vs Creative */
-function setNormalMode(mode){
-  normalAdMode=mode;
-  document.querySelectorAll('input[name="normalMode"]').forEach(r=>r.checked=(r.value===mode));
-  document.getElementById('fieldCreativeUpload').style.display=mode==='creative'?'':'none';
-  document.getElementById('fieldTemplate').style.display=mode==='creative'?'none':'';
-  document.getElementById('fieldServices').style.display=mode==='creative'?'none':'';
-  document.getElementById('fieldBgColor').style.display=mode==='creative'?'none':'';
-  document.getElementById('commonModeHint').style.display=mode==='common'?'':'none';
-  document.getElementById('creativeModeHint').style.display=mode==='creative'?'':'none';
-}
-
-function switchNormalMode(mode){
-  setNormalMode(mode);
-  updatePreview();
-}
-
-function handleCreativeImageChange(input){
-  const f=input.files[0];
-  if(!f)return;
-  if(!['image/jpeg','image/png','image/webp'].includes(f.type)){ showToast('Use JPG, PNG or WebP.'); input.value=''; return; }
-  if(f.size>2*1024*1024){ showToast('Keep the creative below 2 MB.'); input.value=''; return; }
-  creativeFile=f;
-  const r=new FileReader();
-  r.onload=()=>{ creativeImageData=r.result; updatePreview(); };
-  r.readAsDataURL(f);
 }
 
 /* CREATE / EDIT */
@@ -1059,13 +893,6 @@ function editAd(id){
   if(!a)return;
   editingId=id;
   selectedTemplateId=a.templateId||1;
-  setNormalMode(a.adType==='creative'?'creative':'common');
-  creativeImageData=a.creativeImageUrl||null;
-  creativeFile=null;
-  const creativeInput=document.getElementById('fCreativeImage');
-  if(creativeInput)creativeInput.value='';
-  document.getElementById('creativeImageLabel').textContent=a.adType==='creative'?'Banner Creative (leave empty to keep current)':'Banner Creative *';
-  document.getElementById('creativeImageNote').textContent=a.adType==='creative'?'Upload a new file only if you want to replace the current creative.':'Upload your ready-made banner design (JPG, PNG or WebP). It will be shown on the ad exactly as uploaded.';
   fillCategorySelects();
   renderTemplatePicker();
 
@@ -1079,7 +906,6 @@ function editAd(id){
   document.getElementById('fPhone').value=a.phone||'';
   document.getElementById('fWhatsapp').value=a.whatsapp||'';
   document.getElementById('fBadge').value=a.badge||'';
-  document.getElementById('fInstagram').value=a.instagramId||'';
   document.getElementById('fColor').value=a.backgroundColor||'#ffffff';
 
   document.getElementById('servicesContainer').innerHTML='';
@@ -1103,18 +929,12 @@ function cancelCreate(){
 }
 
 function clearForm(){
-  ['fBusiness','fAddressLine','fArea','fPin','fPhone','fWhatsapp','fBadge','fInstagram'].forEach(id=>document.getElementById(id).value='');
+  ['fBusiness','fAddressLine','fArea','fPin','fPhone','fWhatsapp','fBadge'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fCity').value='Bangalore';
   document.getElementById('fState').value='Karnataka';
   document.getElementById('servicesContainer').innerHTML='';
   addService(); addService(); addService();
   document.getElementById('fColor').value='#ffffff';
-  document.getElementById('fCreativeImage').value='';
-  creativeImageData=null;
-  creativeFile=null;
-  document.getElementById('creativeImageLabel').textContent='Banner Creative *';
-  document.getElementById('creativeImageNote').textContent='Upload your ready-made banner design (JPG, PNG or WebP). It will be shown on the ad exactly as uploaded.';
-  setNormalMode('common');
   setColor('#ffffff');
   const d=new Date();
   const e=new Date(Date.now()+30*86400000);
@@ -1183,22 +1003,12 @@ function mapsUrl(address){
 
 /* AD MARKUP */
 function adMarkup(a){
-  const instagram=instagramUrl(a.instagramId);
-  if(a.adType==='creative'){
-    const badge=(a.badge||'').trim();
-    if(!a.creativeImageUrl){
-      return`<div class="ad-frame"><div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:16px">No creative uploaded</div></div>`;
-    }
-    const badgeHtml=badge?`<div class="promo-badge">${esc(badge)}</div>`:'';
-    const inner=`<div class="ad-frame">${badgeHtml}<img class="creative-preview-img" src="${esc(a.creativeImageUrl)}" alt="${esc(a.businessName||'Business')}"></div>`;
-    return instagram?`<a href="${esc(instagram)}" target="_blank" rel="noopener noreferrer">${inner}</a>`:inner;
-  }
   const bg=a.backgroundColor||'#fff';
   const fg=a.textColor||contrast(bg);
   const address=buildAddress(a);
   const tpl=a.templateId||1;
   const badge=(a.badge||'').trim();
-  const inner=`<div class="ad-frame">
+  return`<div class="ad-frame">
     ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
     <div class="ad tpl-${tpl}" style="color:${fg};background:${esc(bg)}">
       <div class="adhead">${esc(a.businessName||'Business Name')}</div>
@@ -1210,20 +1020,10 @@ function adMarkup(a){
       <div class="adphone">${esc(a.phone||'')}</div>
     </div>
   </div>`;
-  return instagram?`<a href="${esc(instagram)}" target="_blank" rel="noopener noreferrer">${inner}</a>`:inner;
 }
+
 /* PREVIEW */
 function updatePreview(){
-  if(normalAdMode==='creative'){
-    const business=document.getElementById('fBusiness').value||'Business Name';
-    const badge=(document.getElementById('fBadge').value||'').trim();
-    document.getElementById('adPreview').innerHTML=creativeImageData?
-      `<div class="ad-frame">${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}<img class="creative-preview-img" src="${esc(creativeImageData)}" alt="${esc(business)}"></div>`:
-      `<div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:16px;padding:40px 16px">Choose a banner creative to preview it here.</div>`;
-    const tplLabel=document.getElementById('previewTemplateLabel');
-    if(tplLabel)tplLabel.textContent='Showing: Custom Creative Upload';
-    return;
-  }
   const bg=document.getElementById('fColor').value;
   const fg=contrast(bg);
   document.getElementById('contrastLabel').textContent='Automatic text: '+(fg==='#fff'?'White':'Black');
@@ -1284,18 +1084,9 @@ async function saveAd(mode){
   const phone=document.getElementById('fPhone').value.trim();
   const s=document.getElementById('fStart').value;
   const e=document.getElementById('fEnd').value;
-  const adType=normalAdMode;
-  const existingAd=editingId?state.ads.find(a=>a.id===editingId):null;
 
   if(!business){ showToast('Business Name is required.'); return; }
   if(!cat){ showToast('Please select a Category.'); return; }
-  if(adType==='creative'){
-    if(!creativeFile && !creativeImageData && !(existingAd&&existingAd.creativeImageUrl)){ showToast('Please upload a banner creative.'); return; }
-    if(creativeFile){
-      if(!['image/jpeg','image/png','image/webp'].includes(creativeFile.type)){ showToast('Use JPG, PNG or WebP.'); return; }
-      if(creativeFile.size>2*1024*1024){ showToast('Keep the creative below 2 MB.'); return; }
-    }
-  }
   if(!address.addressLine){ showToast('Address Line is required.'); return; }
   if(!address.area){ showToast('Area / Locality is required.'); return; }
   if(!address.pin||address.pin.length!==6){ showToast('PIN / Area Code must be exactly 6 digits.'); return; }
@@ -1303,24 +1094,14 @@ async function saveAd(mode){
   if(!s||!e){ showToast('Start and End Date & Time are required.'); return; }
   if(new Date(e)<=new Date(s)){ showToast('End Date & Time must be after Start Date & Time.'); return; }
 
-  let creativeUrl=adType==='creative'?(existingAd?.creativeImageUrl||null):null;
-  if(adType==='creative' && creativeFile){
-    const ext=creativeFile.name.split('.').pop().toLowerCase();
-    const path=`${await generateNextAdId()}-${Date.now()}.${ext}`;
-    const upload=await supabaseClient.storage.from('ad-creatives').upload(path,creativeFile,{contentType:creativeFile.type,upsert:false});
-    if(upload.error){ console.error('Creative upload error:',upload.error); showToast('Could not upload creative: '+upload.error.message); return; }
-    const pub=supabaseClient.storage.from('ad-creatives').getPublicUrl(path);
-    creativeUrl=pub.data.publicUrl;
-  }
-
   const startAt=new Date(s).toISOString();
   const endAt=new Date(e).toISOString();
   const status=mode==='draft'?'draft':calculateStatus(startAt,endAt);
   const payload={
     business_name:business,
     category_id:Number(cat),
-    ad_type:adType,
-    services:adType==='creative'?[]:getFormServices(),
+    ad_type:'common',
+    services:getFormServices(),
     address_line:address.addressLine,
     area:address.area,
     city:address.city,
@@ -1329,11 +1110,10 @@ async function saveAd(mode){
     phone:phone,
     whatsapp:document.getElementById('fWhatsapp').value.trim()||null,
     badge:document.getElementById('fBadge').value.trim()||null,
-    instagram_id:normalizeInstagramId(document.getElementById('fInstagram').value),
-    background_color:adType==='creative'?null:document.getElementById('fColor').value,
-    text_color:adType==='creative'?null:contrast(document.getElementById('fColor').value),
-    template_id:adType==='creative'?null:(selectedTemplateId||1),
-    creative_image_url:creativeUrl,
+    background_color:document.getElementById('fColor').value,
+    text_color:contrast(document.getElementById('fColor').value),
+    template_id:selectedTemplateId||1,
+    creative_image_url:null,
     status,
     start_at:startAt,
     end_at:endAt,
@@ -1341,18 +1121,32 @@ async function saveAd(mode){
   };
 
   let error=null;
+
   if(editingId){
-    const result=await supabaseClient.from('ads').update(payload).eq('id',editingId).select('*').single();
+    const result=await supabaseClient
+      .from('ads')
+      .update(payload)
+      .eq('id',editingId)
+      .select('*')
+      .single();
     error=result.error;
   }else{
     payload.ad_id=await generateNextAdId();
-    const result=await supabaseClient.from('ads').insert(payload).select('*').single();
+    const result=await supabaseClient
+      .from('ads')
+      .insert(payload)
+      .select('*')
+      .single();
     error=result.error;
   }
-  if(error){ console.error('Save ad error:',error); showToast('Could not save advertisement: '+error.message); return; }
+
+  if(error){
+    console.error('Save ad error:',error);
+    showToast('Could not save advertisement: '+error.message);
+    return;
+  }
+
   editingId=null;
-  creativeFile=null;
-  creativeImageData=null;
   await loadAdsFromSupabase();
   renderAll();
   showView('ads');
@@ -1589,76 +1383,6 @@ function renderPublic(){
 }
 
 /* PREMIUM */
-function isDataImage(value){
-  return typeof value==='string' && /^data:image\/(jpeg|png|webp);base64,/i.test(value);
-}
-
-function extensionForImage(file){
-  const map={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'};
-  return map[file?.type]||'jpg';
-}
-
-async function uploadPremiumImage(file){
-  const ext=extensionForImage(file);
-  const path=`premium/${Date.now()}-${Math.random().toString(36).slice(2,10)}.${ext}`;
-  const {error}=await supabaseClient.storage
-    .from(PREMIUM_BANNER_BUCKET)
-    .upload(path,file,{contentType:file.type,upsert:false,cacheControl:'31536000'});
-  if(error)throw error;
-  const {data}=supabaseClient.storage.from(PREMIUM_BANNER_BUCKET).getPublicUrl(path);
-  if(!data?.publicUrl)throw new Error('Could not create the premium banner public URL.');
-  return data.publicUrl;
-}
-
-async function migrateLegacyPremiumImages(){
-  const legacy=premiumBanners.filter(b=>isDataImage(b.imageData));
-  if(!legacy.length)return;
-
-  let migrated=0;
-  for(const banner of legacy){
-    try{
-      const response=await fetch(banner.imageData);
-      const blob=await response.blob();
-      const ext=extensionForImage(blob);
-      const path=`legacy/${banner.id}-${Date.now()}.${ext}`;
-      const upload=await supabaseClient.storage.from(PREMIUM_BANNER_BUCKET).upload(
-        path,blob,{contentType:blob.type||'image/jpeg',upsert:false,cacheControl:'31536000'}
-      );
-      if(upload.error)throw upload.error;
-
-      const {data:urlData}=supabaseClient.storage.from(PREMIUM_BANNER_BUCKET).getPublicUrl(path);
-      const publicUrl=urlData?.publicUrl;
-      if(!publicUrl)throw new Error('Could not create public URL.');
-
-      const {error:updateError}=await supabaseClient
-        .from('premium_banners')
-        .update({image_url:publicUrl,updated_at:new Date().toISOString()})
-        .eq('id',banner.id);
-      if(updateError)throw updateError;
-
-      banner.imageData=publicUrl;
-      migrated++;
-    }catch(error){
-      console.error('Premium banner migration failed:',banner.id,error);
-    }
-  }
-
-  if(migrated){
-    renderPremiumAdmin();
-    renderAdminPublicPremium();
-    showToast(`${migrated} legacy premium banner${migrated===1?'':'s'} moved to Storage.`);
-  }
-}
-
-function fileData(file){
-  return new Promise((res,rej)=>{
-    const r=new FileReader();
-    r.onload=()=>res(r.result);
-    r.onerror=rej;
-    r.readAsDataURL(file);
-  });
-}
-
 function setPremiumDefaultDates(){
   const s=document.getElementById('premiumStart');
   const e=document.getElementById('premiumEnd');
@@ -1670,7 +1394,7 @@ function setPremiumDefaultDates(){
 }
 
 function clearPremiumForm(){
-  ['premiumImage','premiumBusiness','premiumCategory','premiumYoutube','premiumWebsite'].forEach(id=>document.getElementById(id).value='');
+  ['premiumImage','premiumBusiness','premiumCategory'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('premiumPreview').innerHTML=`<div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:10px">Choose a banner to preview it here.</div>`;
   document.getElementById('premiumStart').value='';
   document.getElementById('premiumEnd').value='';
@@ -1699,26 +1423,11 @@ async function savePremiumBanner(){
   const cat=document.getElementById('premiumCategory').value;
   const s=document.getElementById('premiumStart').value;
   const e=document.getElementById('premiumEnd').value;
-  const youtubeLink=document.getElementById('premiumYoutube').value.trim();
-  const websiteLink=document.getElementById('premiumWebsite').value.trim();
 
   const editing=editingPremiumId?premiumBanners.find(b=>String(b.id)===String(editingPremiumId)):null;
 
   if(!name||!cat||!s||!e||(!editing&&!f)){
     showToast('Complete all premium banner fields.');
-    return;
-  }
-
-  if(youtubeLink && websiteLink){
-    showToast('Add either a YouTube Link or a Website Link, not both.');
-    return;
-  }
-  if(youtubeLink && !isValidHttpUrl(youtubeLink)){
-    showToast('Please enter a valid YouTube link.');
-    return;
-  }
-  if(websiteLink && !isValidHttpUrl(websiteLink)){
-    showToast('Please enter a valid Website link.');
     return;
   }
 
@@ -1738,16 +1447,44 @@ async function savePremiumBanner(){
     return;
   }
 
+  // IMPORTANT: store premium banner images in Supabase Storage.
+  // Never save a data:image/... base64 string in premium_banners.image_url.
   let imageUrl=editing?editing.imageData:'';
+  let uploadedStoragePath=null;
+
   if(f){
     try{
-      imageUrl=await uploadPremiumImage(f);
+      const ext=({
+        'image/jpeg':'jpg',
+        'image/png':'png',
+        'image/webp':'webp'
+      })[f.type] || 'jpg';
+
+      const safeName=`premium/${Date.now()}-${Math.random().toString(36).slice(2,10)}.${ext}`;
+      const uploadResult=await supabaseClient.storage
+        .from(PREMIUM_BANNER_BUCKET)
+        .upload(safeName,f,{
+          contentType:f.type,
+          cacheControl:'31536000',
+          upsert:false
+        });
+
+      if(uploadResult.error)throw uploadResult.error;
+
+      uploadedStoragePath=safeName;
+      const publicResult=supabaseClient.storage
+        .from(PREMIUM_BANNER_BUCKET)
+        .getPublicUrl(safeName);
+
+      imageUrl=publicResult.data?.publicUrl || '';
+      if(!imageUrl)throw new Error('Could not create the premium banner public URL.');
     }catch(error){
       console.error('Premium banner Storage upload error:',error);
       showToast('Could not upload premium banner: '+error.message);
       return;
     }
   }
+
   const startAt=new Date(s).toISOString();
   const endAt=new Date(e).toISOString();
   const status=new Date(startAt)>new Date()? 'scheduled' : (new Date(endAt)>=new Date()?'active':'expired');
@@ -1759,8 +1496,6 @@ async function savePremiumBanner(){
       business_name:name,
       category_id:Number(cat),
       image_url:imageUrl,
-      youtube_link:youtubeLink||null,
-      website_link:websiteLink||null,
       start_at:startAt,
       end_at:endAt,
       status,
@@ -1771,7 +1506,7 @@ async function savePremiumBanner(){
       .from('premium_banners')
       .update(payload)
       .eq('id',editing.id)
-      .select(PREMIUM_BANNER_FIELDS)
+      .select('*')
       .single();
 
     error=result.error;
@@ -1789,13 +1524,17 @@ async function savePremiumBanner(){
     const result=await supabaseClient
       .from('premium_banners')
       .insert(payload)
-      .select(PREMIUM_BANNER_FIELDS)
+      .select('*')
       .single();
 
     error=result.error;
   }
 
   if(error){
+    // If the database write failed after the Storage upload, clean up the new file.
+    if(uploadedStoragePath){
+      await supabaseClient.storage.from(PREMIUM_BANNER_BUCKET).remove([uploadedStoragePath]);
+    }
     console.error('Save premium banner error:',error);
     showToast('Could not save premium banner: '+error.message);
     return;
@@ -1807,72 +1546,6 @@ async function savePremiumBanner(){
   renderPremiumAdmin();
   renderAdminPublicPremium();
   showToast(editing?'Premium banner updated successfully.':'Premium banner uploaded successfully.');
-}
-
-function clearHeroVideoForm(){
-  document.getElementById('heroVideoTitle').value='';
-  document.getElementById('heroVideoUrl').value='';
-  document.getElementById('heroVideoOrder').value=heroVideos.length+1;
-  document.getElementById('heroVideoStatus').value='active';
-  editingHeroVideoId=null;
-  document.getElementById('heroVideoSaveBtn').textContent='Add Video';
-}
-
-async function saveHeroVideo(){
-  const title=document.getElementById('heroVideoTitle').value.trim();
-  const url=document.getElementById('heroVideoUrl').value.trim();
-  const order=Math.max(1,parseInt(document.getElementById('heroVideoOrder').value||'1',10));
-  const status=document.getElementById('heroVideoStatus').value;
-  if(!url){showToast('YouTube Link is required.');return;}
-  const embed=youtubeEmbedUrl(url);
-  if(!embed){showToast('Please enter a valid YouTube link.');return;}
-  const payload={title:title||null,youtube_url:url,sort_order:order,status,updated_at:new Date().toISOString()};
-  const wasEditing=Boolean(editingHeroVideoId);
-  let result;
-  if(editingHeroVideoId){
-    result=await supabaseClient.from('hero_videos').update(payload).eq('id',editingHeroVideoId).select('*').single();
-  }else{
-    result=await supabaseClient.from('hero_videos').insert(payload).select('*').single();
-  }
-  if(result.error){console.error('Hero video save error:',result.error);showToast('Could not save hero video: '+result.error.message);return;}
-  await loadHeroVideosFromSupabase();
-  clearHeroVideoForm();
-  renderHeroVideosAdmin();
-  showToast(wasEditing?'Hero video updated.':'Hero video added.');
-}
-
-function editHeroVideo(id){
-  const v=heroVideos.find(x=>String(x.id)===String(id)); if(!v)return;
-  editingHeroVideoId=id;
-  document.getElementById('heroVideoTitle').value=v.title||'';
-  document.getElementById('heroVideoUrl').value=v.youtube_url||'';
-  document.getElementById('heroVideoOrder').value=v.sort_order||1;
-  document.getElementById('heroVideoStatus').value=v.status||'active';
-  document.getElementById('heroVideoSaveBtn').textContent='Save Changes';
-  document.getElementById('heroVideos').scrollIntoView({behavior:'smooth',block:'start'});
-}
-
-async function deleteHeroVideo(id){
-  if(!confirm('Delete this hero video?'))return;
-  const {error}=await supabaseClient.from('hero_videos').delete().eq('id',id);
-  if(error){showToast('Could not delete hero video: '+error.message);return;}
-  await loadHeroVideosFromSupabase();
-  if(String(editingHeroVideoId)===String(id))clearHeroVideoForm();
-  renderHeroVideosAdmin();
-  showToast('Hero video deleted.');
-}
-
-function renderHeroVideosAdmin(){
-  const grid=document.getElementById('heroVideosAdminGrid'); if(!grid)return;
-  const filter=document.getElementById('heroVideoFilter').value;
-  const arr=heroVideos.filter(v=>filter==='all'||v.status===filter);
-  grid.innerHTML=arr.length?arr.map(v=>{
-    const embed=youtubeEmbedUrl(v.youtube_url);
-    return `<article class="banner-card">
-      <div style="aspect-ratio:16/9;background:#eef2f5;overflow:hidden"><iframe src="${esc(embed)}" title="${esc(v.title||'Hero video')}" style="width:100%;height:100%;border:0" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
-      <div class="banner-info"><b>${esc(v.title||'Untitled video')}</b><div class="banner-meta">Order: ${esc(v.sort_order)}<br>Status: <span class="badge ${v.status==='active'?'published':'expired'}">${esc(v.status)}</span></div><div class="banner-actions"><button class="btn small" onclick="editHeroVideo('${v.id}')">Edit</button><button class="btn small danger" onclick="deleteHeroVideo('${v.id}')">Delete</button></div></div>
-    </article>`;
-  }).join(''):'<div class="empty" style="grid-column:1/-1">No hero videos added.</div>';
 }
 
 function renderPremiumAdmin(){
@@ -1888,7 +1561,6 @@ function renderPremiumAdmin(){
         <b>${esc(b.businessName)}</b>
         <div class="banner-meta">
           Category: ${esc(c?.name||'Unknown')}<br>
-          Destination: ${b.youtubeLink?'YouTube':b.websiteLink?'Website':'None'}<br>
           Start: ${new Date(b.startAt).toLocaleString()}<br>
           Expiry: ${new Date(b.endAt).toLocaleString()}<br>
           Status: <span class="badge ${b.status==='active'?'published':b.status==='scheduled'?'scheduled':'expired'}">${b.status}</span>
@@ -1923,8 +1595,6 @@ function editBanner(id){
   document.getElementById('premiumImage').value='';
   document.getElementById('premiumBusiness').value=b.businessName;
   document.getElementById('premiumCategory').value=b.categoryId;
-  document.getElementById('premiumYoutube').value=b.youtubeLink||'';
-  document.getElementById('premiumWebsite').value=b.websiteLink||'';
   document.getElementById('premiumStart').value=toLocalInputFromISO(b.startAt);
   document.getElementById('premiumEnd').value=toLocalInputFromISO(b.endAt);
   document.getElementById('premiumPreview').innerHTML=`<img class="banner-preview" src="${esc(b.imageData)}" alt="${esc(b.businessName)}">`;
@@ -2018,7 +1688,6 @@ function renderAll(){
 
 document.getElementById('fCategory').addEventListener('change',updatePreview);
 
-// Local-only status refresh. This does NOT query Supabase.
 setInterval(()=>{
   refreshStatuses();
   premiumBanners.forEach(refreshPremiumStatus);
