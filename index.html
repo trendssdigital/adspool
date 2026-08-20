@@ -104,7 +104,12 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 .hero-stats span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 
 /* hero card fan */
-.hero-visual{position:relative;height:400px}
+.hero-visual{position:relative;min-height:400px;display:flex;align-items:center;justify-content:center}
+.hero-video{width:100%;max-width:520px;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:10px;box-shadow:0 20px 44px rgba(18,32,26,.14);overflow:hidden}
+.hero-video-frame{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#111}
+.hero-video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.hero-video-caption{display:flex;align-items:center;gap:8px;padding:10px 4px 2px;font-size:12px;color:var(--muted)}
+.hero-video-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex:none}
 .fan-card{position:absolute;width:270px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:0 20px 44px rgba(18,32,26,.14)}
 .fan-card .swatch-top{height:96px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--signage);font-weight:800;font-size:19px;text-align:center;padding:0 10px}
 .fan-card .swatch-tag{margin-top:12px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--muted);display:flex;justify-content:space-between}
@@ -254,7 +259,7 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 
 @media(max-width:950px){
   .hero-inner{grid-template-columns:1fr}
-  .hero-visual{display:none}
+  .hero-visual{min-height:auto;margin-top:12px}
   .ads-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .feature-grid{grid-template-columns:repeat(2,1fr);gap:24px}
   .feature{border-right:0;padding:0}
@@ -274,6 +279,14 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
   .footer-inner{flex-direction:column}
   .footer-links{flex-wrap:wrap}
 }
+
+.hero-video{background:#fff;border:1px solid var(--border);border-radius:22px;overflow:hidden;box-shadow:0 18px 45px rgba(7,61,109,.12)}
+.hero-video-frame{position:relative;aspect-ratio:16/9;background:#0b1724}
+.hero-video-frame iframe{display:block;width:100%;height:100%;border:0}
+.hero-video-caption{padding:11px 14px;font-size:12px;font-weight:700;color:var(--forest);display:flex;justify-content:space-between;gap:10px;align-items:center}
+.hero-video-nav{display:flex;gap:6px}
+.hero-video-nav button{border:1px solid var(--border-strong);background:#fff;color:var(--forest);border-radius:50%;width:30px;height:30px;line-height:1;font-weight:800}
+@media(max-width:760px){.hero-video{margin-top:6px}}
 </style>
 </head>
 <body>
@@ -325,22 +338,7 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
       </div>
     </div>
     <div class="hero-visual">
-      <div class="ring"></div>
-      <div class="fan-card fan-1">
-        <div class="swatch-top" style="background:#e4f7e8;color:#0b6b49">Green Leaf Cafe</div>
-        <div class="swatch-name">Green Leaf Cafe</div>
-        <div class="swatch-tag"><span>RESTAURANTS</span><span>ADS-000241</span></div>
-      </div>
-      <div class="fan-card fan-2">
-        <div class="swatch-top" style="background:#173a67;color:#fff">Nova Interiors</div>
-        <div class="swatch-name">Nova Interiors</div>
-        <div class="swatch-tag"><span>INTERIOR</span><span>ADS-000198</span></div>
-      </div>
-      <div class="fan-card fan-3">
-        <div class="swatch-top" style="background:#fff6bf;color:#7a5b00">Metro Auto Care</div>
-        <div class="swatch-name">Metro Auto Care</div>
-        <div class="swatch-tag"><span>AUTOMOBILE</span><span>ADS-000156</span></div>
-      </div>
+      <div id="heroVideoWrap" class="hero-video"></div>
     </div>
   </div>
 </section>
@@ -422,10 +420,15 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLI
 
 let state={ads:[],categories:[]};
 let selectedCategory='all';
-let premiumBanners=[];let premiumIndex=0;let premiumTimer=null;
+let premiumBanners=[];
+let heroVideos=[];
+let heroVideoIndex=0;let premiumIndex=0;let premiumTimer=null;
 
 async function load(){
   try{
+    // Hero videos are optional. They must never prevent the existing
+    // categories, ads, or premium banners from loading if the new table
+    // has not been created yet or is temporarily unavailable.
     const [catResult,adsResult,bannerResult]=await Promise.all([
       supabaseClient.from('categories').select('*').order('id',{ascending:true}),
       supabaseClient.from('ads').select('*').order('created_at',{ascending:false}),
@@ -434,13 +437,28 @@ async function load(){
     if(catResult.error) throw new Error('Categories: '+catResult.error.message);
     if(adsResult.error) throw new Error('Ads: '+adsResult.error.message);
     if(bannerResult.error) throw new Error('Premium banners: '+bannerResult.error.message);
+
     state.categories=(catResult.data||[]).map(mapCategoryRow);
     state.ads=(adsResult.data||[]).map(mapAdRow);
     premiumBanners=(bannerResult.data||[]).map(mapPremiumRow);
+
+    // Load hero videos separately so a missing table/RLS policy cannot blank
+    // the entire public website.
+    heroVideos=[];
+    const heroVideoResult=await supabaseClient
+      .from('hero_videos').select('*').eq('status','active')
+      .order('sort_order',{ascending:true}).order('created_at',{ascending:true});
+    if(heroVideoResult.error){
+      console.warn('Hero videos unavailable; continuing without them:',heroVideoResult.error.message);
+    }else{
+      heroVideos=heroVideoResult.data||[];
+    }
+    heroVideoIndex=0;
     state.ads.forEach(refreshStatus);
     premiumBanners.forEach(refreshPremiumStatus);
     renderCategories();
     renderPremiumBanner();
+    renderHeroVideo();
     renderAds();
     updateStats();
   }catch(e){
@@ -448,9 +466,35 @@ async function load(){
     showToast('Could not load live listings. Please refresh.');
     state={ads:[],categories:[]};
     premiumBanners=[];
+    heroVideos=[];
     renderCategories();renderPremiumBanner();renderAds();updateStats();
   }
 }
+
+function youtubeVideoId(value){
+  try{
+    const u=new URL(String(value||'').trim());
+    if(u.hostname==='youtu.be') return u.pathname.replace(/^\//,'').split('/')[0]||null;
+    if(/(^|\.)youtube\.com$/i.test(u.hostname)){
+      if(u.pathname==='/watch') return u.searchParams.get('v')||null;
+      const m=u.pathname.match(/^\/(?:embed|shorts|live)\/([^/?]+)/i);
+      return m?m[1]:null;
+    }
+  }catch(e){}
+  return null;
+}
+function youtubeEmbedUrl(value){const id=youtubeVideoId(value);return id?'https://www.youtube.com/embed/'+encodeURIComponent(id):'';}
+function renderHeroVideo(){
+  const wrap=document.getElementById('heroVideoWrap'); if(!wrap)return;
+  const arr=(heroVideos||[]).filter(v=>v.status==='active'&&youtubeEmbedUrl(v.youtube_url));
+  if(!arr.length){wrap.innerHTML='<div style="padding:30px;text-align:center;color:#667080">Hero video coming soon.</div>';return;}
+  if(heroVideoIndex>=arr.length)heroVideoIndex=0;
+  const v=arr[heroVideoIndex], embed=youtubeEmbedUrl(v.youtube_url);
+  const nav=arr.length>1?`<div class="hero-video-nav"><button type="button" onclick="heroVideoPrev()" aria-label="Previous video">‹</button><button type="button" onclick="heroVideoNext()" aria-label="Next video">›</button></div>`:'';
+  wrap.innerHTML=`<div class="hero-video-frame"><iframe src="${esc(embed)}" title="${esc(v.title||'Adspool hero video')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div><div class="hero-video-caption"><span>${esc(v.title||'Adspool')}</span><span>${nav}</span></div>`;
+}
+function heroVideoNext(){const arr=heroVideos.filter(v=>v.status==='active'&&youtubeEmbedUrl(v.youtube_url));if(!arr.length)return;heroVideoIndex=(heroVideoIndex+1)%arr.length;renderHeroVideo();}
+function heroVideoPrev(){const arr=heroVideos.filter(v=>v.status==='active'&&youtubeEmbedUrl(v.youtube_url));if(!arr.length)return;heroVideoIndex=(heroVideoIndex-1+arr.length)%arr.length;renderHeroVideo();}
 
 function mapCategoryRow(r){
   return {id:r.id,name:r.name,active:r.active!==false};
@@ -858,38 +902,4 @@ function viewAdByObject(a){
     </div>
     <div class="ad-actions" style="margin-top:15px">
       ${phone?`<a class="icon-action primary" href="tel:${esc(phone)}" aria-label="Call business" title="Call"><span class="material-symbols-rounded">call</span><span>Call</span></a>`:''}
-      ${wa?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="https://wa.me/${encodeURIComponent(wa)}" aria-label="WhatsApp" title="WhatsApp"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.52 3.48A11.87 11.87 0 0 0 12.08 0C5.54 0 .22 5.32.22 11.86c0 2.09.55 4.13 1.59 5.93L.13 24l6.35-1.66a11.9 11.9 0 0 0 5.59 1.39h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.15-3.42-8.39ZM12.08 21.7h-.01a9.85 9.85 0 0 1-5.02-1.37l-.36-.21-3.77.99 1.01-3.67-.23-.38a9.83 9.83 0 0 1-1.51-5.2c0-5.42 4.41-9.83 9.84-9.83 2.62 0 5.08 1.02 6.93 2.87a9.77 9.77 0 0 1 2.88 6.96c0 5.42-4.41 9.84-9.83 9.84Zm5.4-7.37c-.3-.15-1.77-.87-2.05-.97-.28-.1-.48-.15-.69.15-.2.3-.79.97-.97 1.17-.18.2-.36.23-.66.08-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.14.3-.36.46-.54.15-.18.2-.31.3-.51.1-.2.05-.38-.03-.53-.08-.15-.69-1.66-.95-2.27-.25-.59-.51-.51-.69-.52h-.59c-.2 0-.53.08-.81.38-.28.3-1.06 1.04-1.06 2.54 0 1.5 1.09 2.94 1.24 3.14.15.2 2.14 3.27 5.18 4.58.72.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.18-1.4-.08-.13-.28-.2-.58-.35Z"/></svg><span>WhatsApp</span></a>`:''}
-      <a class="icon-action" target="_blank" rel="noopener noreferrer" href="${mapsUrl(buildAddress(a))}" aria-label="Directions" title="Directions"><span class="material-symbols-rounded">directions</span><span>Directions</span></a>
-      ${a.instagramId?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="${instagramUrl(a.instagramId)}" aria-label="Instagram" title="Instagram"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Zm0 2A2.5 2.5 0 1 0 14.5 12 2.5 2.5 0 0 0 12 9.5ZM17.5 6A1.25 1.25 0 1 1 16.25 7.25 1.25 1.25 0 0 1 17.5 6Z"/></svg><span>Instagram</span></a>`:''}
-      <button class="icon-action" type="button" onclick="shareAd('${esc(a.id)}')" aria-label="Share" title="Share"><span class="material-symbols-rounded">share</span><span>Share</span></button>
-    </div>
-    <div class="modal-note">Adspool displays advertisements that are currently active in the Adspool system.</div>`;
-  document.getElementById('modalBackdrop').classList.add('show');
-}
-
-load().then(()=>openSharedAd());
-
-/* Show the sticky search bar once the hero's own search box has scrolled
-   out of view under the fixed header; hide it again once back at top. */
-(function initStickySearch(){
-  const bar=document.getElementById('stickySearchbar');
-  const spacer=document.getElementById('stickySpacer');
-  const heroBox=document.querySelector('.hero .searchbox');
-  const topbar=document.querySelector('.topbar');
-  const inlineChips=document.getElementById('categories');
-  if(!bar||!heroBox)return;
-  function onScroll(){
-    const headerH=topbar?topbar.offsetHeight:0;
-    const r=heroBox.getBoundingClientRect();
-    const shouldShow=r.bottom<headerH;
-    bar.classList.toggle('show',shouldShow);
-    if(spacer)spacer.style.height=shouldShow?bar.offsetHeight+'px':'0px';
-    if(inlineChips)inlineChips.style.visibility=shouldShow?'hidden':'visible';
-  }
-  window.addEventListener('scroll',onScroll,{passive:true});
-  window.addEventListener('resize',onScroll);
-  onScroll();
-})();
-</script>
-</body>
-</html>
+      ${wa?`<a cla
