@@ -455,7 +455,7 @@ function mapAdRow(r){
     id:r.id,adId:r.ad_id,businessName:r.business_name,categoryId:r.category_id,
     adType:r.ad_type||'common',services:Array.isArray(r.services)?r.services:[],
     addressLine:r.address_line,area:r.area,city:r.city,state:r.state,pin:r.pin,
-    phone:r.phone,whatsapp:r.whatsapp||'',badge:r.badge||'',
+    phone:r.phone,whatsapp:r.whatsapp||'',badge:r.badge||'',instagramId:r.instagram_id||'',
     backgroundColor:r.background_color||'#ffffff',textColor:r.text_color||contrast(r.background_color||'#ffffff'),
     templateId:r.template_id||1,creativeImageUrl:r.creative_image_url||'',
     creativeImageData:r.creative_image_url||'',status:r.status||'draft',
@@ -641,37 +641,34 @@ function getSizing(a,address){
 }
 
 function adMarkup(a){
-  const instagram=instagramUrl(a.instagramId);
   if(a.adType==='creative'){
     const badge=(a.badge||'').trim();
     if(!a.creativeImageData){
       return`<div class="ad-frame"><div class="empty" style="padding:24px"><strong>Creative not available</strong></div></div>`;
     }
-    const inner=`<div class="ad-frame">
+    return`<div class="ad-frame">
       ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
       <img class="creative-preview-img" src="${esc(a.creativeImageData)}" alt="${esc(a.businessName||'Business')}">
     </div>`;
-    return instagram?`<a href="${esc(instagram)}" target="_blank" rel="noopener noreferrer">${inner}</a>`:inner;
   }
   const bg=a.backgroundColor||'#fff',fg=a.textColor||contrast(bg);
   const address=buildAddress(a);
-  const s=getSizing(a,address);
+  const sz=getSizing(a,address);
   const services=(a.services||[]).filter(Boolean);
   const serviceHtml=services.length?services.map(esc).join(' <span>•</span> '):'Local business services';
   const tpl=a.templateId||1;
   const badge=(a.badge||'').trim();
-  const inner=`<div class="ad-frame">
+  return `<div class="ad-frame">
     ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
     <div class="ad tpl-${tpl}" style="color:${fg};background:${esc(bg)}">
-      <div class="adhead" style="font-size:${s.nameSize}px">${esc(a.businessName||'Business Name')}</div>
+      <div class="adhead" style="font-size:${sz.nameSize}px">${esc(a.businessName||'Business Name')}</div>
       <div class="adbody">
-        <div class="servicesline" style="font-size:${s.serviceSize}px">${serviceHtml}</div>
-        <div class="address" style="font-size:${s.addressSize}px">📍 ${esc(address||'')}</div>
+        <div class="servicesline" style="font-size:${sz.serviceSize}px">${serviceHtml}</div>
+        <div class="address" style="font-size:${sz.addressSize}px">📍 ${esc(address||'')}</div>
       </div>
       <div class="adphone" style="font-size:20px">${esc(a.phone||'')}</div>
     </div>
   </div>`;
-  return instagram?`<a href="${esc(instagram)}" target="_blank" rel="noopener noreferrer">${inner}</a>`:inner;
 }
 function loadPremiumBanners(){
   premiumBanners.forEach(refreshPremiumStatus);
@@ -764,6 +761,7 @@ function renderAds(){
           <a class="btn primary" href="tel:${esc(phone)}">Call</a>
           ${wa?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}">WhatsApp</a>`:''}
           ${address?`<a class="btn" target="_blank" rel="noopener" href="${mapsUrl(address)}">Directions</a>`:''}
+          ${instagramUrl(a.instagramId)?`<a class="btn" target="_blank" rel="noopener noreferrer" href="${esc(instagramUrl(a.instagramId))}">Instagram</a>`:''}
           <button class="btn" onclick="shareAd('${esc(a.id)}')">Share</button>
         </div>
       </div>
@@ -798,6 +796,7 @@ function viewAd(id){
       <a class="btn primary" href="tel:${esc(phone)}">Call Business</a>
       ${wa?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}">WhatsApp</a>`:''}
       <a class="btn" target="_blank" rel="noopener" href="${mapsUrl(buildAddress(a))}">Directions</a>
+      ${instagramUrl(a.instagramId)?`<a class="btn" target="_blank" rel="noopener noreferrer" href="${esc(instagramUrl(a.instagramId))}">Instagram</a>`:''}
       <button class="btn" onclick="shareAd('${esc(a.id)}')">Share</button>
     </div>
     <div class="modal-note">Adspool displays advertisements that are currently active in the Adspool system.</div>`;
