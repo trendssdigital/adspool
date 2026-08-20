@@ -679,6 +679,8 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 <script>
 const SUPABASE_URL = 'https://vezffgjnfsuhrbaqpepu.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_QyQhdXbm55VV1nRNlUuH2A_I2iyS56n';
+const PREMIUM_BANNER_BUCKET='premium-banners';
+const PREMIUM_BANNER_FIELDS='id,business_name,category_id,image_url,youtube_link,website_link,start_at,end_at,status,created_at,updated_at';
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
@@ -803,6 +805,7 @@ async function load(){
   await loadCategoriesFromSupabase();
   await loadAdsFromSupabase();
   await loadPremiumBannersFromSupabase();
+  await migrateLegacyPremiumImages();
   await loadHeroVideosFromSupabase();
 
   normalize();
@@ -874,7 +877,7 @@ function mapPremiumRow(r){
 async function loadPremiumBannersFromSupabase(){
   const {data,error}=await supabaseClient
     .from('premium_banners')
-    .select('*')
+    .select(PREMIUM_BANNER_FIELDS)
     .order('created_at',{ascending:false});
 
   if(error){
@@ -1586,6 +1589,67 @@ function renderPublic(){
 }
 
 /* PREMIUM */
+function isDataImage(value){
+  return typeof value==='string' && /^data:image\/(jpeg|png|webp);base64,/i.test(value);
+}
+
+function extensionForImage(file){
+  const map={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'};
+  return map[file?.type]||'jpg';
+}
+
+async function uploadPremiumImage(file){
+  const ext=extensionForImage(file);
+  const path=`premium/${Date.now()}-${Math.random().toString(36).slice(2,10)}.${ext}`;
+  const {error}=await supabaseClient.storage
+    .from(PREMIUM_BANNER_BUCKET)
+    .upload(path,file,{contentType:file.type,upsert:false,cacheControl:'31536000'});
+  if(error)throw error;
+  const {data}=supabaseClient.storage.from(PREMIUM_BANNER_BUCKET).getPublicUrl(path);
+  if(!data?.publicUrl)throw new Error('Could not create the premium banner public URL.');
+  return data.publicUrl;
+}
+
+async function migrateLegacyPremiumImages(){
+  const legacy=premiumBanners.filter(b=>isDataImage(b.imageData));
+  if(!legacy.length)return;
+
+  let migrated=0;
+  for(const banner of legacy){
+    try{
+      const response=await fetch(banner.imageData);
+      const blob=await response.blob();
+      const ext=extensionForImage(blob);
+      const path=`legacy/${banner.id}-${Date.now()}.${ext}`;
+      const upload=await supabaseClient.storage.from(PREMIUM_BANNER_BUCKET).upload(
+        path,blob,{contentType:blob.type||'image/jpeg',upsert:false,cacheControl:'31536000'}
+      );
+      if(upload.error)throw upload.error;
+
+      const {data:urlData}=supabaseClient.storage.from(PREMIUM_BANNER_BUCKET).getPublicUrl(path);
+      const publicUrl=urlData?.publicUrl;
+      if(!publicUrl)throw new Error('Could not create public URL.');
+
+      const {error:updateError}=await supabaseClient
+        .from('premium_banners')
+        .update({image_url:publicUrl,updated_at:new Date().toISOString()})
+        .eq('id',banner.id);
+      if(updateError)throw updateError;
+
+      banner.imageData=publicUrl;
+      migrated++;
+    }catch(error){
+      console.error('Premium banner migration failed:',banner.id,error);
+    }
+  }
+
+  if(migrated){
+    renderPremiumAdmin();
+    renderAdminPublicPremium();
+    showToast(`${migrated} legacy premium banner${migrated===1?'':'s'} moved to Storage.`);
+  }
+}
+
 function fileData(file){
   return new Promise((res,rej)=>{
     const r=new FileReader();
@@ -1674,7 +1738,16 @@ async function savePremiumBanner(){
     return;
   }
 
-  const imageData=f?await fileData(f):(editing?editing.imageData:'');
+  let imageUrl=editing?editing.imageData:'';
+  if(f){
+    try{
+      imageUrl=await uploadPremiumImage(f);
+    }catch(error){
+      console.error('Premium banner Storage upload error:',error);
+      showToast('Could not upload premium banner: '+error.message);
+      return;
+    }
+  }
   const startAt=new Date(s).toISOString();
   const endAt=new Date(e).toISOString();
   const status=new Date(startAt)>new Date()? 'scheduled' : (new Date(endAt)>=new Date()?'active':'expired');
@@ -1685,7 +1758,7 @@ async function savePremiumBanner(){
     const payload={
       business_name:name,
       category_id:Number(cat),
-      image_url:imageData,
+      image_url:imageUrl,
       youtube_link:youtubeLink||null,
       website_link:websiteLink||null,
       start_at:startAt,
@@ -1698,7 +1771,7 @@ async function savePremiumBanner(){
       .from('premium_banners')
       .update(payload)
       .eq('id',editing.id)
-      .select('*')
+      .select(PREMIUM_BANNER_FIELDS)
       .single();
 
     error=result.error;
@@ -1706,7 +1779,7 @@ async function savePremiumBanner(){
     const payload={
       business_name:name,
       category_id:Number(cat),
-      image_url:imageData,
+      image_url:imageUrl,
       start_at:startAt,
       end_at:endAt,
       status,
@@ -1716,7 +1789,7 @@ async function savePremiumBanner(){
     const result=await supabaseClient
       .from('premium_banners')
       .insert(payload)
-      .select('*')
+      .select(PREMIUM_BANNER_FIELDS)
       .single();
 
     error=result.error;
@@ -1945,6 +2018,7 @@ function renderAll(){
 
 document.getElementById('fCategory').addEventListener('change',updatePreview);
 
+// Local-only status refresh. This does NOT query Supabase.
 setInterval(()=>{
   refreshStatuses();
   premiumBanners.forEach(refreshPremiumStatus);
