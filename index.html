@@ -416,6 +416,7 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 <script>
 const SUPABASE_URL = 'https://vezffgjnfsuhrbaqpepu.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_QyQhdXbm55VV1nRNlUuH2A_I2iyS56n';
+const PREMIUM_BANNER_FIELDS='id,business_name,category_id,image_url,youtube_link,website_link,start_at,end_at,status,created_at,updated_at';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 let state={ads:[],categories:[]};
@@ -428,9 +429,9 @@ async function load(){
   // Keep each data source independent. A problem with Hero Videos or one
   // optional table must never hide the existing advertisements.
   const [catResult, adsResult, bannerResult] = await Promise.allSettled([
-    supabaseClient.from('categories').select('*').order('id',{ascending:true}),
+    supabaseClient.from('categories').select('id,name,active').order('id',{ascending:true}),
     supabaseClient.from('ads').select('*').order('created_at',{ascending:false}),
-    supabaseClient.from('premium_banners').select('*').order('created_at',{ascending:false})
+    supabaseClient.from('premium_banners').select(PREMIUM_BANNER_FIELDS).order('created_at',{ascending:false})
   ]);
 
   if(catResult.status==='fulfilled' && !catResult.value.error){
@@ -891,8 +892,10 @@ setInterval(()=>{
   updateStats();
 },30000);
 
-window.addEventListener('focus',()=>{load();});
-setInterval(()=>{load();},30000);
+// No automatic Supabase reload loop here. Re-fetching the entire listings
+// every 30 seconds was causing unnecessary PostgREST egress. The page loads
+// once on startup; users can use the browser refresh when they need fresh data.
+
 
 async function openSharedAd(){
   const id=new URLSearchParams(window.location.search).get('ad');
@@ -908,7 +911,7 @@ async function openSharedAd(){
   // Fallback: fetch the exact ad directly from Supabase.
   // This makes shared links reliable even if the initial listing load is slow.
   try{
-    const {data,error}=await supabaseClient.from('ads').select('*').eq('id',id).maybeSingle();
+    const {data,error}=await supabaseClient.from('ads').select('id,ad_id,business_name,category_id,ad_type,services,address_line,area,city,state,pin,phone,whatsapp,instagram_id,badge,background_color,text_color,template_id,creative_image_url,status,start_at,end_at,created_at,updated_at').eq('id',id).maybeSingle();
     if(error) throw error;
     if(!data){
       console.warn('Shared ad not found:',id);
@@ -917,7 +920,7 @@ async function openSharedAd(){
     const ad=mapAdRow(data);
     const cat=state.categories.find(c=>String(c.id)===String(ad.categoryId));
     if(!cat){
-      const {data:catRow}=await supabaseClient.from('categories').select('*').eq('id',ad.categoryId).maybeSingle();
+      const {data:catRow}=await supabaseClient.from('categories').select('id,name,active').eq('id',ad.categoryId).maybeSingle();
       if(catRow) state.categories.push(mapCategoryRow(catRow));
     }
     viewAdByObject(ad);
