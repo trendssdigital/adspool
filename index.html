@@ -133,6 +133,7 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 /* ---------- premium banner (ticket) ---------- */
 .premium-section{margin-bottom:30px}
 .premium-banner-wrap{position:relative;width:100%;overflow:hidden;border-radius:16px;background:var(--forest-deep);border:1px solid var(--border)}
+.premium-banner-link{display:block;position:relative;color:inherit;text-decoration:none;cursor:pointer}
 .premium-banner-img{display:block;width:100%;aspect-ratio:4.8/1;object-fit:cover}
 .premium-banner-label{position:absolute;left:14px;top:14px;background:var(--gold);color:#fff;padding:5px 10px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em}
 .premium-banner-business{display:none}
@@ -464,6 +465,7 @@ function mapAdRow(r){
 
 function mapPremiumRow(r){
   return {id:r.id,businessName:r.business_name,categoryId:r.category_id,imageData:r.image_url,
+    youtubeLink:r.youtube_link||'',websiteLink:r.website_link||'',
     startAt:r.start_at,endAt:r.end_at,status:r.status||'scheduled',createdAt:r.created_at,updatedAt:r.updated_at};
 }
 
@@ -514,10 +516,14 @@ function renderPremiumBanner(){
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
     </button>`:'';
 
-  wrap.innerHTML=`
+  const destination=premiumDestination(b);
+  const bannerInner=`
     <img class="premium-banner-img" src="${esc(b.imageData||'')}" alt="Premium banner">
     <span class="premium-banner-label">PREMIUM</span>
     ${arrows}`;
+  wrap.innerHTML=destination
+    ? `<a class="premium-banner-link" href="${esc(destination)}" target="_blank" rel="noopener noreferrer" aria-label="Open premium advertisement">${bannerInner}</a>`
+    : bannerInner;
 
   if(dots)dots.innerHTML=arr.map((x,i)=>`<span class="premium-dot ${i===premiumIndex?'active':''}"></span>`).join('');
   if(meta)meta.textContent=`${premiumIndex+1} of ${arr.length}`;
@@ -581,6 +587,21 @@ function esc(s){
   return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 }
 
+function normalizeInstagramId(value){
+  let v=String(value||'').trim();
+  if(!v)return '';
+  v=v.replace(/^@/,'');
+  v=v.replace(/^https?:\/\/(www\.)?instagram\.com\//i,'').split(/[?#/]/)[0];
+  return v;
+}
+function instagramUrl(id){
+  const v=normalizeInstagramId(id);
+  return v?'https://www.instagram.com/'+encodeURIComponent(v)+'/':'';
+}
+function premiumDestination(b){
+  return b.youtubeLink||b.websiteLink||'';
+}
+
 function showToast(t){
   const e=document.getElementById('toast');
   e.textContent=t;
@@ -620,15 +641,17 @@ function getSizing(a,address){
 }
 
 function adMarkup(a){
+  const instagram=instagramUrl(a.instagramId);
   if(a.adType==='creative'){
     const badge=(a.badge||'').trim();
     if(!a.creativeImageData){
       return`<div class="ad-frame"><div class="empty" style="padding:24px"><strong>Creative not available</strong></div></div>`;
     }
-    return`<div class="ad-frame">
+    const inner=`<div class="ad-frame">
       ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
       <img class="creative-preview-img" src="${esc(a.creativeImageData)}" alt="${esc(a.businessName||'Business')}">
     </div>`;
+    return instagram?`<a href="${esc(instagram)}" target="_blank" rel="noopener noreferrer">${inner}</a>`:inner;
   }
   const bg=a.backgroundColor||'#fff',fg=a.textColor||contrast(bg);
   const address=buildAddress(a);
@@ -637,7 +660,7 @@ function adMarkup(a){
   const serviceHtml=services.length?services.map(esc).join(' <span>•</span> '):'Local business services';
   const tpl=a.templateId||1;
   const badge=(a.badge||'').trim();
-  return `<div class="ad-frame">
+  const inner=`<div class="ad-frame">
     ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
     <div class="ad tpl-${tpl}" style="color:${fg};background:${esc(bg)}">
       <div class="adhead" style="font-size:${s.nameSize}px">${esc(a.businessName||'Business Name')}</div>
@@ -648,8 +671,8 @@ function adMarkup(a){
       <div class="adphone" style="font-size:20px">${esc(a.phone||'')}</div>
     </div>
   </div>`;
+  return instagram?`<a href="${esc(instagram)}" target="_blank" rel="noopener noreferrer">${inner}</a>`:inner;
 }
-
 function loadPremiumBanners(){
   premiumBanners.forEach(refreshPremiumStatus);
 }
