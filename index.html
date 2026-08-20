@@ -200,8 +200,13 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 .ad-name{font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:3px}
 .ad-category{font-size:11.5px;color:var(--forest);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 .ad-id{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:3px}
-.ad-actions{display:flex;gap:7px;margin-top:13px;flex-wrap:wrap}
-.ad-actions .btn{flex:1;text-align:center;justify-content:center;padding:9px 8px;font-size:12px;min-width:64px}
+.ad-actions{display:flex;align-items:flex-start;justify-content:center;gap:14px;margin-top:14px;flex-wrap:wrap}
+.ad-action{display:inline-flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;min-width:48px;padding:2px 4px;border:0;background:transparent;color:var(--forest);text-decoration:none;cursor:pointer;font-family:var(--sans);font-size:10px;font-weight:700;line-height:1.1;transition:transform .15s ease,color .15s ease}
+.ad-action svg{width:22px;height:22px;display:block;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ad-action:hover{color:var(--forest-dark);transform:translateY(-1px)}
+.ad-action:focus-visible{outline:2px solid var(--forest);outline-offset:3px;border-radius:8px}
+.ad-action span{white-space:nowrap}
+@media(max-width:520px){.ad-actions{gap:9px}.ad-action{min-width:44px;font-size:9px}.ad-action svg{width:21px;height:21px}}
 
 .empty{grid-column:1/-1;background:var(--card);border:1.5px dashed var(--border-strong);border-radius:16px;padding:60px 20px;text-align:center;color:var(--muted)}
 .empty strong{display:block;color:var(--ink);font-family:var(--serif);font-size:19px;font-weight:600;margin-bottom:6px}
@@ -757,12 +762,27 @@ function renderAds(){
         <div class="ad-name">${esc(a.businessName)}</div>
         <div class="ad-category">${esc(cat)}</div>
         <div class="ad-id">${esc(a.adId||'Adspool Ad')}</div>
-        <div class="ad-actions">
-          <a class="btn primary" href="tel:${esc(phone)}">Call</a>
-          ${wa?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}">WhatsApp</a>`:''}
-          ${address?`<a class="btn" target="_blank" rel="noopener" href="${mapsUrl(address)}">Directions</a>`:''}
-          ${instagramUrl(a.instagramId)?`<a class="btn" target="_blank" rel="noopener noreferrer" href="${esc(instagramUrl(a.instagramId))}">Instagram</a>`:''}
-          <button class="btn" onclick="shareAd('${esc(a.id)}')">Share</button>
+        <div class="ad-actions" aria-label="Advertisement actions">
+          <a class="ad-action" title="Call" aria-label="Call" href="tel:${esc(phone)}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.62 2.63a2 2 0 0 1-.45 2.11L8 9.73a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.85.29 1.73.5 2.63.62A2 2 0 0 1 22 16.92z"/></svg>
+            <span>Call</span>
+          </a>
+          ${wa?`<a class="ad-action" title="WhatsApp" aria-label="WhatsApp" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.25a9.75 9.75 0 0 0-8.37 14.76L2.25 21.75l4.92-1.29A9.75 9.75 0 1 0 12 2.25Z"/><path d="M8.35 7.55c.22-.49.45-.5.67-.5h.58c.18 0 .38.07.5.38l.75 1.82c.1.25.06.45-.08.62l-.55.67c-.13.16-.1.35.02.52.44.63 1.01 1.2 1.64 1.64.17.12.36.15.52.02l.67-.55c.17-.14.37-.18.62-.08l1.82.75c.31.12.38.32.38.5v.58c0 .22-.01.45-.5.67-.4.18-.93.29-1.47.29-.65 0-1.4-.18-2.25-.58-1.03-.49-2.03-1.27-2.88-2.12S8.7 11.05 8.21 10.02c-.4-.85-.58-1.6-.58-2.25 0-.54.11-1.07.29-1.47Z"/></svg>
+            <span>WhatsApp</span>
+          </a>`:''}
+          ${address?`<a class="ad-action" title="Directions" aria-label="Directions" target="_blank" rel="noopener" href="${mapsUrl(address)}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>Directions</span>
+          </a>`:''}
+          ${instagramUrl(a.instagramId)?`<a class="ad-action" title="Instagram" aria-label="Instagram" target="_blank" rel="noopener noreferrer" href="${esc(instagramUrl(a.instagramId))}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+            <span>Instagram</span>
+          </a>`:''}
+          <button class="ad-action" title="Share" aria-label="Share" onclick="shareAd('${esc(a.id)}')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg>
+            <span>Share</span>
+          </button>
         </div>
       </div>
     </article>`;
@@ -792,12 +812,12 @@ function viewAd(id){
       <b>Business:</b> ${esc(a.businessName)}<br>
       <b>Location:</b> ${esc(buildAddress(a))}
     </div>
-    <div class="ad-actions" style="margin-top:15px">
-      <a class="btn primary" href="tel:${esc(phone)}">Call Business</a>
-      ${wa?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}">WhatsApp</a>`:''}
-      <a class="btn" target="_blank" rel="noopener" href="${mapsUrl(buildAddress(a))}">Directions</a>
-      ${instagramUrl(a.instagramId)?`<a class="btn" target="_blank" rel="noopener noreferrer" href="${esc(instagramUrl(a.instagramId))}">Instagram</a>`:''}
-      <button class="btn" onclick="shareAd('${esc(a.id)}')">Share</button>
+    <div class="ad-actions" style="margin-top:15px" aria-label="Advertisement actions">
+      <a class="ad-action" title="Call Business" aria-label="Call Business" href="tel:${esc(phone)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.62 2.63a2 2 0 0 1-.45 2.11L8 9.73a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.85.29 1.73.5 2.63.62A2 2 0 0 1 22 16.92z"/></svg><span>Call</span></a>
+      ${wa?`<a class="ad-action" title="WhatsApp" aria-label="WhatsApp" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.25a9.75 9.75 0 0 0-8.37 14.76L2.25 21.75l4.92-1.29A9.75 9.75 0 1 0 12 2.25Z"/><path d="M8.35 7.55c.22-.49.45-.5.67-.5h.58c.18 0 .38.07.5.38l.75 1.82c.1.25.06.45-.08.62l-.55.67c-.13.16-.1.35.02.52.44.63 1.01 1.2 1.64 1.64.17.12.36.15.52.02l.67-.55c.17-.14.37-.18.62-.08l1.82.75c.31.12.38.32.38.5v.58c0 .22-.01.45-.5.67-.4.18-.93.29-1.47.29-.65 0-1.4-.18-2.25-.58-1.03-.49-2.03-1.27-2.88-2.12S8.7 11.05 8.21 10.02c-.4-.85-.58-1.6-.58-2.25 0-.54.11-1.07.29-1.47Z"/></svg><span>WhatsApp</span></a>`:''}
+      <a class="ad-action" title="Directions" aria-label="Directions" target="_blank" rel="noopener" href="${mapsUrl(buildAddress(a))}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg><span>Directions</span></a>
+      ${instagramUrl(a.instagramId)?`<a class="ad-action" title="Instagram" aria-label="Instagram" target="_blank" rel="noopener noreferrer" href="${esc(instagramUrl(a.instagramId))}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg><span>Instagram</span></a>`:''}
+      <button class="ad-action" title="Share" aria-label="Share" onclick="shareAd('${esc(a.id)}')"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg><span>Share</span></button>
     </div>
     <div class="modal-note">Adspool displays advertisements that are currently active in the Adspool system.</div>`;
   document.getElementById('modalBackdrop').classList.add('show');
