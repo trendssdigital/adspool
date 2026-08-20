@@ -7,7 +7,7 @@
 <meta name="description" content="Adspool is a local business directory for Bangalore. Browse active advertisements by category, or list your own business.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,440;0,9..144,600;0,9..144,700;1,9..144,500&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&family=Baloo+2:wght@600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Poppins:wght@500;600;700;800&family=Courier+Prime:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -134,8 +134,8 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 /* ---------- premium banner (ticket) ---------- */
 .premium-section{margin-bottom:30px}
 .premium-banner-wrap{position:relative;width:100%;overflow:hidden;border-radius:16px;background:var(--forest-deep);border:1px solid var(--border)}
-.premium-banner-link{display:block;position:relative;color:inherit;text-decoration:none;cursor:pointer}
 .premium-banner-img{display:block;width:100%;aspect-ratio:4.8/1;object-fit:cover}
+.premium-banner-link{display:block;line-height:0}
 .premium-banner-label{position:absolute;left:14px;top:14px;background:var(--gold);color:#fff;padding:5px 10px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em}
 .premium-banner-business{display:none}
 .premium-banner-controls{display:flex;justify-content:space-between;align-items:center;margin-top:9px}
@@ -201,14 +201,13 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 .ad-name{font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:3px}
 .ad-category{font-size:11.5px;color:var(--forest);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 .ad-id{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:3px}
-.ad-actions{display:flex;align-items:flex-start;justify-content:flex-start;gap:16px;margin-top:14px;flex-wrap:wrap}
-.ad-action{display:inline-flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;min-width:50px;padding:2px 4px;border:0;background:transparent;color:var(--forest);text-decoration:none;cursor:pointer;font-family:var(--sans);font-size:10px;font-weight:700;line-height:1.1;transition:transform .15s ease,color .15s ease}
-.ad-action .material-symbols-rounded{font-size:23px;line-height:1;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
-.ad-action svg{width:23px;height:23px;display:block;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.ad-action:hover{color:var(--forest-dark);transform:translateY(-1px)}
-.ad-action:focus-visible{outline:2px solid var(--forest);outline-offset:3px;border-radius:8px}
-.ad-action span.label{white-space:nowrap}
-@media(max-width:520px){.ad-actions{gap:10px}.ad-action{min-width:44px;font-size:9px}.ad-action .material-symbols-rounded{font-size:21px}.ad-action svg{width:21px;height:21px}}
+.ad-actions{display:flex;gap:14px;margin-top:13px;flex-wrap:wrap;justify-content:flex-start;align-items:flex-start}
+.ad-actions .icon-action{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:58px;padding:4px 3px;border:0;background:transparent;color:var(--forest);font-size:11px;font-weight:700;line-height:1.15;cursor:pointer;text-decoration:none;transition:transform .15s ease,color .15s ease}
+.ad-actions .icon-action:hover{transform:translateY(-1px);color:var(--forest-dark)}
+.ad-actions .material-symbols-rounded{font-size:24px;line-height:1;font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24}
+.ad-actions .brand-icon{width:24px;height:24px;display:block;fill:currentColor}
+.ad-actions .icon-action.primary{color:var(--forest)}
+
 
 .empty{grid-column:1/-1;background:var(--card);border:1.5px dashed var(--border-strong);border-radius:16px;padding:60px 20px;text-align:center;color:var(--muted)}
 .empty strong{display:block;color:var(--ink);font-family:var(--serif);font-size:19px;font-weight:600;margin-bottom:6px}
@@ -462,7 +461,7 @@ function mapAdRow(r){
     id:r.id,adId:r.ad_id,businessName:r.business_name,categoryId:r.category_id,
     adType:r.ad_type||'common',services:Array.isArray(r.services)?r.services:[],
     addressLine:r.address_line,area:r.area,city:r.city,state:r.state,pin:r.pin,
-    phone:r.phone,whatsapp:r.whatsapp||'',badge:r.badge||'',instagramId:r.instagram_id||'',
+    phone:r.phone,whatsapp:r.whatsapp||'',instagramId:r.instagram_id||'',badge:r.badge||'',
     backgroundColor:r.background_color||'#ffffff',textColor:r.text_color||contrast(r.background_color||'#ffffff'),
     templateId:r.template_id||1,creativeImageUrl:r.creative_image_url||'',
     creativeImageData:r.creative_image_url||'',status:r.status||'draft',
@@ -471,8 +470,7 @@ function mapAdRow(r){
 }
 
 function mapPremiumRow(r){
-  return {id:r.id,businessName:r.business_name,categoryId:r.category_id,imageData:r.image_url,
-    youtubeLink:r.youtube_link||'',websiteLink:r.website_link||'',
+  return {id:r.id,businessName:r.business_name,categoryId:r.category_id,imageData:r.image_url,youtubeLink:r.youtube_link||'',websiteLink:r.website_link||'',
     startAt:r.start_at,endAt:r.end_at,status:r.status||'scheduled',createdAt:r.created_at,updatedAt:r.updated_at};
 }
 
@@ -523,14 +521,13 @@ function renderPremiumBanner(){
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
     </button>`:'';
 
-  const destination=premiumDestination(b);
-  const bannerInner=`
-    <img class="premium-banner-img" src="${esc(b.imageData||'')}" alt="Premium banner">
+  const premiumUrl=(b.youtubeLink||b.websiteLink||'').trim();
+  const premiumImage=`<img class="premium-banner-img" src="${esc(b.imageData||'')}" alt="Premium banner">`;
+  const premiumTarget=premiumUrl?`<a class="premium-banner-link" href="${esc(premiumUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open premium advertisement">${premiumImage}</a>`:premiumImage;
+  wrap.innerHTML=`
+    ${premiumTarget}
     <span class="premium-banner-label">PREMIUM</span>
     ${arrows}`;
-  wrap.innerHTML=destination
-    ? `<a class="premium-banner-link" href="${esc(destination)}" target="_blank" rel="noopener noreferrer" aria-label="Open premium advertisement">${bannerInner}</a>`
-    : bannerInner;
 
   if(dots)dots.innerHTML=arr.map((x,i)=>`<span class="premium-dot ${i===premiumIndex?'active':''}"></span>`).join('');
   if(meta)meta.textContent=`${premiumIndex+1} of ${arr.length}`;
@@ -594,21 +591,6 @@ function esc(s){
   return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 }
 
-function normalizeInstagramId(value){
-  let v=String(value||'').trim();
-  if(!v)return '';
-  v=v.replace(/^@/,'');
-  v=v.replace(/^https?:\/\/(www\.)?instagram\.com\//i,'').split(/[?#/]/)[0];
-  return v;
-}
-function instagramUrl(id){
-  const v=normalizeInstagramId(id);
-  return v?'https://www.instagram.com/'+encodeURIComponent(v)+'/':'';
-}
-function premiumDestination(b){
-  return b.youtubeLink||b.websiteLink||'';
-}
-
 function showToast(t){
   const e=document.getElementById('toast');
   e.textContent=t;
@@ -647,6 +629,13 @@ function getSizing(a,address){
   return {serviceSize,addressSize,nameSize};
 }
 
+function instagramUrl(value){
+  const raw=String(value||'').trim();
+  if(!raw)return '';
+  if(/^https?:\/\/([a-z0-9-]+\.)?instagram\.com\//i.test(raw))return raw;
+  return 'https://www.instagram.com/'+raw.replace(/^@+/,'').replace(/^\/+|\/+$/g,'')+'/';
+}
+
 function adMarkup(a){
   if(a.adType==='creative'){
     const badge=(a.badge||'').trim();
@@ -660,7 +649,7 @@ function adMarkup(a){
   }
   const bg=a.backgroundColor||'#fff',fg=a.textColor||contrast(bg);
   const address=buildAddress(a);
-  const sz=getSizing(a,address);
+  const s=getSizing(a,address);
   const services=(a.services||[]).filter(Boolean);
   const serviceHtml=services.length?services.map(esc).join(' <span>•</span> '):'Local business services';
   const tpl=a.templateId||1;
@@ -668,15 +657,16 @@ function adMarkup(a){
   return `<div class="ad-frame">
     ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
     <div class="ad tpl-${tpl}" style="color:${fg};background:${esc(bg)}">
-      <div class="adhead" style="font-size:${sz.nameSize}px">${esc(a.businessName||'Business Name')}</div>
+      <div class="adhead" style="font-size:${s.nameSize}px">${esc(a.businessName||'Business Name')}</div>
       <div class="adbody">
-        <div class="servicesline" style="font-size:${sz.serviceSize}px">${serviceHtml}</div>
-        <div class="address" style="font-size:${sz.addressSize}px">📍 ${esc(address||'')}</div>
+        <div class="servicesline" style="font-size:${s.serviceSize}px">${serviceHtml}</div>
+        <div class="address" style="font-size:${s.addressSize}px">📍 ${esc(address||'')}</div>
       </div>
       <div class="adphone" style="font-size:20px">${esc(a.phone||'')}</div>
     </div>
   </div>`;
 }
+
 function loadPremiumBanners(){
   premiumBanners.forEach(refreshPremiumStatus);
 }
@@ -764,27 +754,12 @@ function renderAds(){
         <div class="ad-name">${esc(a.businessName)}</div>
         <div class="ad-category">${esc(cat)}</div>
         <div class="ad-id">${esc(a.adId||'Adspool Ad')}</div>
-        <div class="ad-actions" aria-label="Advertisement actions">
-          <a class="ad-action" title="Call" aria-label="Call" href="tel:${esc(phone)}">
-            <span class="material-symbols-rounded" aria-hidden="true">call</span>
-            <span class="label">Call</span>
-          </a>
-          ${wa?`<a class="ad-action" title="WhatsApp" aria-label="WhatsApp" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.25a9.75 9.75 0 0 0-8.37 14.76L2.25 21.75l4.92-1.29A9.75 9.75 0 1 0 12 2.25Z"/><path d="M8.35 7.55c.22-.49.45-.5.67-.5h.58c.18 0 .38.07.5.38l.75 1.82c.1.25.06.45-.08.62l-.55.67c-.13.16-.1.35.02.52.44.63 1.01 1.2 1.64 1.64.17.12.36.15.52.02l.67-.55c.17-.14.37-.18.62-.08l1.82.75c.31.12.38.32.38.5v.58c0 .22-.01.45-.5.67-.4.18-.93.29-1.47.29-.65 0-1.4-.18-2.25-.58-1.03-.49-2.03-1.27-2.88-2.12S8.7 11.05 8.21 10.02c-.4-.85-.58-1.6-.58-2.25 0-.54.11-1.07.29-1.47Z"/></svg>
-            <span class="label">WhatsApp</span>
-          </a>`:''}
-          ${address?`<a class="ad-action" title="Directions" aria-label="Directions" target="_blank" rel="noopener" href="${mapsUrl(address)}">
-            <span class="material-symbols-rounded" aria-hidden="true">directions</span>
-            <span class="label">Directions</span>
-          </a>`:''}
-          ${instagramUrl(a.instagramId)?`<a class="ad-action" title="Instagram" aria-label="Instagram" target="_blank" rel="noopener noreferrer" href="${esc(instagramUrl(a.instagramId))}">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
-            <span class="label">Instagram</span>
-          </a>`:''}
-          <button class="ad-action" title="Share" aria-label="Share" onclick="shareAd('${esc(a.id)}')">
-            <span class="material-symbols-rounded" aria-hidden="true">share</span>
-            <span class="label">Share</span>
-          </button>
+        <div class="ad-actions">
+          ${phone?`<a class="icon-action primary" href="tel:${esc(phone)}" aria-label="Call ${esc(a.businessName||'business')}" title="Call"><span class="material-symbols-rounded">call</span><span>Call</span></a>`:''}
+          ${wa?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="https://wa.me/${encodeURIComponent(wa)}" aria-label="WhatsApp" title="WhatsApp"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.52 3.48A11.87 11.87 0 0 0 12.08 0C5.54 0 .22 5.32.22 11.86c0 2.09.55 4.13 1.59 5.93L.13 24l6.35-1.66a11.9 11.9 0 0 0 5.59 1.39h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.15-3.42-8.39ZM12.08 21.7h-.01a9.85 9.85 0 0 1-5.02-1.37l-.36-.21-3.77.99 1.01-3.67-.23-.38a9.83 9.83 0 0 1-1.51-5.2c0-5.42 4.41-9.83 9.84-9.83 2.62 0 5.08 1.02 6.93 2.87a9.77 9.77 0 0 1 2.88 6.96c0 5.42-4.41 9.84-9.83 9.84Zm5.4-7.37c-.3-.15-1.77-.87-2.05-.97-.28-.1-.48-.15-.69.15-.2.3-.79.97-.97 1.17-.18.2-.36.23-.66.08-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.14.3-.36.46-.54.15-.18.2-.31.3-.51.1-.2.05-.38-.03-.53-.08-.15-.69-1.66-.95-2.27-.25-.59-.51-.51-.69-.52h-.59c-.2 0-.53.08-.81.38-.28.3-1.06 1.04-1.06 2.54 0 1.5 1.09 2.94 1.24 3.14.15.2 2.14 3.27 5.18 4.58.72.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.18-1.4-.08-.13-.28-.2-.58-.35Z"/></svg><span>WhatsApp</span></a>`:''}
+          ${address?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="${mapsUrl(address)}" aria-label="Directions" title="Directions"><span class="material-symbols-rounded">directions</span><span>Directions</span></a>`:''}
+          ${a.instagramId?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="${instagramUrl(a.instagramId)}" aria-label="Instagram" title="Instagram"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Zm0 2A2.5 2.5 0 1 0 14.5 12 2.5 2.5 0 0 0 12 9.5ZM17.5 6A1.25 1.25 0 1 1 16.25 7.25 1.25 1.25 0 0 1 17.5 6Z"/></svg><span>Instagram</span></a>`:''}
+          <button class="icon-action" type="button" onclick="shareAd('${esc(a.id)}')" aria-label="Share" title="Share"><span class="material-symbols-rounded">share</span><span>Share</span></button>
         </div>
       </div>
     </article>`;
@@ -814,12 +789,12 @@ function viewAd(id){
       <b>Business:</b> ${esc(a.businessName)}<br>
       <b>Location:</b> ${esc(buildAddress(a))}
     </div>
-    <div class="ad-actions" style="margin-top:15px" aria-label="Advertisement actions">
-      <a class="ad-action" title="Call Business" aria-label="Call Business" href="tel:${esc(phone)}"><span class="material-symbols-rounded" aria-hidden="true">call</span><span class="label">Call</span></a>
-      ${wa?`<a class="ad-action" title="WhatsApp" aria-label="WhatsApp" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(wa)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.25a9.75 9.75 0 0 0-8.37 14.76L2.25 21.75l4.92-1.29A9.75 9.75 0 1 0 12 2.25Z"/><path d="M8.35 7.55c.22-.49.45-.5.67-.5h.58c.18 0 .38.07.5.38l.75 1.82c.1.25.06.45-.08.62l-.55.67c-.13.16-.1.35.02.52.44.63 1.01 1.2 1.64 1.64.17.12.36.15.52.02l.67-.55c.17-.14.37-.18.62-.08l1.82.75c.31.12.38.32.38.5v.58c0 .22-.01.45-.5.67-.4.18-.93.29-1.47.29-.65 0-1.4-.18-2.25-.58-1.03-.49-2.03-1.27-2.88-2.12S8.7 11.05 8.21 10.02c-.4-.85-.58-1.6-.58-2.25 0-.54.11-1.07.29-1.47Z"/></svg><span class="label">WhatsApp</span></a>`:''}
-      <a class="ad-action" title="Directions" aria-label="Directions" target="_blank" rel="noopener" href="${mapsUrl(buildAddress(a))}"><span class="material-symbols-rounded" aria-hidden="true">directions</span><span class="label">Directions</span></a>
-      ${instagramUrl(a.instagramId)?`<a class="ad-action" title="Instagram" aria-label="Instagram" target="_blank" rel="noopener noreferrer" href="${esc(instagramUrl(a.instagramId))}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg><span class="label">Instagram</span></a>`:''}
-      <button class="ad-action" title="Share" aria-label="Share" onclick="shareAd('${esc(a.id)}')"><span class="material-symbols-rounded" aria-hidden="true">share</span><span class="label">Share</span></button>
+    <div class="ad-actions" style="margin-top:15px">
+      ${phone?`<a class="icon-action primary" href="tel:${esc(phone)}" aria-label="Call business" title="Call"><span class="material-symbols-rounded">call</span><span>Call</span></a>`:''}
+      ${wa?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="https://wa.me/${encodeURIComponent(wa)}" aria-label="WhatsApp" title="WhatsApp"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.52 3.48A11.87 11.87 0 0 0 12.08 0C5.54 0 .22 5.32.22 11.86c0 2.09.55 4.13 1.59 5.93L.13 24l6.35-1.66a11.9 11.9 0 0 0 5.59 1.39h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.15-3.42-8.39ZM12.08 21.7h-.01a9.85 9.85 0 0 1-5.02-1.37l-.36-.21-3.77.99 1.01-3.67-.23-.38a9.83 9.83 0 0 1-1.51-5.2c0-5.42 4.41-9.83 9.84-9.83 2.62 0 5.08 1.02 6.93 2.87a9.77 9.77 0 0 1 2.88 6.96c0 5.42-4.41 9.84-9.83 9.84Zm5.4-7.37c-.3-.15-1.77-.87-2.05-.97-.28-.1-.48-.15-.69.15-.2.3-.79.97-.97 1.17-.18.2-.36.23-.66.08-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.14.3-.36.46-.54.15-.18.2-.31.3-.51.1-.2.05-.38-.03-.53-.08-.15-.69-1.66-.95-2.27-.25-.59-.51-.51-.69-.52h-.59c-.2 0-.53.08-.81.38-.28.3-1.06 1.04-1.06 2.54 0 1.5 1.09 2.94 1.24 3.14.15.2 2.14 3.27 5.18 4.58.72.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.18-1.4-.08-.13-.28-.2-.58-.35Z"/></svg><span>WhatsApp</span></a>`:''}
+      <a class="icon-action" target="_blank" rel="noopener noreferrer" href="${mapsUrl(buildAddress(a))}" aria-label="Directions" title="Directions"><span class="material-symbols-rounded">directions</span><span>Directions</span></a>
+      ${a.instagramId?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="${instagramUrl(a.instagramId)}" aria-label="Instagram" title="Instagram"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Zm0 2A2.5 2.5 0 1 0 14.5 12 2.5 2.5 0 0 0 12 9.5ZM17.5 6A1.25 1.25 0 1 1 16.25 7.25 1.25 1.25 0 0 1 17.5 6Z"/></svg><span>Instagram</span></a>`:''}
+      <button class="icon-action" type="button" onclick="shareAd('${esc(a.id)}')" aria-label="Share" title="Share"><span class="material-symbols-rounded">share</span><span>Share</span></button>
     </div>
     <div class="modal-note">Adspool displays advertisements that are currently active in the Adspool system.</div>`;
   document.getElementById('modalBackdrop').classList.add('show');
@@ -836,13 +811,20 @@ setInterval(()=>{
 window.addEventListener('focus',()=>{load();});
 setInterval(()=>{load();},30000);
 
-function openSharedAd(){
+async function openSharedAd(){
   const id=new URLSearchParams(window.location.search).get('ad');
-  if(id){setTimeout(()=>{if(activeAds().some(a=>a.id===id))viewAd(id)},150)}
+  if(!id)return;
+  // Wait for the initial Supabase load to finish before looking up the shared ad.
+  const found=activeAds().find(a=>String(a.id)===String(id));
+  if(found){viewAd(found.id);return;}
+  // One short retry handles slow local-network/Supabase responses without reopening later.
+  setTimeout(()=>{
+    const retry=activeAds().find(a=>String(a.id)===String(id));
+    if(retry)viewAd(retry.id);
+  },1000);
 }
 
-load();
-openSharedAd();
+load().then(()=>openSharedAd());
 
 /* Show the sticky search bar once the hero's own search box has scrolled
    out of view under the fixed header; hide it again once back at top. */
