@@ -471,6 +471,12 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
           <span class="hint">Shows as a small round badge on the ad. Leave blank for none.</span>
         </div>
 
+        <div class="field">
+          <label>Instagram ID (optional)</label>
+          <input id="fInstagram" maxlength="80" placeholder="e.g. yourbusiness">
+          <span class="hint">Optional Instagram username/ID. Clicking the public ad opens this Instagram profile.</span>
+        </div>
+
         <div class="field full" id="fieldBgColor">
           <label>Background Color</label>
           <div class="colorrow">
@@ -540,6 +546,18 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
         <div class="field">
           <label>Expiry Date & Time *</label>
           <input id="premiumEnd" type="datetime-local">
+        </div>
+
+        <div class="field">
+          <label>YouTube Link (optional)</label>
+          <input id="premiumYoutube" type="url" maxlength="500" placeholder="https://www.youtube.com/watch?v=...">
+          <span class="hint">Add this OR a Website Link. Clicking the public premium banner opens the destination.</span>
+        </div>
+
+        <div class="field">
+          <label>Website Link (optional)</label>
+          <input id="premiumWebsite" type="url" maxlength="500" placeholder="https://www.example.com">
+          <span class="hint">Add this OR a YouTube Link. Use the full URL.</span>
         </div>
 
         <div class="field full">
@@ -676,6 +694,21 @@ function mapCategoryRow(c){
   return {id:Number(c.id),name:c.name,active:Boolean(c.active),createdAt:c.created_at};
 }
 
+function isValidHttpUrl(value){
+  try{const u=new URL(value);return u.protocol==='https:'||u.protocol==='http:';}catch(e){return false;}
+}
+function normalizeInstagramId(value){
+  let v=String(value||'').trim();
+  if(!v)return null;
+  v=v.replace(/^@/,'');
+  v=v.replace(/^https?:\/\/(www\.)?instagram\.com\//i,'').split(/[?#/]/)[0];
+  return v||null;
+}
+function instagramUrl(id){
+  const v=normalizeInstagramId(id);
+  return v?'https://www.instagram.com/'+encodeURIComponent(v)+'/':'';
+}
+
 function mapAdRow(r){
   return {
     id:r.id,
@@ -692,6 +725,7 @@ function mapAdRow(r){
     phone:r.phone,
     whatsapp:r.whatsapp||'',
     badge:r.badge||'',
+    instagramId:r.instagram_id||'',
     backgroundColor:r.background_color||'#ffffff',
     textColor:r.text_color||contrast(r.background_color||'#ffffff'),
     templateId:r.template_id||1,
@@ -765,6 +799,8 @@ function mapPremiumRow(r){
     businessName:r.business_name,
     categoryId:Number(r.category_id),
     imageData:r.image_url,
+    youtubeLink:r.youtube_link||'',
+    websiteLink:r.website_link||'',
     startAt:r.start_at,
     endAt:r.end_at,
     status:r.status||'scheduled',
@@ -967,6 +1003,7 @@ function editAd(id){
   document.getElementById('fPhone').value=a.phone||'';
   document.getElementById('fWhatsapp').value=a.whatsapp||'';
   document.getElementById('fBadge').value=a.badge||'';
+  document.getElementById('fInstagram').value=a.instagramId||'';
   document.getElementById('fColor').value=a.backgroundColor||'#ffffff';
 
   document.getElementById('servicesContainer').innerHTML='';
@@ -990,7 +1027,7 @@ function cancelCreate(){
 }
 
 function clearForm(){
-  ['fBusiness','fAddressLine','fArea','fPin','fPhone','fWhatsapp','fBadge'].forEach(id=>document.getElementById(id).value='');
+  ['fBusiness','fAddressLine','fArea','fPin','fPhone','fWhatsapp','fBadge','fInstagram'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fCity').value='Bangalore';
   document.getElementById('fState').value='Karnataka';
   document.getElementById('servicesContainer').innerHTML='';
@@ -1070,19 +1107,22 @@ function mapsUrl(address){
 
 /* AD MARKUP */
 function adMarkup(a){
+  const instagram=instagramUrl(a.instagramId);
   if(a.adType==='creative'){
     const badge=(a.badge||'').trim();
     if(!a.creativeImageUrl){
       return`<div class="ad-frame"><div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:16px">No creative uploaded</div></div>`;
     }
-    return`<div class="ad-frame">${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}<img class="creative-preview-img" src="${esc(a.creativeImageUrl)}" alt="${esc(a.businessName||'Business')}"></div>`;
+    const badgeHtml=badge?`<div class="promo-badge">${esc(badge)}</div>`:'';
+    const inner=`<div class="ad-frame">${badgeHtml}<img class="creative-preview-img" src="${esc(a.creativeImageUrl)}" alt="${esc(a.businessName||'Business')}"></div>`;
+    return instagram?`<a href="${esc(instagram)}" target="_blank" rel="noopener noreferrer">${inner}</a>`:inner;
   }
   const bg=a.backgroundColor||'#fff';
   const fg=a.textColor||contrast(bg);
   const address=buildAddress(a);
   const tpl=a.templateId||1;
   const badge=(a.badge||'').trim();
-  return`<div class="ad-frame">
+  const inner=`<div class="ad-frame">
     ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
     <div class="ad tpl-${tpl}" style="color:${fg};background:${esc(bg)}">
       <div class="adhead">${esc(a.businessName||'Business Name')}</div>
@@ -1094,8 +1134,8 @@ function adMarkup(a){
       <div class="adphone">${esc(a.phone||'')}</div>
     </div>
   </div>`;
+  return instagram?`<a href="${esc(instagram)}" target="_blank" rel="noopener noreferrer">${inner}</a>`:inner;
 }
-
 /* PREVIEW */
 function updatePreview(){
   if(normalAdMode==='creative'){
@@ -1213,6 +1253,7 @@ async function saveAd(mode){
     phone:phone,
     whatsapp:document.getElementById('fWhatsapp').value.trim()||null,
     badge:document.getElementById('fBadge').value.trim()||null,
+    instagram_id:normalizeInstagramId(document.getElementById('fInstagram').value),
     background_color:adType==='creative'?null:document.getElementById('fColor').value,
     text_color:adType==='creative'?null:contrast(document.getElementById('fColor').value),
     template_id:adType==='creative'?null:(selectedTemplateId||1),
@@ -1492,7 +1533,7 @@ function setPremiumDefaultDates(){
 }
 
 function clearPremiumForm(){
-  ['premiumImage','premiumBusiness','premiumCategory'].forEach(id=>document.getElementById(id).value='');
+  ['premiumImage','premiumBusiness','premiumCategory','premiumYoutube','premiumWebsite'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('premiumPreview').innerHTML=`<div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:10px">Choose a banner to preview it here.</div>`;
   document.getElementById('premiumStart').value='';
   document.getElementById('premiumEnd').value='';
@@ -1521,11 +1562,26 @@ async function savePremiumBanner(){
   const cat=document.getElementById('premiumCategory').value;
   const s=document.getElementById('premiumStart').value;
   const e=document.getElementById('premiumEnd').value;
+  const youtubeLink=document.getElementById('premiumYoutube').value.trim();
+  const websiteLink=document.getElementById('premiumWebsite').value.trim();
 
   const editing=editingPremiumId?premiumBanners.find(b=>String(b.id)===String(editingPremiumId)):null;
 
   if(!name||!cat||!s||!e||(!editing&&!f)){
     showToast('Complete all premium banner fields.');
+    return;
+  }
+
+  if(youtubeLink && websiteLink){
+    showToast('Add either a YouTube Link or a Website Link, not both.');
+    return;
+  }
+  if(youtubeLink && !isValidHttpUrl(youtubeLink)){
+    showToast('Please enter a valid YouTube link.');
+    return;
+  }
+  if(websiteLink && !isValidHttpUrl(websiteLink)){
+    showToast('Please enter a valid Website link.');
     return;
   }
 
@@ -1557,6 +1613,8 @@ async function savePremiumBanner(){
       business_name:name,
       category_id:Number(cat),
       image_url:imageData,
+      youtube_link:youtubeLink||null,
+      website_link:websiteLink||null,
       start_at:startAt,
       end_at:endAt,
       status,
@@ -1618,6 +1676,7 @@ function renderPremiumAdmin(){
         <b>${esc(b.businessName)}</b>
         <div class="banner-meta">
           Category: ${esc(c?.name||'Unknown')}<br>
+          Destination: ${b.youtubeLink?'YouTube':b.websiteLink?'Website':'None'}<br>
           Start: ${new Date(b.startAt).toLocaleString()}<br>
           Expiry: ${new Date(b.endAt).toLocaleString()}<br>
           Status: <span class="badge ${b.status==='active'?'published':b.status==='scheduled'?'scheduled':'expired'}">${b.status}</span>
@@ -1652,6 +1711,8 @@ function editBanner(id){
   document.getElementById('premiumImage').value='';
   document.getElementById('premiumBusiness').value=b.businessName;
   document.getElementById('premiumCategory').value=b.categoryId;
+  document.getElementById('premiumYoutube').value=b.youtubeLink||'';
+  document.getElementById('premiumWebsite').value=b.websiteLink||'';
   document.getElementById('premiumStart').value=toLocalInputFromISO(b.startAt);
   document.getElementById('premiumEnd').value=toLocalInputFromISO(b.endAt);
   document.getElementById('premiumPreview').innerHTML=`<img class="banner-preview" src="${esc(b.imageData)}" alt="${esc(b.businessName)}">`;
