@@ -328,6 +328,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
   <button class="navbtn" data-view="expired" onclick="setAdStatusFilter('expired')"><span class="ico">○</span><span class="label">Expired</span></button>
   <button class="navbtn" data-view="categories" onclick="showView('categories')"><span class="ico">☷</span><span class="label">Categories</span></button>
   <button class="navbtn" data-view="public" onclick="showView('public')"><span class="ico">↗</span><span class="label">Public Ads</span></button>
+  <button class="navbtn" data-view="heroVideos" onclick="showView('heroVideos')"><span class="ico">▶</span><span class="label">Hero Videos</span></button>
 </aside>
 
 <main class="main">
@@ -591,6 +592,47 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
   </div>
 </section>
 
+<!-- HERO VIDEOS -->
+<section id="heroVideos" class="view">
+  <span class="eyebrow"><span class="dot"></span>Hero content</span>
+  <h1>Hero Videos</h1>
+  <p class="sub">Add YouTube videos one by one. Active videos appear in the public website hero.</p>
+  <div class="panel">
+    <div class="formgrid">
+      <div class="field">
+        <label>Video Title (optional)</label>
+        <input id="heroVideoTitle" maxlength="120" placeholder="e.g. Welcome to Adspool">
+      </div>
+      <div class="field">
+        <label>YouTube Link *</label>
+        <input id="heroVideoUrl" type="url" maxlength="500" placeholder="https://www.youtube.com/watch?v=...">
+        <span class="hint">You can paste a youtube.com/watch or youtu.be link. Adspool converts it to an embedded player.</span>
+      </div>
+      <div class="field">
+        <label>Display Order</label>
+        <input id="heroVideoOrder" type="number" min="1" step="1" value="1">
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="heroVideoStatus"><option value="active">Active</option><option value="inactive">Inactive</option></select>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="clearHeroVideoForm()">Clear</button>
+      <button class="btn primary" id="heroVideoSaveBtn" onclick="saveHeroVideo()">Add Video</button>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="toolbar">
+      <h2 style="margin:0;flex:1">Hero Video Library</h2>
+      <select id="heroVideoFilter" onchange="renderHeroVideosAdmin()">
+        <option value="all">All</option><option value="active">Active</option><option value="inactive">Inactive</option>
+      </select>
+    </div>
+    <div id="heroVideosAdminGrid" class="banner-grid"></div>
+  </div>
+</section>
+
 <!-- CATEGORIES -->
 <section id="categories" class="view">
   <span class="eyebrow"><span class="dot"></span>Taxonomy</span>
@@ -677,6 +719,8 @@ let state={
 };
 
 let premiumBanners=[];
+let heroVideos=[];
+let editingHeroVideoId=null;
 let editingId=null;
 let editingPremiumId=null;
 let selectedTemplateId=1;
@@ -697,6 +741,23 @@ function mapCategoryRow(c){
 function isValidHttpUrl(value){
   try{const u=new URL(value);return u.protocol==='https:'||u.protocol==='http:';}catch(e){return false;}
 }
+function youtubeVideoId(value){
+  try{
+    const u=new URL(String(value||'').trim());
+    if(u.hostname==='youtu.be') return u.pathname.replace(/^\//,'').split('/')[0]||null;
+    if(/(^|\.)youtube\.com$/i.test(u.hostname)){
+      if(u.pathname==='/watch') return u.searchParams.get('v')||null;
+      const m=u.pathname.match(/^\/(?:embed|shorts|live)\/([^/?]+)/i);
+      return m?m[1]:null;
+    }
+  }catch(e){}
+  return null;
+}
+function youtubeEmbedUrl(value){
+  const id=youtubeVideoId(value);
+  return id?'https://www.youtube.com/embed/'+encodeURIComponent(id):'';
+}
+
 function normalizeInstagramId(value){
   let v=String(value||'').trim();
   if(!v)return null;
@@ -742,6 +803,7 @@ async function load(){
   await loadCategoriesFromSupabase();
   await loadAdsFromSupabase();
   await loadPremiumBannersFromSupabase();
+  await loadHeroVideosFromSupabase();
 
   normalize();
   premiumBanners.forEach(refreshPremiumStatus);
@@ -823,6 +885,16 @@ async function loadPremiumBannersFromSupabase(){
   }
 
   premiumBanners=(data||[]).map(mapPremiumRow);
+}
+
+async function loadHeroVideosFromSupabase(){
+  const {data,error}=await supabaseClient.from('hero_videos').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true});
+  if(error){
+    console.error('Hero videos load error:',error);
+    heroVideos=[];
+    return;
+  }
+  heroVideos=data||[];
 }
 
 function contrast(hex){
@@ -920,6 +992,7 @@ function showView(v){
   if(['published','scheduled','drafts','expired'].includes(v))renderAdsTable();
   if(v==='categories')renderCategories();
   if(v==='public')renderPublic();
+  if(v==='heroVideos')renderHeroVideosAdmin();
 
   updateAdminStickyBar();
 }
@@ -1661,6 +1734,72 @@ async function savePremiumBanner(){
   renderPremiumAdmin();
   renderAdminPublicPremium();
   showToast(editing?'Premium banner updated successfully.':'Premium banner uploaded successfully.');
+}
+
+function clearHeroVideoForm(){
+  document.getElementById('heroVideoTitle').value='';
+  document.getElementById('heroVideoUrl').value='';
+  document.getElementById('heroVideoOrder').value=heroVideos.length+1;
+  document.getElementById('heroVideoStatus').value='active';
+  editingHeroVideoId=null;
+  document.getElementById('heroVideoSaveBtn').textContent='Add Video';
+}
+
+async function saveHeroVideo(){
+  const title=document.getElementById('heroVideoTitle').value.trim();
+  const url=document.getElementById('heroVideoUrl').value.trim();
+  const order=Math.max(1,parseInt(document.getElementById('heroVideoOrder').value||'1',10));
+  const status=document.getElementById('heroVideoStatus').value;
+  if(!url){showToast('YouTube Link is required.');return;}
+  const embed=youtubeEmbedUrl(url);
+  if(!embed){showToast('Please enter a valid YouTube link.');return;}
+  const payload={title:title||null,youtube_url:url,sort_order:order,status,updated_at:new Date().toISOString()};
+  const wasEditing=Boolean(editingHeroVideoId);
+  let result;
+  if(editingHeroVideoId){
+    result=await supabaseClient.from('hero_videos').update(payload).eq('id',editingHeroVideoId).select('*').single();
+  }else{
+    result=await supabaseClient.from('hero_videos').insert(payload).select('*').single();
+  }
+  if(result.error){console.error('Hero video save error:',result.error);showToast('Could not save hero video: '+result.error.message);return;}
+  await loadHeroVideosFromSupabase();
+  clearHeroVideoForm();
+  renderHeroVideosAdmin();
+  showToast(wasEditing?'Hero video updated.':'Hero video added.');
+}
+
+function editHeroVideo(id){
+  const v=heroVideos.find(x=>String(x.id)===String(id)); if(!v)return;
+  editingHeroVideoId=id;
+  document.getElementById('heroVideoTitle').value=v.title||'';
+  document.getElementById('heroVideoUrl').value=v.youtube_url||'';
+  document.getElementById('heroVideoOrder').value=v.sort_order||1;
+  document.getElementById('heroVideoStatus').value=v.status||'active';
+  document.getElementById('heroVideoSaveBtn').textContent='Save Changes';
+  document.getElementById('heroVideos').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+async function deleteHeroVideo(id){
+  if(!confirm('Delete this hero video?'))return;
+  const {error}=await supabaseClient.from('hero_videos').delete().eq('id',id);
+  if(error){showToast('Could not delete hero video: '+error.message);return;}
+  await loadHeroVideosFromSupabase();
+  if(String(editingHeroVideoId)===String(id))clearHeroVideoForm();
+  renderHeroVideosAdmin();
+  showToast('Hero video deleted.');
+}
+
+function renderHeroVideosAdmin(){
+  const grid=document.getElementById('heroVideosAdminGrid'); if(!grid)return;
+  const filter=document.getElementById('heroVideoFilter').value;
+  const arr=heroVideos.filter(v=>filter==='all'||v.status===filter);
+  grid.innerHTML=arr.length?arr.map(v=>{
+    const embed=youtubeEmbedUrl(v.youtube_url);
+    return `<article class="banner-card">
+      <div style="aspect-ratio:16/9;background:#eef2f5;overflow:hidden"><iframe src="${esc(embed)}" title="${esc(v.title||'Hero video')}" style="width:100%;height:100%;border:0" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+      <div class="banner-info"><b>${esc(v.title||'Untitled video')}</b><div class="banner-meta">Order: ${esc(v.sort_order)}<br>Status: <span class="badge ${v.status==='active'?'published':'expired'}">${esc(v.status)}</span></div><div class="banner-actions"><button class="btn small" onclick="editHeroVideo('${v.id}')">Edit</button><button class="btn small danger" onclick="deleteHeroVideo('${v.id}')">Delete</button></div></div>
+    </article>`;
+  }).join(''):'<div class="empty" style="grid-column:1/-1">No hero videos added.</div>';
 }
 
 function renderPremiumAdmin(){
