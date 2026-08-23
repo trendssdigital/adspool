@@ -790,7 +790,17 @@ function premiumPrev(){
 }
 
 function renderCategories(){
-  const cats=state.categories.filter(c=>c.active);
+  const cats=state.categories
+    .filter(c=>c.active)
+    .slice()
+    .sort((a,b)=>{
+      const an=(a.name||'').trim().toLowerCase();
+      const bn=(b.name||'').trim().toLowerCase();
+      const aRank=an==='others'?2:(an==='other'?1:0);
+      const bRank=bn==='others'?2:(bn==='other'?1:0);
+      if(aRank!==bRank)return aRank-bRank;
+      return(a.name||'').localeCompare(b.name||'',undefined,{sensitivity:'base'});
+    });
   const html=`<button class="chip ${selectedCategory==='all'?'active':''}" onclick="setCategory('all')">All Categories</button>`+
     cats.map(c=>`<button class="chip ${String(selectedCategory)===String(c.id)?'active':''}" onclick="setCategory('${c.id}')">${esc(c.name)}</button>`).join('');
   document.getElementById('categories').innerHTML=html;
