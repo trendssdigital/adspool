@@ -1492,6 +1492,7 @@ function renderCategories(){
     <div class="catrow ${c.active?'':'inactive'}">
       <span class="catname"><span class="catstatus"></span>${esc(c.name)}</span>
       <div style="display:flex;gap:7px;align-items:center">
+        <button class="btn small" onclick="editCategory(${c.id})">Edit</button>
         <button class="btn small" onclick="toggleCategory(${c.id})">${c.active?'Deactivate':'Activate'}</button>
         <button class="btn small danger" onclick="deleteCategory(${c.id})">Delete</button>
       </div>
@@ -1535,6 +1536,42 @@ async function addCategory(){
   premiumCategories();
   renderCategories();
   showToast('Category added.');
+}
+
+async function editCategory(id){
+  const c=state.categories.find(x=>Number(x.id)===Number(id));
+  if(!c){showToast('Category not found.');return;}
+
+  const currentName=String(c.name||'').trim();
+  const editedName=prompt('Edit category name:',currentName);
+  if(editedName===null)return;
+
+  const n=editedName.trim();
+  if(!n){showToast('Category name is required.');return;}
+  if(n===currentName){showToast('No changes made.');return;}
+
+  const duplicate=state.categories.some(x=>
+    Number(x.id)!==Number(id) &&
+    String(x.name||'').trim().toLowerCase()===n.toLowerCase()
+  );
+  if(duplicate){showToast('Category already exists.');return;}
+
+  const {error}=await supabaseClient
+    .from('categories')
+    .update({name:n})
+    .eq('id',id);
+
+  if(error){
+    console.error('Edit category error:',error);
+    showToast('Could not edit category: '+error.message);
+    return;
+  }
+
+  await loadCategoriesFromSupabase();
+  fillCategorySelects();
+  premiumCategories();
+  renderCategories();
+  showToast(`Category renamed to "${n}".`);
 }
 
 async function toggleCategory(id){
