@@ -1487,20 +1487,26 @@ function renderDashboard(){
 
 /* CATEGORIES */
 function renderCategories(){
+  sortCategories();
   document.getElementById('categoryList').innerHTML=state.categories.map(c=>`
     <div class="catrow ${c.active?'':'inactive'}">
       <span class="catname"><span class="catstatus"></span>${esc(c.name)}</span>
-      <button class="btn small" onclick="toggleCategory(${c.id})">${c.active?'Deactivate':'Activate'}</button>
+      <div style="display:flex;gap:7px;align-items:center">
+        <button class="btn small" onclick="toggleCategory(${c.id})">${c.active?'Deactivate':'Activate'}</button>
+        <button class="btn small danger" onclick="deleteCategory(${c.id})">Delete</button>
+      </div>
     </div>`).join('');
 }
 
-/* Keeps categories A→Z, with "Other" always pinned last regardless of when it was added */
+/* Keeps categories A→Z. "Others" is always pinned last, regardless of when it was added.
+   "Other" is also kept near the end for backward compatibility with older data. */
 function sortCategories(){
   state.categories.sort((a,b)=>{
-    const aOther=(a.name||'').trim().toLowerCase()==='other';
-    const bOther=(b.name||'').trim().toLowerCase()==='other';
-    if(aOther&&!bOther)return 1;
-    if(bOther&&!aOther)return-1;
+    const an=(a.name||'').trim().toLowerCase();
+    const bn=(b.name||'').trim().toLowerCase();
+    const aRank=an==='others'?2:(an==='other'?1:0);
+    const bRank=bn==='others'?2:(bn==='other'?1:0);
+    if(aRank!==bRank)return aRank-bRank;
     return(a.name||'').localeCompare(b.name||'',undefined,{sensitivity:'base'});
   });
 }
@@ -1551,6 +1557,57 @@ async function toggleCategory(id){
   premiumCategories();
   renderCategories();
   showToast(c.active?'Category activated.':'Category deactivated.');
+}
+
+async function deleteCategory(id){
+  const c=state.categories.find(x=>Number(x.id)===Number(id));
+  if(!c){showToast('Category not found.');return;}
+
+  const confirmed=confirm(
+    `Delete the "${c.name}" category?\n\nThis cannot be undone.`
+  );
+  if(!confirmed)return;
+
+  /* Protect existing ads and premium banners from orphaned category references. */
+  const [adsCheck,bannersCheck]=await Promise.all([
+    supabaseClient.from('ads').select('id',{count:'exact',head:true}).eq('category_id',id),
+    supabaseClient.from('premium_banners').select('id',{count:'exact',head:true}).eq('category_id',id)
+  ]);
+
+  if(adsCheck.error||bannersCheck.error){
+    const error=adsCheck.error||bannersCheck.error;
+    console.error('Category reference check error:',error);
+    showToast('Could not check category usage: '+error.message);
+    return;
+  }
+
+  const adCount=adsCheck.count||0;
+  const bannerCount=bannersCheck.count||0;
+
+  if(adCount>0||bannerCount>0){
+    const parts=[];
+    if(adCount>0)parts.push(`${adCount} advertisement${adCount===1?'':'s'}`);
+    if(bannerCount>0)parts.push(`${bannerCount} premium banner${bannerCount===1?'':'s'}`);
+    showToast(`Cannot delete "${c.name}" — it is used by ${parts.join(' and ')}. Deactivate it instead.`);
+    return;
+  }
+
+  const {error}=await supabaseClient
+    .from('categories')
+    .delete()
+    .eq('id',id);
+
+  if(error){
+    console.error('Delete category error:',error);
+    showToast('Could not delete category: '+error.message);
+    return;
+  }
+
+  await loadCategoriesFromSupabase();
+  fillCategorySelects();
+  premiumCategories();
+  renderCategories();
+  showToast(`Category "${c.name}" deleted.`);
 }
 
 function publicActive(){
