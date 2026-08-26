@@ -115,6 +115,11 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 .modeOption:has(input:checked){border-color:var(--forest);background:var(--gold-soft);color:var(--forest-dark)}
 .creative-preview-img{display:block;width:100%;max-width:400px;border-radius:20px;box-shadow:0 10px 26px rgba(18,32,26,.08)}
 .banner-note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:6px}
+.creative-upload-meta{font-size:11.5px;color:var(--muted);line-height:1.55;margin-top:7px;min-height:18px}
+.creative-upload-meta.processing{color:var(--forest);font-weight:600}
+.creative-upload-meta.success{color:#0a6b3f;font-weight:600}
+.creative-upload-meta.error{color:var(--danger);font-weight:600}
+.creative-upload-meta .size{font-family:var(--mono);font-size:10.5px}
 .address-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
 .servicesDynamic{display:flex;flex-direction:column;gap:8px}
 .serviceRow{display:flex;gap:8px}
@@ -404,7 +409,8 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
         <div class="field full" id="fieldCreativeUpload" style="display:none">
           <label id="creativeImageLabel">Banner Creative *</label>
           <input id="fCreativeImage" type="file" accept="image/jpeg,image/png,image/webp" onchange="handleCreativeImageChange(this)">
-          <div class="banner-note" id="creativeImageNote">Upload your ready-made banner design (JPG, PNG or WebP). It will be shown on the ad exactly as uploaded.</div>
+          <div class="banner-note" id="creativeImageNote">Upload your ready-made banner design (JPG, PNG or WebP). It will be optimized automatically before upload.</div>
+          <div id="creativeUploadMeta" class="creative-upload-meta" aria-live="polite"></div>
         </div>
 
         <div class="field">
@@ -732,6 +738,18 @@ let premiumCarouselIndex=0;
 let normalAdMode='common';
 let creativeImageData=null;
 let creativeFile=null;
+let creativeOriginalSize=0;
+let creativeOptimizedSize=0;
+let creativeOriginalName='';
+let creativeOriginalDimensions=null;
+let creativeOptimizedDimensions=null;
+let creativeProcessing=false;
+let creativeSaveInProgress=false;
+
+const CREATIVE_MAX_INPUT_BYTES=15*1024*1024;
+const CREATIVE_MAX_DIMENSION=1600;
+const CREATIVE_TARGET_BYTES=100*1024;
+const CREATIVE_SOFT_MAX_BYTES=250*1024;
 
 function esc(s){
   return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -1025,15 +1043,283 @@ function switchNormalMode(mode){
   updatePreview();
 }
 
-function handleCreativeImageChange(input){
+function formatBytes(bytes){
+  if(!Number.isFinite(bytes)||bytes<0)return'0 B';
+  if(bytes<1024)return bytes+' B';
+  if(bytes<1024*1024)return (bytes/1024).toFixed(bytes<10*1024?1:0)+' KB';
+  return (bytes/(1024*1024)).toFixed(2)+' MB';
+}
+
+function setCreativeMeta(message,state=''){
+  const el=document.getElementById('creativeUploadMeta');
+  if(!el)return;
+  el.className='creative-upload-meta '+state;
+  el.textContent=message||'';
+}
+
+function creativeFileSignature(file){
+  return file.slice(0,16).arrayBuffer().then(buf=>{
+    const b=new Uint8Array(buf);
+    const isJpeg=b.length>=3&&b[0]===0xff&&b[1]===0xd8&&b[2]===0xff;
+    const isPng=b.length>=8&&b[0]===0x89&&b[1]===0x50&&b[2]===0x4e&&b[3]===0x47&&b[4]===0x0d&&b[5]===0x0a&&b[6]===0x1a&&b[7]===0x0a;
+    const isWebp=b.length>=12&&b[0]===0x52&&b[1]===0x49&&b[2]===0x46&&b[3]===0x46&&b[8]===0x57&&b[9]===0x45&&b[10]===0x42&&b[11]===0x50;
+    return{isJpeg,isPng,isWebp};
+  });
+}
+
+async function getJpegExifOrientation(file){
+  if(file.type!=='image/jpeg')return 1;
+  const buf=await file.slice(0,256*1024).arrayBuffer();
+  const view=new DataView(buf);
+  if(view.byteLength<4||view.getUint16(0,false)!==0xffd8)return 1;
+  let offset=2;
+  while(offset+4<=view.byteLength){
+    if(view.getUint8(offset)!==0xff){offset++;continue;}
+    const marker=view.getUint8(offset+1);
+    offset+=2;
+    if(marker===0xd8||marker===0xd9)continue;
+    if(offset+2>view.byteLength)break;
+    const length=view.getUint16(offset,false);
+    if(length<2||offset+length>view.byteLength)break;
+    if(marker===0xe1 && length>=10){
+      const exifStart=offset+2;
+      if(view.getUint32(exifStart,false)!==0x45786966 || view.getUint16(exifStart+4,false)!==0)return 1;
+      const tiff=exifStart+6;
+      const little=view.getUint16(tiff,false)===0x4949;
+      if(view.getUint16(tiff,little)!==0x002a)return 1;
+      const ifdOffset=view.getUint32(tiff+4,little);
+      const ifd=tiff+ifdOffset;
+      if(ifd+2>view.byteLength)break;
+      const count=view.getUint16(ifd,little);
+      for(let i=0;i<count;i++){
+        const entry=ifd+2+i*12;
+        if(entry+12>view.byteLength)break;
+        if(view.getUint16(entry,little)===0x0112){
+          const type=view.getUint16(entry+2,little);
+          const n=view.getUint32(entry+4,little);
+          if(type===3&&n>=1)return view.getUint16(entry+8,little);
+          if(type===4&&n>=1)return view.getUint32(entry+8,little);
+        }
+      }
+    }
+    offset+=length;
+  }
+  return 1;
+}
+
+function exifTransform(ctx,orientation,w,h){
+  switch(orientation){
+    case 2: ctx.translate(w,0);ctx.scale(-1,1);break;
+    case 3: ctx.translate(w,h);ctx.rotate(Math.PI);break;
+    case 4: ctx.translate(0,h);ctx.scale(1,-1);break;
+    case 5: ctx.rotate(0.5*Math.PI);ctx.scale(1,-1);break;
+    case 6: ctx.translate(h,0);ctx.rotate(0.5*Math.PI);break;
+    case 7: ctx.translate(h,0);ctx.rotate(0.5*Math.PI);ctx.scale(-1,1);break;
+    case 8: ctx.translate(0,w);ctx.rotate(-0.5*Math.PI);break;
+  }
+}
+
+function supportsWebp(){
+  try{
+    const c=document.createElement('canvas');
+    return c.toDataURL('image/webp').startsWith('data:image/webp');
+  }catch(e){return false;}
+}
+
+function canvasToBlob(canvas,type,quality){
+  return new Promise((resolve,reject)=>{
+    canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('This browser could not encode the optimized image.')),type,quality);
+  });
+}
+
+async function decodeCreativeImage(file){
+  const orientation=await getJpegExifOrientation(file);
+  if('createImageBitmap' in window){
+    try{
+      const bitmap=await createImageBitmap(file,{imageOrientation:'from-image'});
+      return{source:bitmap,width:bitmap.width,height:bitmap.height,close:()=>bitmap.close&&bitmap.close(),orientation:1};
+    }catch(e){}
+  }
+
+  const objectUrl=URL.createObjectURL(file);
+  try{
+    const img=new Image();
+    img.decoding='async';
+    img.src=objectUrl;
+    if(img.decode)await img.decode();
+    else await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;});
+    return{source:img,width:img.naturalWidth,height:img.naturalHeight,close:()=>{},orientation};
+  }finally{
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+async function detectTransparency(source){
+  const size=64;
+  const c=document.createElement('canvas');
+  c.width=size;c.height=size;
+  const ctx=c.getContext('2d',{willReadFrequently:true});
+  ctx.clearRect(0,0,size,size);
+  ctx.drawImage(source,0,0,size,size);
+  const data=ctx.getImageData(0,0,size,size).data;
+  for(let i=3;i<data.length;i+=4)if(data[i]<250)return true;
+  return false;
+}
+
+async function optimizeCreativeImage(file){
+  const decoded=await decodeCreativeImage(file);
+  const src=decoded.source;
+  const sourceW=decoded.width;
+  const sourceH=decoded.height;
+  if(!sourceW||!sourceH)throw new Error('The selected file is not a readable image.');
+
+  const transparent=await detectTransparency(src);
+  const webpAvailable=supportsWebp();
+  const outputType=webpAvailable?'image/webp':(transparent?'image/png':'image/jpeg');
+
+  /* Keep already-small, reasonably sized WebP files untouched. This avoids
+     needless generation loss when the upload is already optimized. */
+  if(file.type==='image/webp' && file.size<=CREATIVE_SOFT_MAX_BYTES &&
+     Math.max(sourceW,sourceH)<=CREATIVE_MAX_DIMENSION){
+    if(decoded.close)decoded.close();
+    return{
+      file,
+      originalWidth:sourceW,
+      originalHeight:sourceH,
+      optimizedWidth:sourceW,
+      optimizedHeight:sourceH,
+      type:file.type,
+      reused:true
+    };
+  }
+
+  let maxDim=Math.min(CREATIVE_MAX_DIMENSION,Math.max(sourceW,sourceH));
+  const dimensionSteps=[maxDim,1400,1200,1000,900,800].filter((v,i,a)=>v>0&&a.indexOf(v)===i);
+  const qualitySteps=[0.86,0.80,0.74,0.68,0.62,0.56,0.50];
+
+  let best=null;
+  for(const limit of dimensionSteps){
+    const scale=Math.min(1,limit/Math.max(sourceW,sourceH));
+    const outW=Math.max(1,Math.round(sourceW*scale));
+    const outH=Math.max(1,Math.round(sourceH*scale));
+    const canvas=document.createElement('canvas');
+    canvas.width=outW;canvas.height=outH;
+    const ctx=canvas.getContext('2d');
+    if(!ctx)throw new Error('Your browser could not prepare the image.');
+    ctx.imageSmoothingEnabled=true;
+    ctx.imageSmoothingQuality='high';
+
+    if(decoded.orientation!==1){
+      /* The rotated orientations require a swapped output canvas. */
+      if(decoded.orientation===5||decoded.orientation===6||decoded.orientation===7||decoded.orientation===8){
+        const rotated=document.createElement('canvas');
+        rotated.width=outH;rotated.height=outW;
+        const rctx=rotated.getContext('2d');
+        rctx.imageSmoothingEnabled=true;rctx.imageSmoothingQuality='high';
+        exifTransform(rctx,decoded.orientation,outW,outH);
+        rctx.drawImage(src,0,0,outW,outH);
+        for(const q of qualitySteps){
+          const blob=await canvasToBlob(rotated,outputType,q);
+          if(!best||blob.size<best.blob.size)best={blob,outW:rotated.width,outH:rotated.height};
+          if(blob.size<=CREATIVE_TARGET_BYTES){
+            if(decoded.close)decoded.close();
+            return{
+              file:new File([blob],`adspool-creative.${outputType==='image/webp'?'webp':outputType==='image/png'?'png':'jpg'}`,{type:outputType,lastModified:Date.now()}),
+              originalWidth:sourceW,originalHeight:sourceH,
+              optimizedWidth:rotated.width,optimizedHeight:rotated.height,
+              type:outputType,reused:false
+            };
+          }
+        }
+        continue;
+      }
+    }
+
+    ctx.drawImage(src,0,0,outW,outH);
+    for(const q of qualitySteps){
+      const blob=await canvasToBlob(canvas,outputType,q);
+      if(!best||blob.size<best.blob.size)best={blob,outW,outH};
+      if(blob.size<=CREATIVE_TARGET_BYTES){
+        if(decoded.close)decoded.close();
+        return{
+          file:new File([blob],`adspool-creative.${outputType==='image/webp'?'webp':outputType==='image/png'?'png':'jpg'}`,{type:outputType,lastModified:Date.now()}),
+          originalWidth:sourceW,originalHeight:sourceH,
+          optimizedWidth:outW,optimizedHeight:outH,type:outputType,reused:false
+        };
+      }
+    }
+  }
+
+  if(decoded.close)decoded.close();
+  if(!best)throw new Error('Could not optimize this image.');
+
+  const finalFile=new File([best.blob],`adspool-creative.${outputType==='image/webp'?'webp':outputType==='image/png'?'png':'jpg'}`,{type:outputType,lastModified:Date.now()});
+  return{
+    file:finalFile,
+    originalWidth:sourceW,originalHeight:sourceH,
+    optimizedWidth:best.outW,optimizedHeight:best.outH,
+    type:outputType,reused:false
+  };
+}
+
+async function handleCreativeImageChange(input){
   const f=input.files[0];
   if(!f)return;
-  if(!['image/jpeg','image/png','image/webp'].includes(f.type)){ showToast('Use JPG, PNG or WebP.'); input.value=''; return; }
-  if(f.size>2*1024*1024){ showToast('Keep the creative below 2 MB.'); input.value=''; return; }
-  creativeFile=f;
-  const r=new FileReader();
-  r.onload=()=>{ creativeImageData=r.result; updatePreview(); };
-  r.readAsDataURL(f);
+
+  creativeProcessing=true;
+  setCreativeMeta('Checking image…','processing');
+  try{
+    if(!['image/jpeg','image/png','image/webp'].includes(f.type)){
+      throw new Error('Use a JPG, PNG or WebP image.');
+    }
+    if(f.size>CREATIVE_MAX_INPUT_BYTES){
+      throw new Error('This image is too large. Please choose an image below 15 MB.');
+    }
+
+    const signature=await creativeFileSignature(f);
+    const signatureOk=(f.type==='image/jpeg'&&signature.isJpeg)||
+      (f.type==='image/png'&&signature.isPng)||
+      (f.type==='image/webp'&&signature.isWebp);
+    if(!signatureOk)throw new Error('The selected file is not a valid '+f.type.replace('image/','').toUpperCase()+' image.');
+
+    setCreativeMeta('Reading dimensions and optimizing…','processing');
+    const result=await optimizeCreativeImage(f);
+
+    creativeOriginalSize=f.size;
+    creativeOptimizedSize=result.file.size;
+    creativeOriginalName=f.name;
+    creativeOriginalDimensions={width:result.originalWidth,height:result.originalHeight};
+    creativeOptimizedDimensions={width:result.optimizedWidth,height:result.optimizedHeight};
+    creativeFile=result.file;
+
+    const r=new FileReader();
+    await new Promise((resolve,reject)=>{
+      r.onload=()=>{creativeImageData=r.result;resolve();};
+      r.onerror=()=>reject(new Error('Could not prepare the image preview.'));
+      r.readAsDataURL(result.file);
+    });
+    updatePreview();
+
+    const saved=creativeOptimizedSize<creativeOriginalSize;
+    const dimensions=(result.optimizedWidth+' × '+result.optimizedHeight);
+    setCreativeMeta(
+      `Original: ${formatBytes(creativeOriginalSize)} → Optimized: ${formatBytes(creativeOptimizedSize)} · ${dimensions}${saved?' · optimized before upload':''}`,
+      'success'
+    );
+  }catch(error){
+    console.error('Creative image processing error:',error);
+    creativeFile=null;
+    creativeImageData=null;
+    creativeOriginalSize=0;
+    creativeOptimizedSize=0;
+    creativeOriginalDimensions=null;
+    creativeOptimizedDimensions=null;
+    input.value='';
+    updatePreview();
+    setCreativeMeta(error?.message||'Could not process this image.','error');
+  }finally{
+    creativeProcessing=false;
+  }
 }
 
 /* CREATE / EDIT */
@@ -1066,7 +1352,13 @@ function editAd(id){
   const creativeInput=document.getElementById('fCreativeImage');
   if(creativeInput)creativeInput.value='';
   document.getElementById('creativeImageLabel').textContent=a.adType==='creative'?'Banner Creative (leave empty to keep current)':'Banner Creative *';
-  document.getElementById('creativeImageNote').textContent=a.adType==='creative'?'Upload a new file only if you want to replace the current creative.':'Upload your ready-made banner design (JPG, PNG or WebP). It will be shown on the ad exactly as uploaded.';
+  document.getElementById('creativeImageNote').textContent=a.adType==='creative'?'Upload a new file only if you want to replace the current creative. The new image will be optimized automatically before upload.':'Upload your ready-made banner design (JPG, PNG or WebP). It will be optimized automatically before upload.';
+  creativeOriginalSize=0;
+  creativeOptimizedSize=0;
+  creativeOriginalName='';
+  creativeOriginalDimensions=null;
+  creativeOptimizedDimensions=null;
+  setCreativeMeta(a.adType==='creative'&&a.creativeImageUrl?'Current creative loaded. Choose a new image only if you want to replace it.':'');
   fillCategorySelects();
   renderTemplatePicker();
 
@@ -1113,8 +1405,14 @@ function clearForm(){
   document.getElementById('fCreativeImage').value='';
   creativeImageData=null;
   creativeFile=null;
+  creativeOriginalSize=0;
+  creativeOptimizedSize=0;
+  creativeOriginalName='';
+  creativeOriginalDimensions=null;
+  creativeOptimizedDimensions=null;
+  setCreativeMeta('');
   document.getElementById('creativeImageLabel').textContent='Banner Creative *';
-  document.getElementById('creativeImageNote').textContent='Upload your ready-made banner design (JPG, PNG or WebP). It will be shown on the ad exactly as uploaded.';
+  document.getElementById('creativeImageNote').textContent='Upload your ready-made banner design (JPG, PNG or WebP). It will be optimized automatically before upload.';
   setNormalMode('common');
   setColor('#ffffff');
   const d=new Date();
@@ -1279,6 +1577,14 @@ function chooseTemplate(id){
 
 /* SAVE AD */
 async function saveAd(mode){
+  if(creativeSaveInProgress||creativeProcessing){
+    showToast(creativeProcessing?'Please wait for image optimization to finish.':'Please wait for the current save to finish.');
+    return;
+  }
+  creativeSaveInProgress=true;
+  const saveButtons=[...document.querySelectorAll('#tabNormalAds .actions .btn')];
+  saveButtons.forEach(b=>b.disabled=true);
+  try{
   const business=document.getElementById('fBusiness').value.trim();
   const cat=document.getElementById('fCategory').value;
   const address=getAddressData();
@@ -1294,7 +1600,7 @@ async function saveAd(mode){
     if(!creativeFile && !creativeImageData && !(existingAd&&existingAd.creativeImageUrl)){ showToast('Please upload a banner creative.'); return; }
     if(creativeFile){
       if(!['image/jpeg','image/png','image/webp'].includes(creativeFile.type)){ showToast('Use JPG, PNG or WebP.'); return; }
-      if(creativeFile.size>2*1024*1024){ showToast('Keep the creative below 2 MB.'); return; }
+      if(creativeFile.size>CREATIVE_MAX_INPUT_BYTES){ showToast('This image is too large. Please choose an image below 15 MB.'); return; }
     }
   }
   if(!address.addressLine){ showToast('Address Line is required.'); return; }
@@ -1306,12 +1612,28 @@ async function saveAd(mode){
 
   let creativeUrl=adType==='creative'?(existingAd?.creativeImageUrl||null):null;
   if(adType==='creative' && creativeFile){
-    const ext=creativeFile.name.split('.').pop().toLowerCase();
+    setCreativeMeta(`Uploading optimized image (${formatBytes(creativeFile.size)})…`,'processing');
+    const ext=creativeFile.type==='image/webp'?'webp':creativeFile.type==='image/png'?'png':'jpg';
     const path=`${await generateNextAdId()}-${Date.now()}.${ext}`;
-    const upload=await supabaseClient.storage.from('ad-creatives').upload(path,creativeFile,{contentType:creativeFile.type,upsert:false});
-    if(upload.error){ console.error('Creative upload error:',upload.error); showToast('Could not upload creative: '+upload.error.message); return; }
+    const upload=await supabaseClient.storage.from('ad-creatives').upload(
+      path,
+      creativeFile,
+      {contentType:creativeFile.type,upsert:false,cacheControl:'31536000'}
+    );
+    if(upload.error){
+      console.error('Creative upload error:',upload.error);
+      setCreativeMeta('Upload failed. Your optimized image was not stored.','error');
+      showToast('Could not upload creative: '+upload.error.message);
+      return;
+    }
     const pub=supabaseClient.storage.from('ad-creatives').getPublicUrl(path);
     creativeUrl=pub.data.publicUrl;
+    if(!creativeUrl){
+      setCreativeMeta('Upload completed, but no public image URL was returned.','error');
+      showToast('Could not create creative public URL.');
+      return;
+    }
+    setCreativeMeta(`Uploaded optimized image: ${formatBytes(creativeFile.size)} · ${creativeOptimizedDimensions?.width||''} × ${creativeOptimizedDimensions?.height||''}`,'success');
   }
 
   const startAt=new Date(s).toISOString();
@@ -1354,10 +1676,19 @@ async function saveAd(mode){
   editingId=null;
   creativeFile=null;
   creativeImageData=null;
+  creativeOriginalSize=0;
+  creativeOptimizedSize=0;
+  creativeOriginalName='';
+  creativeOriginalDimensions=null;
+  creativeOptimizedDimensions=null;
   await loadAdsFromSupabase();
   renderAll();
   showView('ads');
   showToast(mode==='draft'?'Draft saved to Supabase.':'Advertisement saved to Supabase.');
+  }finally{
+    creativeSaveInProgress=false;
+    saveButtons.forEach(b=>b.disabled=false);
+  }
 }
 
 function calculateStatus(startAt,endAt){
