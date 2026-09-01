@@ -170,6 +170,11 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 .ad{position:relative;width:100%;min-height:225px;border:2px solid currentColor;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;text-align:center;font-family:var(--signage)}
 .ad-frame{position:relative;width:100%}
 .creative-preview-img{display:block;width:100%;border-radius:16px;border:2px solid var(--border);object-fit:cover}
+.informational-public{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.informational-public img{display:block;width:100%;height:auto;max-height:360px;object-fit:cover}
+.informational-public-body{padding:16px}
+.informational-public-title{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.2;margin-bottom:8px}
+.informational-public-description{font-size:14px;line-height:1.65;color:#4d5a51;white-space:pre-wrap;word-break:break-word}
 .promo-badge{position:absolute;top:-10px;right:-10px;width:52px;height:52px;background:#ff0000;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--sans);font-weight:800;font-size:8.5px;line-height:1.12;letter-spacing:.01em;text-transform:uppercase;box-shadow:0 6px 14px rgba(0,0,0,.22);z-index:5;padding:4px;overflow:hidden;clip-path:polygon(50.00% 0.00%, 61.39% 7.50%, 75.00% 6.70%, 81.11% 18.89%, 93.30% 25.00%, 92.50% 38.61%, 100.00% 50.00%, 92.50% 61.39%, 93.30% 75.00%, 81.11% 81.11%, 75.00% 93.30%, 61.39% 92.50%, 50.00% 100.00%, 38.61% 92.50%, 25.00% 93.30%, 18.89% 81.11%, 6.70% 75.00%, 7.50% 61.39%, 0.00% 50.00%, 7.50% 38.61%, 6.70% 25.00%, 18.89% 18.89%, 25.00% 6.70%, 38.61% 7.50%)}
 .ad .adhead{flex:0 0 auto;padding:14px 12px 10px;border-bottom:2px solid currentColor;font-size:22px;font-weight:800;line-height:1.08;min-height:56px;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere}
 .ad .adbody{flex:1;padding:12px 16px 10px;display:flex;flex-direction:column;justify-content:center;gap:10px}
@@ -432,7 +437,7 @@ async function load(){
   // optional table must never hide the existing advertisements.
   const [catResult, adsResult, bannerResult] = await Promise.allSettled([
     supabaseClient.from('categories').select('id,name,active').order('id',{ascending:true}),
-    supabaseClient.from('ads').select('id,ad_id,business_name,category_id,ad_type,services,address_line,area,city,state,pin,phone,whatsapp,instagram_id,badge,background_color,text_color,template_id,creative_image_url,status,start_at,end_at,created_at,updated_at').order('created_at',{ascending:false}),
+    supabaseClient.from('ads').select('id,ad_id,business_name,description,category_id,ad_type,services,address_line,area,city,state,pin,phone,whatsapp,instagram_id,badge,background_color,text_color,template_id,creative_image_url,status,start_at,end_at,created_at,updated_at').order('created_at',{ascending:false}),
     supabaseClient.from('premium_banners').select('id,business_name,category_id,image_url,youtube_link,website_link,start_at,end_at,status,created_at,updated_at').order('created_at',{ascending:false})
   ]);
 
@@ -539,7 +544,7 @@ function mapCategoryRow(r){
 
 function mapAdRow(r){
   return {
-    id:r.id,adId:r.ad_id,businessName:r.business_name,categoryId:r.category_id,
+    id:r.id,adId:r.ad_id,businessName:r.business_name,description:r.description||'',categoryId:r.category_id,
     adType:r.ad_type||'common',services:Array.isArray(r.services)?r.services:[],
     addressLine:r.address_line,area:r.area,city:r.city,state:r.state,pin:r.pin,
     phone:r.phone,whatsapp:r.whatsapp||'',instagramId:r.instagram_id||'',badge:r.badge||'',
@@ -734,32 +739,14 @@ function instagramUrl(value){
 function adMarkup(a){
   if(a.adType==='creative'){
     const badge=(a.badge||'').trim();
-    if(!a.creativeImageData){
-      return`<div class="ad-frame"><div class="empty" style="padding:24px"><strong>Creative not available</strong></div></div>`;
-    }
-    return`<div class="ad-frame">
-      ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
-      <img class="creative-preview-img" src="${esc(a.creativeImageData)}" alt="${esc(a.businessName||'Business')}">
-    </div>`;
+    if(!a.creativeImageData)return`<div class="ad-frame"><div class="empty" style="padding:24px"><strong>Creative not available</strong></div></div>`;
+    return`<div class="ad-frame">${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}<img class="creative-preview-img" src="${esc(a.creativeImageData)}" alt="${esc(a.businessName||'Business')}"></div>`;
   }
-  const bg=a.backgroundColor||'#fff',fg=a.textColor||contrast(bg);
-  const address=buildAddress(a);
-  const s=getSizing(a,address);
-  const services=(a.services||[]).filter(Boolean);
-  const serviceHtml=services.length?services.map(esc).join(' <span>•</span> '):'Local business services';
-  const tpl=a.templateId||1;
-  const badge=(a.badge||'').trim();
-  return `<div class="ad-frame">
-    ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
-    <div class="ad tpl-${tpl}" style="color:${fg};background:${esc(bg)}">
-      <div class="adhead" style="font-size:${s.nameSize}px">${esc(a.businessName||'Business Name')}</div>
-      <div class="adbody">
-        <div class="servicesline" style="font-size:${s.serviceSize}px">${serviceHtml}</div>
-        <div class="address" style="font-size:${s.addressSize}px">📍 ${esc(address||'')}</div>
-      </div>
-      <div class="adphone" style="font-size:20px">${esc(a.phone||'')}</div>
-    </div>
-  </div>`;
+  if(a.adType==='informational'){
+    return`<div class="informational-public">${a.creativeImageData?`<img src="${esc(a.creativeImageData)}" alt="${esc(a.businessName||'Informational Post')}">`:''}<div class="informational-public-body"><div class="informational-public-title">${esc(a.businessName||'Informational Post')}</div><div class="informational-public-description">${esc(a.description||'')}</div></div></div>`;
+  }
+  const bg=a.backgroundColor||'#fff',fg=a.textColor||contrast(bg),address=buildAddress(a),s=getSizing(a,address),services=(a.services||[]).filter(Boolean),serviceHtml=services.length?services.map(esc).join(' <span>•</span> '):'Local business services',tpl=a.templateId||1,badge=(a.badge||'').trim();
+  return `<div class="ad-frame">${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}<div class="ad tpl-${tpl}" style="color:${fg};background:${bg}"><div class="adhead" style="font-size:${s.nameSize}px">${esc(a.businessName||'Business Name')}</div><div class="adbody"><div class="servicesline" style="font-size:${s.serviceSize}px">${serviceHtml}</div><div class="address" style="font-size:${s.addressSize}px">📍 ${esc(address||'')}</div></div><div class="adphone" style="font-size:20px">${esc(a.phone||'')}</div></div></div>`;
 }
 
 function loadPremiumBanners(){
@@ -837,7 +824,7 @@ function renderAds(){
   const q=(document.getElementById('searchInput').value||'').trim().toLowerCase();
   const arr=activeAds().filter(a=>{
     const category=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
-    const hay=[a.businessName,a.adId,buildAddress(a),(a.services||[]).join(' '),category].join(' ').toLowerCase();
+    const hay=[a.businessName,a.description,a.adId,buildAddress(a),(a.services||[]).join(' '),category].join(' ').toLowerCase();
     return (!q||hay.includes(q)) && (selectedCategory==='all'||String(a.categoryId)===String(selectedCategory));
   });
 
@@ -849,9 +836,9 @@ function renderAds(){
 
   grid.innerHTML=arr.map(a=>{
     const cat=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
-    const phone=(a.phone||'').replace(/\s/g,'');
-    const wa=(a.whatsapp||'').replace(/\D/g,'');
-    const address=buildAddress(a);
+    const phone=a.adType==='informational'?'':(a.phone||'').replace(/\s/g,'');
+    const wa=a.adType==='informational'?'':(a.whatsapp||'').replace(/\D/g,'');
+    const address=a.adType==='informational'?'':buildAddress(a);
     return `<article class="ad-card">
       <div class="ad-mini">${adMarkup(a)}</div>
       <div class="ad-perf"></div>
@@ -860,11 +847,11 @@ function renderAds(){
         <div class="ad-category">${esc(cat)}</div>
         <div class="ad-id">${esc(a.adId||'Adspool Ad')}</div>
         <div class="ad-actions">
-          ${phone?`<a class="icon-action primary" href="tel:${esc(phone)}" aria-label="Call ${esc(a.businessName||'business')}" title="Call"><span class="material-symbols-rounded">call</span><span>Call</span></a>`:''}
+          ${a.adType==='informational' ? `<button class="icon-action" type="button" onclick="shareAd('${esc(a.id)}')" aria-label="Share" title="Share"><span class="material-symbols-rounded">share</span><span>Share</span></button>` : `${phone?`<a class="icon-action primary" href="tel:${esc(phone)}" aria-label="Call ${esc(a.businessName||'business')}" title="Call"><span class="material-symbols-rounded">call</span><span>Call</span></a>`:''}
           ${wa?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="https://wa.me/${encodeURIComponent(wa)}" aria-label="WhatsApp" title="WhatsApp"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.52 3.48A11.87 11.87 0 0 0 12.08 0C5.54 0 .22 5.32.22 11.86c0 2.09.55 4.13 1.59 5.93L.13 24l6.35-1.66a11.9 11.9 0 0 0 5.59 1.39h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.15-3.42-8.39ZM12.08 21.7h-.01a9.85 9.85 0 0 1-5.02-1.37l-.36-.21-3.77.99 1.01-3.67-.23-.38a9.83 9.83 0 0 1-1.51-5.2c0-5.42 4.41-9.83 9.84-9.83 2.62 0 5.08 1.02 6.93 2.87a9.77 9.77 0 0 1 2.88 6.96c0 5.42-4.41 9.84-9.83 9.84Zm5.4-7.37c-.3-.15-1.77-.87-2.05-.97-.28-.1-.48-.15-.69.15-.2.3-.79.97-.97 1.17-.18.2-.36.23-.66.08-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.14.3-.36.46-.54.15-.18.2-.31.3-.51.1-.2.05-.38-.03-.53-.08-.15-.69-1.66-.95-2.27-.25-.59-.51-.51-.69-.52h-.59c-.2 0-.53.08-.81.38-.28.3-1.06 1.04-1.06 2.54 0 1.5 1.09 2.94 1.24 3.14.15.2 2.14 3.27 5.18 4.58.72.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.18-1.4-.08-.13-.28-.2-.58-.35Z"/></svg><span>WhatsApp</span></a>`:''}
           ${address?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="${mapsUrl(address)}" aria-label="Directions" title="Directions"><span class="material-symbols-rounded">directions</span><span>Directions</span></a>`:''}
           ${a.instagramId?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="${instagramUrl(a.instagramId)}" aria-label="Instagram" title="Instagram"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Zm0 2A2.5 2.5 0 1 0 14.5 12 2.5 2.5 0 0 0 12 9.5ZM17.5 6A1.25 1.25 0 1 1 16.25 7.25 1.25 1.25 0 0 1 17.5 6Z"/></svg><span>Instagram</span></a>`:''}
-          <button class="icon-action" type="button" onclick="shareAd('${esc(a.id)}')" aria-label="Share" title="Share"><span class="material-symbols-rounded">share</span><span>Share</span></button>
+          <button class="icon-action" type="button" onclick="shareAd('${esc(a.id)}')" aria-label="Share" title="Share"><span class="material-symbols-rounded">share</span><span>Share</span></button>`}
         </div>
       </div>
     </article>`;
@@ -884,16 +871,16 @@ function viewAd(id){
   const a=activeAds().find(x=>x.id===id);
   if(!a)return;
   const cat=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
+  if(a.adType==='informational'){ viewAdByObject(a); return; }
   const phone=(a.phone||'').replace(/\s/g,'');
   const wa=(a.whatsapp||'').replace(/\D/g,'');
   document.getElementById('modalTitle').textContent=a.businessName||'Advertisement';
+  const modalMeta=a.adType==='informational'
+    ? `<div style="margin-top:15px;font-size:13px"><b>Category:</b> ${esc(cat)}</div>`
+    : `<div style="margin-top:15px;font-size:13px"><b>Category:</b> ${esc(cat)}<br><b>Business:</b> ${esc(a.businessName)}<br><b>Location:</b> ${esc(buildAddress(a))}</div>`;
   document.getElementById('modalContent').innerHTML=`
     ${adMarkup(a)}
-    <div style="margin-top:15px;font-size:13px">
-      <b>Category:</b> ${esc(cat)}<br>
-      <b>Business:</b> ${esc(a.businessName)}<br>
-      <b>Location:</b> ${esc(buildAddress(a))}
-    </div>
+    ${modalMeta}
     <div class="ad-actions" style="margin-top:15px">
       ${phone?`<a class="icon-action primary" href="tel:${esc(phone)}" aria-label="Call business" title="Call"><span class="material-symbols-rounded">call</span><span>Call</span></a>`:''}
       ${wa?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="https://wa.me/${encodeURIComponent(wa)}" aria-label="WhatsApp" title="WhatsApp"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.52 3.48A11.87 11.87 0 0 0 12.08 0C5.54 0 .22 5.32.22 11.86c0 2.09.55 4.13 1.59 5.93L.13 24l6.35-1.66a11.9 11.9 0 0 0 5.59 1.39h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.15-3.42-8.39ZM12.08 21.7h-.01a9.85 9.85 0 0 1-5.02-1.37l-.36-.21-3.77.99 1.01-3.67-.23-.38a9.83 9.83 0 0 1-1.51-5.2c0-5.42 4.41-9.83 9.84-9.83 2.62 0 5.08 1.02 6.93 2.87a9.77 9.77 0 0 1 2.88 6.96c0 5.42-4.41 9.84-9.83 9.84Zm5.4-7.37c-.3-.15-1.77-.87-2.05-.97-.28-.1-.48-.15-.69.15-.2.3-.79.97-.97 1.17-.18.2-.36.23-.66.08-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.14.3-.36.46-.54.15-.18.2-.31.3-.51.1-.2.05-.38-.03-.53-.08-.15-.69-1.66-.95-2.27-.25-.59-.51-.51-.69-.52h-.59c-.2 0-.53.08-.81.38-.28.3-1.06 1.04-1.06 2.54 0 1.5 1.09 2.94 1.24 3.14.15.2 2.14 3.27 5.18 4.58.72.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.18-1.4-.08-.13-.28-.2-.58-.35Z"/></svg><span>WhatsApp</span></a>`:''}
@@ -957,7 +944,7 @@ async function openSharedAd(){
   // Fallback: fetch the exact ad directly from Supabase.
   // This makes shared links reliable even if the initial listing load is slow.
   try{
-    const {data,error}=await supabaseClient.from('ads').select('id,ad_id,business_name,category_id,ad_type,services,address_line,area,city,state,pin,phone,whatsapp,instagram_id,badge,background_color,text_color,template_id,creative_image_url,status,start_at,end_at,created_at,updated_at').eq('id',id).maybeSingle();
+    const {data,error}=await supabaseClient.from('ads').select('id,ad_id,business_name,description,category_id,ad_type,services,address_line,area,city,state,pin,phone,whatsapp,instagram_id,badge,background_color,text_color,template_id,creative_image_url,status,start_at,end_at,created_at,updated_at').eq('id',id).maybeSingle();
     if(error) throw error;
     if(!data){
       console.warn('Shared ad not found:',id);
@@ -981,6 +968,17 @@ function viewAdByObject(a){
   const phone=(a.phone||'').replace(/\s/g,'');
   const wa=(a.whatsapp||'').replace(/\D/g,'');
   document.getElementById('modalTitle').textContent=a.businessName||'Advertisement';
+  if(a.adType==='informational'){
+    document.getElementById('modalContent').innerHTML=`
+      ${adMarkup(a)}
+      <div style="margin-top:15px;font-size:13px"><b>Category:</b> ${esc(cat)}</div>
+      <div class="ad-actions" style="margin-top:15px">
+        <button class="icon-action" type="button" onclick="shareAd('${esc(a.id)}')" aria-label="Share" title="Share"><span class="material-symbols-rounded">share</span><span>Share</span></button>
+      </div>
+      <div class="modal-note">Adspool displays advertisements that are currently active in the Adspool system.</div>`;
+    document.getElementById('modalBackdrop').classList.add('show');
+    return;
+  }
   document.getElementById('modalContent').innerHTML=`
     ${adMarkup(a)}
     <div style="margin-top:15px;font-size:13px">
