@@ -124,7 +124,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 .informational-preview img{display:block;width:100%;height:auto;max-height:300px;object-fit:cover}
 .informational-body{padding:16px;text-align:left}
 .informational-title{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.2;margin:0 0 8px}
-.informational-description{font-size:14px;line-height:1.6;color:var(--muted);white-space:pre-wrap;word-break:break-word}
+.informational-description{font-size:14px;line-height:1.6;color:var(--muted);white-space:pre-wrap;word-break:break-word}.informational-location{margin-top:12px;font-size:13px;line-height:1.5;color:#5b6673}
 .address-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
 .servicesDynamic{display:flex;flex-direction:column;gap:8px}
 .serviceRow{display:flex;gap:8px}
@@ -454,7 +454,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
         </div>
 
         <div class="field full" id="fieldAddress">
-          <label>Address *</label>
+          <label id="addressSectionLabel">Address *</label>
           <div class="address-grid">
             <div class="field">
               <label>Address Line</label>
@@ -473,12 +473,12 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 
         <div class="field" id="fieldCity">
           <label>City *</label>
-          <input id="fCity" value="Bangalore" readonly>
+          <input id="fCity" value="Bangalore" maxlength="80" placeholder="City" oninput="updatePreview()">
         </div>
 
         <div class="field" id="fieldState">
           <label>State *</label>
-          <input id="fState" value="Karnataka" readonly>
+          <input id="fState" value="Karnataka" maxlength="80" placeholder="State" oninput="updatePreview()">
         </div>
 
         <div class="field" id="fieldPhone">
@@ -1057,9 +1057,11 @@ function setNormalMode(mode){
   document.getElementById('fieldServices').style.display=(creative||info)?'none':'';
   document.getElementById('fieldBgColor').style.display=(creative||info)?'none':'';
   document.getElementById('fieldBusiness').style.display=info?'none':'';
-  document.getElementById('fieldAddress').style.display=info?'none':'';
-  document.getElementById('fieldCity').style.display=info?'none':'';
-  document.getElementById('fieldState').style.display=info?'none':'';
+  document.getElementById('fieldAddress').style.display='';
+  document.getElementById('fieldCity').style.display='';
+  document.getElementById('fieldState').style.display='';
+  const addressLabel=document.getElementById('addressSectionLabel');
+  if(addressLabel) addressLabel.textContent=info?'Address & Location (Optional)':'Address *';
   document.getElementById('fieldPhone').style.display=info?'none':'';
   document.getElementById('fieldWhatsapp').style.display=info?'none':'';
   document.getElementById('fieldBadge').style.display=info?'none':'';
@@ -1539,8 +1541,8 @@ function updatePreview(){
     const t=document.getElementById('previewTemplateLabel');if(t)t.textContent='Showing: Custom Creative Upload';return;
   }
   if(normalAdMode==='informational'){
-    const title=document.getElementById('fInfoTitle').value||'Informational Title', description=document.getElementById('fInfoDescription').value||'Your informational content will appear here.';
-    document.getElementById('adPreview').innerHTML=`<div class="informational-preview">${creativeImageData?`<img src="${esc(creativeImageData)}" alt="${esc(title)}">`:''}<div class="informational-body"><div class="informational-title">${esc(title)}</div><div class="informational-description">${esc(description)}</div></div></div>`;
+    const title=document.getElementById('fInfoTitle').value||'Informational Title', description=document.getElementById('fInfoDescription').value||'Your informational content will appear here.', location=buildAddress(getAddressData());
+    document.getElementById('adPreview').innerHTML=`<div class="informational-preview">${creativeImageData?`<img src="${esc(creativeImageData)}" alt="${esc(title)}">`:''}<div class="informational-body"><div class="informational-title">${esc(title)}</div><div class="informational-description">${esc(description)}</div>${location?`<div class="informational-location">📍 ${esc(location)}</div>`:''}</div></div>`;
     const t=document.getElementById('previewTemplateLabel');if(t)t.textContent='Showing: Informational Post';return;
   }
   const bg=document.getElementById('fColor').value,fg=contrast(bg);
@@ -1593,12 +1595,21 @@ async function saveAd(mode){
         if(creativeFile.size>CREATIVE_MAX_INPUT_BYTES){showToast('This image is too large. Please choose an image below 15 MB.');return;}
       }
     }
-    let address={addressLine:'',area:'',city:'',state:'',pin:''},phone='';
+    const address=getAddressData();
+    let phone='';
+    // Common and Creative keep their existing required location validation.
+    // Informational location fields are optional; if supplied, validate PIN format.
     if(!isInfo){
-      address=getAddressData();phone=document.getElementById('fPhone').value.trim();
       if(!address.addressLine){showToast('Address Line is required.');return;}
       if(!address.area){showToast('Area / Locality is required.');return;}
       if(!address.pin||address.pin.length!==6){showToast('PIN / Area Code must be exactly 6 digits.');return;}
+      if(!address.city){showToast('City is required.');return;}
+      if(!address.state){showToast('State is required.');return;}
+    }else if(address.pin && !/^\d{6}$/.test(address.pin)){
+      showToast('PIN / Area Code must be exactly 6 digits when provided.');return;
+    }
+    if(!isInfo){
+      phone=document.getElementById('fPhone').value.trim();
       if(!phone||phone.length!==10){showToast('Phone must be exactly 10 digits.');return;}
     }
     if(!s||!e){showToast('Start and End Date & Time are required.');return;}
@@ -1617,10 +1628,9 @@ async function saveAd(mode){
     const payload={
       business_name:business,category_id:Number(cat),ad_type:adType,description:isInfo?document.getElementById('fInfoDescription').value.trim():null,
       services:adType==='common'?getFormServices():[],
-      // Informational ads intentionally do not collect these fields. The existing
-      // ads table has NOT NULL constraints on some legacy columns, so keep them
-      // empty in the database rather than exposing them in the Informational UI.
-      address_line:isInfo?'':address.addressLine,area:isInfo?'':address.area,city:isInfo?'':address.city,state:isInfo?'':address.state,pin:isInfo?'':address.pin,
+      // Common and Creative require location fields; Informational location is optional.
+      // Informational omits the contact/social fields below.
+      address_line:address.addressLine,area:address.area,city:address.city,state:address.state,pin:address.pin,
       phone:isInfo?'':phone,whatsapp:isInfo?null:(document.getElementById('fWhatsapp').value.trim()||null),badge:isInfo?null:(document.getElementById('fBadge').value.trim()||null),instagram_id:isInfo?null:normalizeInstagramId(document.getElementById('fInstagram').value),
       background_color:adType==='common'?document.getElementById('fColor').value:null,text_color:adType==='common'?contrast(document.getElementById('fColor').value):null,template_id:adType==='common'?(selectedTemplateId||1):null,
       creative_image_url:creativeUrl,status,start_at:startAt,end_at:endAt,updated_at:new Date().toISOString()
