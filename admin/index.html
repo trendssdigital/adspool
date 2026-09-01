@@ -120,6 +120,11 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 .creative-upload-meta.success{color:#0a6b3f;font-weight:600}
 .creative-upload-meta.error{color:var(--danger);font-weight:600}
 .creative-upload-meta .size{font-family:var(--mono);font-size:10.5px}
+.informational-preview{width:100%;max-width:400px;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 10px 26px rgba(18,32,26,.08)}
+.informational-preview img{display:block;width:100%;height:auto;max-height:300px;object-fit:cover}
+.informational-body{padding:16px;text-align:left}
+.informational-title{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.2;margin:0 0 8px}
+.informational-description{font-size:14px;line-height:1.6;color:var(--muted);white-space:pre-wrap;word-break:break-word}
 .address-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
 .servicesDynamic{display:flex;flex-direction:column;gap:8px}
 .serviceRow{display:flex;gap:8px}
@@ -401,9 +406,11 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
           <div class="modeToggle">
             <label class="modeOption"><input type="radio" name="normalMode" value="common" checked onchange="switchNormalMode('common')">Common</label>
             <label class="modeOption"><input type="radio" name="normalMode" value="creative" onchange="switchNormalMode('creative')">Creative</label>
+            <label class="modeOption"><input type="radio" name="normalMode" value="informational" onchange="switchNormalMode('informational')">Informational</label>
           </div>
           <span class="hint" id="commonModeHint">Common builds the ad from the fields below using one of our templates.</span>
           <span class="hint" id="creativeModeHint" style="display:none">Creative lets you upload your own ready-made banner design instead.</span>
+           <span class="hint" id="informationalModeHint" style="display:none">Informational is for announcements, updates and useful posts with a title, description and banner.</span>
         </div>
 
         <div class="field full" id="fieldCreativeUpload" style="display:none">
@@ -413,7 +420,18 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
           <div id="creativeUploadMeta" class="creative-upload-meta" aria-live="polite"></div>
         </div>
 
-        <div class="field">
+        <div class="field full" id="fieldInformationalContent" style="display:none">
+          <label>Title *</label>
+          <input id="fInfoTitle" maxlength="120" placeholder="Enter informational post title" oninput="updatePreview()">
+        </div>
+
+        <div class="field full" id="fieldInformationalDescription" style="display:none">
+          <label>Description *</label>
+          <textarea id="fInfoDescription" maxlength="2000" rows="7" placeholder="Write the information you want visitors to read…" oninput="updatePreview()"></textarea>
+          <span class="hint">Maximum 2,000 characters.</span>
+        </div>
+
+        <div class="field" id="fieldBusiness">
           <label>Business Name *</label>
           <input id="fBusiness" maxlength="80" oninput="updatePreview()">
         </div>
@@ -435,7 +453,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
           <button type="button" class="btn small" style="width:max-content;margin-top:8px" onclick="addService()">+ Add Service</button>
         </div>
 
-        <div class="field full">
+        <div class="field full" id="fieldAddress">
           <label>Address *</label>
           <div class="address-grid">
             <div class="field">
@@ -453,33 +471,33 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
           </div>
         </div>
 
-        <div class="field">
+        <div class="field" id="fieldCity">
           <label>City *</label>
           <input id="fCity" value="Bangalore" readonly>
         </div>
 
-        <div class="field">
+        <div class="field" id="fieldState">
           <label>State *</label>
           <input id="fState" value="Karnataka" readonly>
         </div>
 
-        <div class="field">
+        <div class="field" id="fieldPhone">
           <label>Phone *</label>
           <input id="fPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digit mobile number" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10);updatePreview()">
         </div>
 
-        <div class="field">
+        <div class="field" id="fieldWhatsapp">
           <label>WhatsApp (optional)</label>
           <input id="fWhatsapp" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digit WhatsApp number" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
         </div>
 
-        <div class="field">
+        <div class="field" id="fieldBadge">
           <label>Promo Badge (optional)</label>
           <input id="fBadge" maxlength="12" placeholder="e.g. 10% OFF" oninput="updatePreview()">
           <span class="hint">Shows as a small round badge on the ad. Leave blank for none.</span>
         </div>
 
-        <div class="field">
+        <div class="field" id="fieldInstagram">
           <label>Instagram ID (optional)</label>
           <input id="fInstagram" maxlength="80" placeholder="e.g. yourbusiness">
           <span class="hint">Optional Instagram username/ID. Clicking the public ad opens this Instagram profile.</span>
@@ -796,6 +814,7 @@ function mapAdRow(r){
     id:r.id,
     adId:r.ad_id,
     businessName:r.business_name,
+    description:r.description||'',
     categoryId:Number(r.category_id),
     adType:r.ad_type||'common',
     services:Array.isArray(r.services)?r.services:[],
@@ -1030,12 +1049,25 @@ function switchCreateTab(tab){
 function setNormalMode(mode){
   normalAdMode=mode;
   document.querySelectorAll('input[name="normalMode"]').forEach(r=>r.checked=(r.value===mode));
-  document.getElementById('fieldCreativeUpload').style.display=mode==='creative'?'':'none';
-  document.getElementById('fieldTemplate').style.display=mode==='creative'?'none':'';
-  document.getElementById('fieldServices').style.display=mode==='creative'?'none':'';
-  document.getElementById('fieldBgColor').style.display=mode==='creative'?'none':'';
+  const info=mode==='informational', creative=mode==='creative';
+  document.getElementById('fieldCreativeUpload').style.display=(creative||info)?'':'none';
+  document.getElementById('fieldInformationalContent').style.display=info?'':'none';
+  document.getElementById('fieldInformationalDescription').style.display=info?'':'none';
+  document.getElementById('fieldTemplate').style.display=(creative||info)?'none':'';
+  document.getElementById('fieldServices').style.display=(creative||info)?'none':'';
+  document.getElementById('fieldBgColor').style.display=(creative||info)?'none':'';
+  document.getElementById('fieldBusiness').style.display=info?'none':'';
+  document.getElementById('fieldAddress').style.display=info?'none':'';
+  document.getElementById('fieldCity').style.display=info?'none':'';
+  document.getElementById('fieldState').style.display=info?'none':'';
+  document.getElementById('fieldPhone').style.display=info?'none':'';
+  document.getElementById('fieldWhatsapp').style.display=info?'none':'';
+  document.getElementById('fieldBadge').style.display=info?'none':'';
+  document.getElementById('fieldInstagram').style.display=info?'none':'';
   document.getElementById('commonModeHint').style.display=mode==='common'?'':'none';
-  document.getElementById('creativeModeHint').style.display=mode==='creative'?'':'none';
+  document.getElementById('creativeModeHint').style.display=creative?'':'none';
+  document.getElementById('informationalModeHint').style.display=info?'':'none';
+  document.getElementById('fCreativeImage').required=info||creative;
 }
 
 function switchNormalMode(mode){
@@ -1346,23 +1378,25 @@ function editAd(id){
   if(!a)return;
   editingId=id;
   selectedTemplateId=a.templateId||1;
-  setNormalMode(a.adType==='creative'?'creative':'common');
+  setNormalMode(a.adType==='creative'?'creative':(a.adType==='informational'?'informational':'common'));
   creativeImageData=a.creativeImageUrl||null;
   creativeFile=null;
   const creativeInput=document.getElementById('fCreativeImage');
   if(creativeInput)creativeInput.value='';
-  document.getElementById('creativeImageLabel').textContent=a.adType==='creative'?'Banner Creative (leave empty to keep current)':'Banner Creative *';
-  document.getElementById('creativeImageNote').textContent=a.adType==='creative'?'Upload a new file only if you want to replace the current creative. The new image will be optimized automatically before upload.':'Upload your ready-made banner design (JPG, PNG or WebP). It will be optimized automatically before upload.';
+  document.getElementById('creativeImageLabel').textContent=(a.adType==='creative'||a.adType==='informational')?'Banner Creative (leave empty to keep current)':'Banner Creative *';
+  document.getElementById('creativeImageNote').textContent=(a.adType==='creative'||a.adType==='informational')?'Upload a new file only if you want to replace the current creative. The new image will be optimized automatically before upload.':'Upload your ready-made banner design (JPG, PNG or WebP). It will be optimized automatically before upload.';
   creativeOriginalSize=0;
   creativeOptimizedSize=0;
   creativeOriginalName='';
   creativeOriginalDimensions=null;
   creativeOptimizedDimensions=null;
-  setCreativeMeta(a.adType==='creative'&&a.creativeImageUrl?'Current creative loaded. Choose a new image only if you want to replace it.':'');
+  setCreativeMeta((a.adType==='creative'||a.adType==='informational')&&a.creativeImageUrl?'Current creative loaded. Choose a new image only if you want to replace it.':'');
   fillCategorySelects();
   renderTemplatePicker();
 
   document.getElementById('fBusiness').value=a.businessName||'';
+  document.getElementById('fInfoTitle').value=a.adType==='informational'?(a.businessName||''):'';
+  document.getElementById('fInfoDescription').value=a.adType==='informational'?(a.description||''):'';
   document.getElementById('fCategory').value=a.categoryId;
   document.getElementById('fAddressLine').value=a.addressLine||'';
   document.getElementById('fArea').value=a.area||'';
@@ -1396,7 +1430,7 @@ function cancelCreate(){
 }
 
 function clearForm(){
-  ['fBusiness','fAddressLine','fArea','fPin','fPhone','fWhatsapp','fBadge','fInstagram'].forEach(id=>document.getElementById(id).value='');
+  ['fBusiness','fInfoTitle','fInfoDescription','fAddressLine','fArea','fPin','fPhone','fWhatsapp','fBadge','fInstagram'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('fCity').value='Bangalore';
   document.getElementById('fState').value='Karnataka';
   document.getElementById('servicesContainer').innerHTML='';
@@ -1485,69 +1519,35 @@ function adMarkup(a){
   const instagram=instagramUrl(a.instagramId);
   if(a.adType==='creative'){
     const badge=(a.badge||'').trim();
-    if(!a.creativeImageUrl){
-      return`<div class="ad-frame"><div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:16px">No creative uploaded</div></div>`;
-    }
+    if(!a.creativeImageUrl)return`<div class="ad-frame"><div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:16px">No creative uploaded</div></div>`;
     const badgeHtml=badge?`<div class="promo-badge">${esc(badge)}</div>`:'';
     const inner=`<div class="ad-frame">${badgeHtml}<img class="creative-preview-img" src="${esc(a.creativeImageUrl)}" alt="${esc(a.businessName||'Business')}"></div>`;
     return instagram?`<a href="${esc(instagram)}" target="_blank" rel="noopener noreferrer">${inner}</a>`:inner;
   }
-  const bg=a.backgroundColor||'#fff';
-  const fg=a.textColor||contrast(bg);
-  const address=buildAddress(a);
-  const tpl=a.templateId||1;
-  const badge=(a.badge||'').trim();
-  const inner=`<div class="ad-frame">
-    ${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}
-    <div class="ad tpl-${tpl}" style="color:${fg};background:${esc(bg)}">
-      <div class="adhead">${esc(a.businessName||'Business Name')}</div>
-      <div class="adbody">
-        <div class="servicesline">${(a.services||[]).map(esc).join(' • ')}</div>
-        <div class="address">📍 ${esc(address||'Address')}</div>
-        ${address?`<a class="directionBtn" href="${mapsUrl(address)}" target="_blank" rel="noopener">📍 Share Directions</a>`:''}
-      </div>
-      <div class="adphone">${esc(a.phone||'')}</div>
-    </div>
-  </div>`;
+  if(a.adType==='informational'){
+    return`<div class="informational-preview">${a.creativeImageUrl?`<img src="${esc(a.creativeImageUrl)}" alt="${esc(a.businessName||'Informational Post')}">`:''}<div class="informational-body"><div class="informational-title">${esc(a.businessName||'Informational Post')}</div><div class="informational-description">${esc(a.description||'')}</div></div></div>`;
+  }
+  const bg=a.backgroundColor||'#fff',fg=a.textColor||contrast(bg),address=buildAddress(a),tpl=a.templateId||1,badge=(a.badge||'').trim();
+  const inner=`<div class="ad-frame">${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}<div class="ad tpl-${tpl}" style="color:${fg};background:${esc(bg)}"><div class="adhead">${esc(a.businessName||'Business Name')}</div><div class="adbody"><div class="servicesline">${(a.services||[]).map(esc).join(' • ')}</div><div class="address">📍 ${esc(address||'Address')}</div>${address?`<a class="directionBtn" href="${mapsUrl(address)}" target="_blank" rel="noopener">📍 Share Directions</a>`:''}</div><div class="adphone">${esc(a.phone||'')}</div></div></div>`;
   return instagram?`<a href="${esc(instagram)}" target="_blank" rel="noopener noreferrer">${inner}</a>`:inner;
 }
 /* PREVIEW */
 function updatePreview(){
   if(normalAdMode==='creative'){
-    const business=document.getElementById('fBusiness').value||'Business Name';
-    const badge=(document.getElementById('fBadge').value||'').trim();
-    document.getElementById('adPreview').innerHTML=creativeImageData?
-      `<div class="ad-frame">${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}<img class="creative-preview-img" src="${esc(creativeImageData)}" alt="${esc(business)}"></div>`:
-      `<div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:16px;padding:40px 16px">Choose a banner creative to preview it here.</div>`;
-    const tplLabel=document.getElementById('previewTemplateLabel');
-    if(tplLabel)tplLabel.textContent='Showing: Custom Creative Upload';
-    return;
+    const business=document.getElementById('fBusiness').value||'Business Name', badge=(document.getElementById('fBadge').value||'').trim();
+    document.getElementById('adPreview').innerHTML=creativeImageData?`<div class="ad-frame">${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}<img class="creative-preview-img" src="${esc(creativeImageData)}" alt="${esc(business)}"></div>`:`<div class="empty" style="border:1.5px dashed var(--border-strong);border-radius:16px;padding:40px 16px">Choose a banner creative to preview it here.</div>`;
+    const t=document.getElementById('previewTemplateLabel');if(t)t.textContent='Showing: Custom Creative Upload';return;
   }
-  const bg=document.getElementById('fColor').value;
-  const fg=contrast(bg);
+  if(normalAdMode==='informational'){
+    const title=document.getElementById('fInfoTitle').value||'Informational Title', description=document.getElementById('fInfoDescription').value||'Your informational content will appear here.';
+    document.getElementById('adPreview').innerHTML=`<div class="informational-preview">${creativeImageData?`<img src="${esc(creativeImageData)}" alt="${esc(title)}">`:''}<div class="informational-body"><div class="informational-title">${esc(title)}</div><div class="informational-description">${esc(description)}</div></div></div>`;
+    const t=document.getElementById('previewTemplateLabel');if(t)t.textContent='Showing: Informational Post';return;
+  }
+  const bg=document.getElementById('fColor').value,fg=contrast(bg);
   document.getElementById('contrastLabel').textContent='Automatic text: '+(fg==='#fff'?'White':'Black');
-
-  const a={
-    businessName:document.getElementById('fBusiness').value||'Business Name',
-    services:getFormServices(),
-    addressLine:document.getElementById('fAddressLine').value||'Address',
-    area:document.getElementById('fArea').value,
-    city:document.getElementById('fCity').value,
-    state:document.getElementById('fState').value,
-    pin:document.getElementById('fPin').value,
-    phone:document.getElementById('fPhone').value||'+91 9001009001',
-    backgroundColor:bg,
-    textColor:fg,
-    templateId:selectedTemplateId,
-    badge:document.getElementById('fBadge').value
-  };
-
+  const a={businessName:document.getElementById('fBusiness').value||'Business Name',services:getFormServices(),addressLine:document.getElementById('fAddressLine').value||'Address',area:document.getElementById('fArea').value,city:document.getElementById('fCity').value,state:document.getElementById('fState').value,pin:document.getElementById('fPin').value,phone:document.getElementById('fPhone').value||'+91 9001009001',backgroundColor:bg,textColor:fg,templateId:selectedTemplateId,badge:document.getElementById('fBadge').value};
   document.getElementById('adPreview').innerHTML=adMarkup(a);
-  const tplLabel=document.getElementById('previewTemplateLabel');
-  if(tplLabel){
-    const tpl=adTemplates[selectedTemplateId-1]||adTemplates[0];
-    tplLabel.textContent='Showing: '+tpl.name;
-  }
+  const t=document.getElementById('previewTemplateLabel');if(t){const tpl=adTemplates[selectedTemplateId-1]||adTemplates[0];t.textContent='Showing: '+tpl.name;}
 }
 
 function setColor(c){
@@ -1577,118 +1577,61 @@ function chooseTemplate(id){
 
 /* SAVE AD */
 async function saveAd(mode){
-  if(creativeSaveInProgress||creativeProcessing){
-    showToast(creativeProcessing?'Please wait for image optimization to finish.':'Please wait for the current save to finish.');
-    return;
-  }
-  creativeSaveInProgress=true;
-  const saveButtons=[...document.querySelectorAll('#tabNormalAds .actions .btn')];
-  saveButtons.forEach(b=>b.disabled=true);
+  if(creativeSaveInProgress||creativeProcessing){showToast(creativeProcessing?'Please wait for image optimization to finish.':'Please wait for the current save to finish.');return;}
+  creativeSaveInProgress=true;const saveButtons=[...document.querySelectorAll('#tabNormalAds .actions .btn')];saveButtons.forEach(b=>b.disabled=true);
   try{
-  const business=document.getElementById('fBusiness').value.trim();
-  const cat=document.getElementById('fCategory').value;
-  const address=getAddressData();
-  const phone=document.getElementById('fPhone').value.trim();
-  const s=document.getElementById('fStart').value;
-  const e=document.getElementById('fEnd').value;
-  const adType=normalAdMode;
-  const existingAd=editingId?state.ads.find(a=>a.id===editingId):null;
-
-  if(!business){ showToast('Business Name is required.'); return; }
-  if(!cat){ showToast('Please select a Category.'); return; }
-  if(adType==='creative'){
-    if(!creativeFile && !creativeImageData && !(existingAd&&existingAd.creativeImageUrl)){ showToast('Please upload a banner creative.'); return; }
-    if(creativeFile){
-      if(!['image/jpeg','image/png','image/webp'].includes(creativeFile.type)){ showToast('Use JPG, PNG or WebP.'); return; }
-      if(creativeFile.size>CREATIVE_MAX_INPUT_BYTES){ showToast('This image is too large. Please choose an image below 15 MB.'); return; }
+    const adType=normalAdMode,isInfo=adType==='informational',existingAd=editingId?state.ads.find(a=>a.id===editingId):null;
+    const business=(isInfo?document.getElementById('fInfoTitle').value:document.getElementById('fBusiness').value).trim();
+    const cat=document.getElementById('fCategory').value,s=document.getElementById('fStart').value,e=document.getElementById('fEnd').value;
+    if(!business){showToast(isInfo?'Title is required.':'Business Name is required.');return;}
+    if(isInfo&&!document.getElementById('fInfoDescription').value.trim()){showToast('Description is required.');return;}
+    if(!cat){showToast('Please select a Category.');return;}
+    if(adType==='creative'||isInfo){
+      if(!creativeFile&&!creativeImageData&&!(existingAd&&existingAd.creativeImageUrl)){showToast('Please upload a banner creative.');return;}
+      if(creativeFile){
+        if(!['image/jpeg','image/png','image/webp'].includes(creativeFile.type)){showToast('Use JPG, PNG or WebP.');return;}
+        if(creativeFile.size>CREATIVE_MAX_INPUT_BYTES){showToast('This image is too large. Please choose an image below 15 MB.');return;}
+      }
     }
-  }
-  if(!address.addressLine){ showToast('Address Line is required.'); return; }
-  if(!address.area){ showToast('Area / Locality is required.'); return; }
-  if(!address.pin||address.pin.length!==6){ showToast('PIN / Area Code must be exactly 6 digits.'); return; }
-  if(!phone||phone.length!==10){ showToast('Phone must be exactly 10 digits.'); return; }
-  if(!s||!e){ showToast('Start and End Date & Time are required.'); return; }
-  if(new Date(e)<=new Date(s)){ showToast('End Date & Time must be after Start Date & Time.'); return; }
-
-  let creativeUrl=adType==='creative'?(existingAd?.creativeImageUrl||null):null;
-  if(adType==='creative' && creativeFile){
-    setCreativeMeta(`Uploading optimized image (${formatBytes(creativeFile.size)})…`,'processing');
-    const ext=creativeFile.type==='image/webp'?'webp':creativeFile.type==='image/png'?'png':'jpg';
-    const path=`${await generateNextAdId()}-${Date.now()}.${ext}`;
-    const upload=await supabaseClient.storage.from('ad-creatives').upload(
-      path,
-      creativeFile,
-      {contentType:creativeFile.type,upsert:false,cacheControl:'31536000'}
-    );
-    if(upload.error){
-      console.error('Creative upload error:',upload.error);
-      setCreativeMeta('Upload failed. Your optimized image was not stored.','error');
-      showToast('Could not upload creative: '+upload.error.message);
-      return;
+    let address={addressLine:'',area:'',city:'',state:'',pin:''},phone='';
+    if(!isInfo){
+      address=getAddressData();phone=document.getElementById('fPhone').value.trim();
+      if(!address.addressLine){showToast('Address Line is required.');return;}
+      if(!address.area){showToast('Area / Locality is required.');return;}
+      if(!address.pin||address.pin.length!==6){showToast('PIN / Area Code must be exactly 6 digits.');return;}
+      if(!phone||phone.length!==10){showToast('Phone must be exactly 10 digits.');return;}
     }
-    const pub=supabaseClient.storage.from('ad-creatives').getPublicUrl(path);
-    creativeUrl=pub.data.publicUrl;
-    if(!creativeUrl){
-      setCreativeMeta('Upload completed, but no public image URL was returned.','error');
-      showToast('Could not create creative public URL.');
-      return;
+    if(!s||!e){showToast('Start and End Date & Time are required.');return;}
+    if(new Date(e)<=new Date(s)){showToast('End Date & Time must be after Start Date & Time.');return;}
+    let creativeUrl=(adType==='creative'||isInfo)?(existingAd?.creativeImageUrl||null):null;
+    if((adType==='creative'||isInfo)&&creativeFile){
+      setCreativeMeta(`Uploading optimized image (${formatBytes(creativeFile.size)})…`,'processing');
+      const ext=creativeFile.type==='image/webp'?'webp':creativeFile.type==='image/png'?'png':'jpg',path=`${await generateNextAdId()}-${Date.now()}.${ext}`;
+      const upload=await supabaseClient.storage.from('ad-creatives').upload(path,creativeFile,{contentType:creativeFile.type,upsert:false,cacheControl:'31536000'});
+      if(upload.error){console.error('Creative upload error:',upload.error);setCreativeMeta('Upload failed. Your optimized image was not stored.','error');showToast('Could not upload creative: '+upload.error.message);return;}
+      creativeUrl=supabaseClient.storage.from('ad-creatives').getPublicUrl(path).data.publicUrl;
+      if(!creativeUrl){showToast('Could not create creative public URL.');return;}
+      setCreativeMeta(`Uploaded optimized image: ${formatBytes(creativeFile.size)} · ${creativeOptimizedDimensions?.width||''} × ${creativeOptimizedDimensions?.height||''}`,'success');
     }
-    setCreativeMeta(`Uploaded optimized image: ${formatBytes(creativeFile.size)} · ${creativeOptimizedDimensions?.width||''} × ${creativeOptimizedDimensions?.height||''}`,'success');
-  }
-
-  const startAt=new Date(s).toISOString();
-  const endAt=new Date(e).toISOString();
-  const status=mode==='draft'?'draft':calculateStatus(startAt,endAt);
-  const payload={
-    business_name:business,
-    category_id:Number(cat),
-    ad_type:adType,
-    services:adType==='creative'?[]:getFormServices(),
-    address_line:address.addressLine,
-    area:address.area,
-    city:address.city,
-    state:address.state,
-    pin:address.pin,
-    phone:phone,
-    whatsapp:document.getElementById('fWhatsapp').value.trim()||null,
-    badge:document.getElementById('fBadge').value.trim()||null,
-    instagram_id:normalizeInstagramId(document.getElementById('fInstagram').value),
-    background_color:adType==='creative'?null:document.getElementById('fColor').value,
-    text_color:adType==='creative'?null:contrast(document.getElementById('fColor').value),
-    template_id:adType==='creative'?null:(selectedTemplateId||1),
-    creative_image_url:creativeUrl,
-    status,
-    start_at:startAt,
-    end_at:endAt,
-    updated_at:new Date().toISOString()
-  };
-
-  let error=null;
-  if(editingId){
-    const result=await supabaseClient.from('ads').update(payload).eq('id',editingId).select('*').single();
-    error=result.error;
-  }else{
-    payload.ad_id=await generateNextAdId();
-    const result=await supabaseClient.from('ads').insert(payload).select('*').single();
-    error=result.error;
-  }
-  if(error){ console.error('Save ad error:',error); showToast('Could not save advertisement: '+error.message); return; }
-  editingId=null;
-  creativeFile=null;
-  creativeImageData=null;
-  creativeOriginalSize=0;
-  creativeOptimizedSize=0;
-  creativeOriginalName='';
-  creativeOriginalDimensions=null;
-  creativeOptimizedDimensions=null;
-  await loadAdsFromSupabase();
-  renderAll();
-  showView('ads');
-  showToast(mode==='draft'?'Draft saved to Supabase.':'Advertisement saved to Supabase.');
-  }finally{
-    creativeSaveInProgress=false;
-    saveButtons.forEach(b=>b.disabled=false);
-  }
+    const startAt=new Date(s).toISOString(),endAt=new Date(e).toISOString(),status=mode==='draft'?'draft':calculateStatus(startAt,endAt);
+    const payload={
+      business_name:business,category_id:Number(cat),ad_type:adType,description:isInfo?document.getElementById('fInfoDescription').value.trim():null,
+      services:adType==='common'?getFormServices():[],
+      // Informational ads intentionally do not collect these fields. The existing
+      // ads table has NOT NULL constraints on some legacy columns, so keep them
+      // empty in the database rather than exposing them in the Informational UI.
+      address_line:isInfo?'':address.addressLine,area:isInfo?'':address.area,city:isInfo?'':address.city,state:isInfo?'':address.state,pin:isInfo?'':address.pin,
+      phone:isInfo?'':phone,whatsapp:isInfo?null:(document.getElementById('fWhatsapp').value.trim()||null),badge:isInfo?null:(document.getElementById('fBadge').value.trim()||null),instagram_id:isInfo?null:normalizeInstagramId(document.getElementById('fInstagram').value),
+      background_color:adType==='common'?document.getElementById('fColor').value:null,text_color:adType==='common'?contrast(document.getElementById('fColor').value):null,template_id:adType==='common'?(selectedTemplateId||1):null,
+      creative_image_url:creativeUrl,status,start_at:startAt,end_at:endAt,updated_at:new Date().toISOString()
+    };
+    let error=null;
+    if(editingId){const result=await supabaseClient.from('ads').update(payload).eq('id',editingId).select('*').single();error=result.error;}
+    else{payload.ad_id=await generateNextAdId();const result=await supabaseClient.from('ads').insert(payload).select('*').single();error=result.error;}
+    if(error){console.error('Save ad error:',error);showToast('Could not save advertisement: '+error.message);return;}
+    editingId=null;creativeFile=null;creativeImageData=null;creativeOriginalSize=0;creativeOptimizedSize=0;creativeOriginalName='';creativeOriginalDimensions=null;creativeOptimizedDimensions=null;
+    await loadAdsFromSupabase();renderAll();showView('ads');showToast(mode==='draft'?'Draft saved to Supabase.':'Advertisement saved to Supabase.');
+  }finally{creativeSaveInProgress=false;saveButtons.forEach(b=>b.disabled=false);}
 }
 
 function calculateStatus(startAt,endAt){
