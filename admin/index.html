@@ -488,7 +488,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 
         <div class="field" id="fieldWhatsapp">
           <label>WhatsApp (optional)</label>
-          <input id="fWhatsapp" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digit WhatsApp number" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
+          <input id="fWhatsapp" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digit WhatsApp number" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10);updatePreview()">
         </div>
 
         <div class="field" id="fieldBadge">
@@ -499,7 +499,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
 
         <div class="field" id="fieldInstagram">
           <label>Instagram ID (optional)</label>
-          <input id="fInstagram" maxlength="80" placeholder="e.g. yourbusiness">
+          <input id="fInstagram" maxlength="80" placeholder="e.g. yourbusiness" oninput="updatePreview()">
           <span class="hint">Optional Instagram username/ID. Clicking the public ad opens this Instagram profile.</span>
         </div>
 
@@ -1062,10 +1062,10 @@ function setNormalMode(mode){
   document.getElementById('fieldState').style.display='';
   const addressLabel=document.getElementById('addressSectionLabel');
   if(addressLabel) addressLabel.textContent=info?'Address & Location (Optional)':'Address *';
-  document.getElementById('fieldPhone').style.display=info?'none':'';
-  document.getElementById('fieldWhatsapp').style.display=info?'none':'';
+  document.getElementById('fieldPhone').style.display='';
+  document.getElementById('fieldWhatsapp').style.display='';
   document.getElementById('fieldBadge').style.display=info?'none':'';
-  document.getElementById('fieldInstagram').style.display=info?'none':'';
+  document.getElementById('fieldInstagram').style.display='';
   document.getElementById('commonModeHint').style.display=mode==='common'?'':'none';
   document.getElementById('creativeModeHint').style.display=creative?'':'none';
   document.getElementById('informationalModeHint').style.display=info?'':'none';
@@ -1542,7 +1542,11 @@ function updatePreview(){
   }
   if(normalAdMode==='informational'){
     const title=document.getElementById('fInfoTitle').value||'Informational Title', description=document.getElementById('fInfoDescription').value||'Your informational content will appear here.', location=buildAddress(getAddressData());
-    document.getElementById('adPreview').innerHTML=`<div class="informational-preview">${creativeImageData?`<img src="${esc(creativeImageData)}" alt="${esc(title)}">`:''}<div class="informational-body"><div class="informational-title">${esc(title)}</div><div class="informational-description">${esc(description)}</div>${location?`<div class="informational-location">📍 ${esc(location)}</div>`:''}</div></div>`;
+    const phone=(document.getElementById('fPhone').value||'').replace(/\s/g,'');
+    const wa=(document.getElementById('fWhatsapp').value||'').replace(/\D/g,'');
+    const instagram=instagramUrl(document.getElementById('fInstagram').value);
+    const actions=`<div class="ad-actions" style="margin-top:14px">${phone?`<a class="icon-action primary" href="tel:${esc(phone)}"><span class="material-symbols-rounded">call</span><span>Call</span></a>`:''}${wa?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="https://wa.me/${encodeURIComponent(wa)}"><span class="material-symbols-rounded">chat</span><span>WhatsApp</span></a>`:''}${instagram?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="${esc(instagram)}"><span class="material-symbols-rounded">photo_camera</span><span>Instagram</span></a>`:''}</div>`;
+    document.getElementById('adPreview').innerHTML=`<div class="informational-preview">${creativeImageData?`<img src="${esc(creativeImageData)}" alt="${esc(title)}">`:''}<div class="informational-body"><div class="informational-title">${esc(title)}</div><div class="informational-description">${esc(description)}</div>${location?`<div class="informational-location">📍 ${esc(location)}</div>`:''}${actions}</div></div>`;
     const t=document.getElementById('previewTemplateLabel');if(t)t.textContent='Showing: Informational Post';return;
   }
   const bg=document.getElementById('fColor').value,fg=contrast(bg);
@@ -1608,10 +1612,9 @@ async function saveAd(mode){
     }else if(address.pin && !/^\d{6}$/.test(address.pin)){
       showToast('PIN / Area Code must be exactly 6 digits when provided.');return;
     }
-    if(!isInfo){
-      phone=document.getElementById('fPhone').value.trim();
-      if(!phone||phone.length!==10){showToast('Phone must be exactly 10 digits.');return;}
-    }
+    phone=document.getElementById('fPhone').value.trim();
+    if(phone && phone.length!==10){showToast('Phone must be exactly 10 digits when provided.');return;}
+    if(!isInfo && !phone){showToast('Phone must be exactly 10 digits.');return;}
     if(!s||!e){showToast('Start and End Date & Time are required.');return;}
     if(new Date(e)<=new Date(s)){showToast('End Date & Time must be after Start Date & Time.');return;}
     let creativeUrl=(adType==='creative'||isInfo)?(existingAd?.creativeImageUrl||null):null;
@@ -1629,9 +1632,9 @@ async function saveAd(mode){
       business_name:business,category_id:Number(cat),ad_type:adType,description:isInfo?document.getElementById('fInfoDescription').value.trim():null,
       services:adType==='common'?getFormServices():[],
       // Common and Creative require location fields; Informational location is optional.
-      // Informational omits the contact/social fields below.
+      // Informational also supports optional contact/social fields.
       address_line:address.addressLine,area:address.area,city:address.city,state:address.state,pin:address.pin,
-      phone:isInfo?'':phone,whatsapp:isInfo?null:(document.getElementById('fWhatsapp').value.trim()||null),badge:isInfo?null:(document.getElementById('fBadge').value.trim()||null),instagram_id:isInfo?null:normalizeInstagramId(document.getElementById('fInstagram').value),
+      phone:phone||'',whatsapp:document.getElementById('fWhatsapp').value.trim()||null,badge:isInfo?null:(document.getElementById('fBadge').value.trim()||null),instagram_id:normalizeInstagramId(document.getElementById('fInstagram').value),
       background_color:adType==='common'?document.getElementById('fColor').value:null,text_color:adType==='common'?contrast(document.getElementById('fColor').value):null,template_id:adType==='common'?(selectedTemplateId||1):null,
       creative_image_url:creativeUrl,status,start_at:startAt,end_at:endAt,updated_at:new Date().toISOString()
     };
