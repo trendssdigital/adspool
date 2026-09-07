@@ -997,10 +997,19 @@ function shareAd(id){
 }
 
 function viewAd(id){
-  const a=activeAds().find(x=>x.id===id);
+  const a=activeAds().find(x=>String(x.id)===String(id));
   if(!a)return;
+  viewAdByObject(a);
+}
+
+// Open a specific advertisement object. This is the function used by
+// shared links such as https://adspool.in/?ad=<id>#categories.
+// It deliberately does not depend on the homepage card/list rendering.
+function viewAdByObject(a){
+  if(!a)return;
+  trackAdEvent(a.id,'view');
+
   const cat=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
-  if(a.adType==='informational'){ viewAdByObject(a); return; }
   const phone=(a.phone||'').replace(/\s/g,'');
   const waRaw=(a.whatsapp||'').replace(/\D/g,'');
   const wa=waRaw.length===10?'91'+waRaw:waRaw;
