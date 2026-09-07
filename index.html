@@ -964,11 +964,21 @@ async function trackAdEvent(adId,eventType){
 function trackAndContinue(adId,eventType){
   trackAdEvent(adId,eventType);
 }
+function adspoolAdUrl(ad){
+  const id=ad?.id||ad?.adId||'';
+  if(!id)return 'https://adspool.in/';
+  const u=new URL('https://adspool.in/');
+  u.searchParams.set('ad',id);
+  u.hash='categories';
+  return u.href;
+}
 function whatsappUrl(ad){
   const raw=(ad?.whatsapp||'').replace(/\D/g,'');
   if(!raw)return '';
   const number=raw.length===10?'91'+raw:raw;
-  const message=`Hi, I found your advertisement on Adspool. I'm interested in your service. Please contact me.`;
+  const link=adspoolAdUrl(ad);
+  const business=(ad?.businessName||'Business').trim();
+  const message=`Hi, I found your ad on Adspool.\n${business}\nAdspool Ad: ${link}\nI'm interested in your service. Please contact me.`;
   return `https://wa.me/${encodeURIComponent(number)}?text=${encodeURIComponent(message)}`;
 }
 function shareAd(id){
