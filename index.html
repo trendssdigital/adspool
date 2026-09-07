@@ -165,7 +165,7 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 /* ---------- ad ticket card ---------- */
 .ads-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
 .ad-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 3px 14px rgba(18,32,26,.05);position:relative;transition:transform .15s ease,box-shadow .15s ease}
-.ad-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(18,32,26,.10)}
+.ad-card{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.ad-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(18,32,26,.10)}
 .ad-mini{padding:14px}
 .ad-perf{position:relative;height:0;border-top:2px dashed var(--border-strong);margin:0 14px}
 .ad-perf::before,.ad-perf::after{content:"";position:absolute;top:-8px;width:16px;height:16px;border-radius:50%;background:var(--paper)}
@@ -945,34 +945,12 @@ function renderAds(){
       </div>
     </article>`;
   }).join('');
-  setupAdViewTracking();
 }
 
 
-let adViewObserver=null;
-const trackedViewIds=new Set();
+/* Robust card interaction for desktop + mobile. Action buttons remain independent. */
 
-function trackAdView(adId){
-  if(!adId || trackedViewIds.has(String(adId))) return;
-  trackedViewIds.add(String(adId));
-  trackAdEvent(adId,'view');
-}
 
-function setupAdViewTracking(){
-  if(adViewObserver) adViewObserver.disconnect();
-  const cards=document.querySelectorAll('#adsGrid .ad-card[data-ad-id]');
-  if(!cards.length || !('IntersectionObserver' in window)) return;
-  adViewObserver=new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting && entry.intersectionRatio >= 0.5){
-        const id=entry.target.getAttribute('data-ad-id');
-        trackAdView(id);
-        if(trackedViewIds.has(String(id))) adViewObserver.unobserve(entry.target);
-      }
-    });
-  },{threshold:[0.5]});
-  cards.forEach(card=>adViewObserver.observe(card));
-}
 
 async function trackAdEvent(adId,eventType){
   if(!adId||!eventType)return;
@@ -1044,6 +1022,7 @@ function viewAd(id){
 }
 
 function closeModal(){document.getElementById('modalBackdrop').classList.remove('show')}
+
 
 /* Cheap local re-render (no network) to keep countdowns/status fresh. */
 setInterval(()=>{
