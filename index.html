@@ -971,10 +971,9 @@ function trackAndContinue(adId,eventType){
 function adspoolAdUrl(ad){
   const id=ad?.id||ad?.adId||'';
   if(!id)return 'https://adspool.in/';
-  const u=new URL('https://adspool.in/');
-  u.searchParams.set('ad',id);
-  u.hash='categories';
-  return u.href;
+  // Canonical deep link. Opening this URL on desktop or mobile loads
+  // Adspool and automatically opens the matching advertisement popup.
+  return 'https://adspool.in/?ad='+encodeURIComponent(String(id))+'#categories';
 }
 function whatsappUrl(ad){
   const raw=(ad?.whatsapp||'').replace(/\D/g,'');
@@ -988,9 +987,11 @@ function whatsappUrl(ad){
 function shareAd(id){
   trackAdEvent(id,'share_click');
   const a=activeAds().find(x=>x.id===id);if(!a)return;
-  const u=new URL(window.location.href);u.searchParams.set('ad',a.id);
-  const message=`${a.businessName} on Adspool: ${u.href}`;
-  if(navigator.share)navigator.share({title:`${a.businessName} on Adspool`,text:message,url:u.href}).catch(()=>{});
+  // Always share the production Adspool deep link, even when testing the HTML locally.
+  // This prevents a file:/// or localhost URL from being shared.
+  const link=adspoolAdUrl(a);
+  const message=`${a.businessName} on Adspool: ${link}`;
+  if(navigator.share)navigator.share({title:`${a.businessName} on Adspool`,text:message,url:link}).catch(()=>{});
   else if(navigator.clipboard)navigator.clipboard.writeText(message).then(()=>showToast('Link copied to clipboard.')).catch(()=>prompt('Copy this Adspool link:',message));
   else prompt('Copy this Adspool link:',message);
 }
@@ -1060,81 +1061,111 @@ document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState==='visible') safeReload('visibilitychange');
 });
 
-async function openSharedAd(){
-  const id=new URLSearchParams(window.location.search).get('ad');
-  if(!id) return;
-
-  // Use the already-loaded listings first.
-  const found=state.ads.find(a=>String(a.id)===String(id));
-  if(found){
-    viewAdByObject(found);
-    return;
-  }
-
-  // Fallback: fetch the exact ad directly from Supabase.
-  // This makes shared links reliable even if the initial listing load is slow.
+/* ================================================================
+   SHARED AD DEEP LINK
+   URL format: https://adspool.in/?ad=<SUPABASE-AD-UUID>#categories
+   This path intentionally fetches the exact ad FIRST instead of waiting
+   for the normal homepage listing load. That makes links from WhatsApp,
+   Windows Share, Android/iOS share and copied links reliably open the
+   exact advertisement popup.
+================================================================ */
+let sharedAdBootStarted=false;
+function getSharedAdId(){
   try{
-    const {data,error}=await supabaseClient.from('ads').select('id,ad_id,business_name,description,category_id,ad_type,services,address_line,area,city,state,pin,phone,whatsapp,instagram_id,badge,background_color,text_color,template_id,creative_image_url,scroll_banner_enabled,scroll_banner_text,status,start_at,end_at,created_at,updated_at').eq('id',id).maybeSingle();
-    if(error) throw error;
-    if(!data){
-      console.warn('Shared ad not found:',id);
-      return;
-    }
-    const ad=mapAdRow(data);
-    const cat=state.categories.find(c=>String(c.id)===String(ad.categoryId));
-    if(!cat){
-      const {data:catRow}=await supabaseClient.from('categories').select('id,name,active').eq('id',ad.categoryId).maybeSingle();
-      if(catRow) state.categories.push(mapCategoryRow(catRow));
-    }
-    viewAdByObject(ad);
-  }catch(e){
-    console.error('Could not open shared ad:',e);
-  }
+    const u=new URL(window.location.href);
+    const fromQuery=u.searchParams.get('ad');
+    if(fromQuery)return fromQuery.trim();
+    // Also support links where a platform preserves only the hash.
+    const hash=(u.hash||'').replace(/^#/,'');
+    if(hash.startsWith('ad='))return decodeURIComponent(hash.slice(3)).trim();
+    const m=hash.match(/(?:^|&)ad=([^&]+)/);
+    return m?decodeURIComponent(m[1]).trim():'';
+  }catch(e){return '';}
 }
 
-function viewAdByObject(a){
-  if(!a)return;
-  trackAdView(a.id);
-  const cat=state.categories.find(c=>String(c.id)===String(a.categoryId))?.name||'Other';
-  const phone=(a.phone||'').replace(/\s/g,'');
-  const waRaw=(a.whatsapp||'').replace(/\D/g,'');
-  const wa=waRaw.length===10?'91'+waRaw:waRaw;
-  document.getElementById('modalTitle').textContent=a.businessName||'Advertisement';
-  if(a.adType==='informational'){
-    const location=buildAddress(a), phone=(a.phone||'').replace(/\s/g,''), wa=(a.whatsapp||'').replace(/\D/g,''), instagram=instagramUrl(a.instagramId);
-    document.getElementById('modalContent').innerHTML=`
-      ${adMarkup(a)}
-      <div style="margin-top:15px;font-size:13px"><b>Category:</b> ${esc(cat)}${location?`<br><b>Location:</b> ${esc(location)}`:''}</div>
-      <div class="ad-actions" style="margin-top:15px">
-        ${phone?`<a class="icon-action primary" href="tel:${esc(phone)}" aria-label="Call business" title="Call"><span class="material-symbols-rounded">call</span><span>Call</span></a>`:''}
-        ${wa?`<a class="icon-action" target="_blank" rel="noopener noreferrer" onclick="trackAndContinue('${esc(a.id)}','whatsapp_click')" href="${whatsappUrl(a)}" aria-label="WhatsApp" title="WhatsApp"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.52 3.48A11.87 11.87 0 0 0 12.08 0C5.54 0 .22 5.32.22 11.86c0 2.09.55 4.13 1.59 5.93L.13 24l6.35-1.66a11.9 11.9 0 0 0 5.59 1.39h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.15-3.42-8.39ZM12.08 21.7h-.01a9.85 9.85 0 0 1-5.02-1.37l-.36-.21-3.77.99 1.01-3.67-.23-.38a9.83 9.83 0 0 1-1.51-5.2c0-5.42 4.41-9.83 9.84-9.83 2.62 0 5.08 1.02 6.93 2.87a9.77 9.77 0 0 1 2.88 6.96c0 5.42-4.41 9.84-9.83 9.84Zm5.4-7.37c-.3-.15-1.77-.87-2.05-.97-.28-.1-.48-.15-.69.15-.2.3-.79.97-.97 1.17-.18.2-.36.23-.66.08-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.14.3-.36.46-.54.15-.18.2-.31.3-.51.1-.2.05-.38-.03-.53-.08-.15-.69-1.66-.95-2.27-.25-.59-.51-.51-.69-.52h-.59c-.2 0-.53.08-.81.38-.28.3-1.06 1.04-1.06 2.54 0 1.5 1.09 2.94 1.24 3.14.15.2 2.14 3.27 5.18 4.58.72.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.18-1.4-.08-.13-.28-.2-.58-.35Z"/></svg><span>WhatsApp</span></a>`:''}
-        ${location?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="${mapsUrl(location)}" aria-label="Directions" title="Directions"><span class="material-symbols-rounded">directions</span><span>Directions</span></a>`:''}
-        ${instagram?`<a class="icon-action" target="_blank" rel="noopener noreferrer" onclick="trackAndContinue('${esc(a.id)}','instagram_click')" href="${esc(instagram)}" aria-label="Instagram" title="Instagram"><span class="material-symbols-rounded">photo_camera</span><span>Instagram</span></a>`:''}
-        <button class="icon-action" type="button" onclick="shareAd('${esc(a.id)}')" aria-label="Share" title="Share"><span class="material-symbols-rounded">share</span><span>Share</span></button>
-      </div>
-      <div class="modal-note">Adspool displays advertisements that are currently active in the Adspool system.</div>`;
-    document.getElementById('modalBackdrop').classList.add('show');
-    return;
-  }
-  document.getElementById('modalContent').innerHTML=`
-    ${adMarkup(a)}
-    <div style="margin-top:15px;font-size:13px">
-      <b>Category:</b> ${esc(cat)}<br>
-      <b>Business:</b> ${esc(a.businessName)}<br>
-      <b>Location:</b> ${esc(buildAddress(a))}
-    </div>
-    <div class="ad-actions" style="margin-top:15px">
-      ${phone?`<a class="icon-action primary" href="tel:${esc(phone)}" aria-label="Call business" title="Call"><span class="material-symbols-rounded">call</span><span>Call</span></a>`:''}
-      ${wa?`<a class="icon-action" target="_blank" rel="noopener noreferrer" onclick="trackAndContinue('${esc(a.id)}','whatsapp_click')" href="${whatsappUrl(a)}" aria-label="WhatsApp" title="WhatsApp"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.52 3.48A11.87 11.87 0 0 0 12.08 0C5.54 0 .22 5.32.22 11.86c0 2.09.55 4.13 1.59 5.93L.13 24l6.35-1.66a11.9 11.9 0 0 0 5.59 1.39h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.15-3.42-8.39ZM12.08 21.7h-.01a9.85 9.85 0 0 1-5.02-1.37l-.36-.21-3.77.99 1.01-3.67-.23-.38a9.83 9.83 0 0 1-1.51-5.2c0-5.42 4.41-9.83 9.84-9.83 2.62 0 5.08 1.02 6.93 2.87a9.77 9.77 0 0 1 2.88 6.96c0 5.42-4.41 9.84-9.83 9.84Zm5.4-7.37c-.3-.15-1.77-.87-2.05-.97-.28-.1-.48-.15-.69.15-.2.3-.79.97-.97 1.17-.18.2-.36.23-.66.08-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.14.3-.36.46-.54.15-.18.2-.31.3-.51.1-.2.05-.38-.03-.53-.08-.15-.69-1.66-.95-2.27-.25-.59-.51-.51-.69-.52h-.59c-.2 0-.53.08-.81.38-.28.3-1.06 1.04-1.06 2.54 0 1.5 1.09 2.94 1.24 3.14.15.2 2.14 3.27 5.18 4.58.72.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.18-1.4-.08-.13-.28-.2-.58-.35Z"/></svg><span>WhatsApp</span></a>`:''}
-      <a class="icon-action" target="_blank" rel="noopener noreferrer" onclick="trackAndContinue('${esc(a.id)}','directions_click')" href="${mapsUrl(buildAddress(a))}" aria-label="Directions" title="Directions"><span class="material-symbols-rounded">directions</span><span>Directions</span></a>
-      ${a.instagramId?`<a class="icon-action" target="_blank" rel="noopener noreferrer" onclick="trackAndContinue('${esc(a.id)}','instagram_click')" href="${instagramUrl(a.instagramId)}" aria-label="Instagram" title="Instagram"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Zm0 2A2.5 2.5 0 1 0 14.5 12 2.5 2.5 0 0 0 12 9.5ZM17.5 6A1.25 1.25 0 1 1 16.25 7.25 1.25 1.25 0 0 1 17.5 6Z"/></svg><span>Instagram</span></a>`:''}
-      <button class="icon-action" type="button" onclick="shareAd('${esc(a.id)}')" aria-label="Share" title="Share"><span class="material-symbols-rounded">share</span><span>Share</span></button>
-    </div>
-    <div class="modal-note">Adspool displays advertisements that are currently active in the Adspool system.</div>`;
-  document.getElementById('modalBackdrop').classList.add('show');
+const SHARED_AD_SELECT='id,ad_id,business_name,description,category_id,ad_type,services,address_line,area,city,state,pin,phone,whatsapp,instagram_id,badge,background_color,text_color,template_id,creative_image_url,add_adspool_watermark,scroll_banner_enabled,scroll_banner_text,status,start_at,end_at,created_at,updated_at';
+
+async function fetchSharedAd(id){
+  if(!id)return null;
+  // Normal links use the UUID primary key.
+  try{
+    const byId=await supabaseClient.from('ads').select(SHARED_AD_SELECT).eq('id',id).maybeSingle();
+    if(!byId.error && byId.data)return byId.data;
+  }catch(e){console.warn('Shared ad id lookup failed:',e?.message||e)}
+
+  // Compatibility: also accept an Adspool public ad_id if an older link
+  // was created using that identifier instead of the UUID.
+  try{
+    const byAdId=await supabaseClient.from('ads').select(SHARED_AD_SELECT).eq('ad_id',id).maybeSingle();
+    if(!byAdId.error && byAdId.data)return byAdId.data;
+  }catch(e){console.warn('Shared ad_id lookup failed:',e?.message||e)}
+  return null;
 }
 
-load().then(()=>{openSharedAd();});
+async function ensureSharedAdCategory(ad){
+  if(!ad)return;
+  if(state.categories.some(c=>String(c.id)===String(ad.categoryId)))return;
+  try{
+    const {data}=await supabaseClient.from('categories').select('id,name,active').eq('id',ad.categoryId).maybeSingle();
+    if(data)state.categories.push(mapCategoryRow(data));
+  }catch(e){console.warn('Shared ad category lookup failed:',e?.message||e)}
+}
+
+async function bootSharedAd(){
+  if(sharedAdBootStarted)return;
+  const id=getSharedAdId();
+  if(!id)return;
+  sharedAdBootStarted=true;
+
+  // Give the browser a chance to finish constructing the modal before
+  // inserting its content. This also works when the script is loaded in
+  // the <head> on a static host.
+  if(document.readyState==='loading'){
+    await new Promise(resolve=>document.addEventListener('DOMContentLoaded',resolve,{once:true}));
+  }
+
+  for(let attempt=0;attempt<10;attempt++){
+    try{
+      // 1) Exact database lookup first. Do NOT wait for the homepage load.
+      let row=await fetchSharedAd(id);
+
+      // 2) If RLS/network is temporarily unavailable, use the already
+      // loaded public listing as a fallback.
+      if(!row){
+        const found=state.ads.find(a=>String(a.id)===String(id)||String(a.adId)===String(id));
+        if(found){
+          await ensureSharedAdCategory(found);
+          viewAdByObject(found);
+          return;
+        }
+      }
+
+      if(row){
+        const ad=mapAdRow(row);
+        await ensureSharedAdCategory(ad);
+        viewAdByObject(ad);
+        return;
+      }
+    }catch(e){
+      console.warn('Shared ad boot retry:',e?.message||e);
+    }
+
+    // If the exact lookup did not succeed, let the normal page load finish
+    // and try the listing cache again on the next pass.
+    if(attempt===0){
+      try{ await load(); }catch(e){ console.warn('Homepage load during shared boot failed:',e?.message||e); }
+    }
+    await new Promise(r=>setTimeout(r,500));
+  }
+
+  console.warn('Could not open shared Adspool ad:',id);
+}
+
+// Start shared-ad opening immediately; it is independent of the normal
+// listing load. The normal load still runs for the rest of the homepage.
+bootSharedAd();
+load();
+window.addEventListener('load',()=>bootSharedAd());
 
 /* Search stays fixed directly below the white header. Categories remain directly below it. */
 (function initFixedSearch(){
