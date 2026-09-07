@@ -130,6 +130,10 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 .link{color:var(--forest);font-weight:700;font-size:13.5px;white-space:nowrap}
 .link:hover{text-decoration:underline}
 
+/* Enforce horizontal category scrolling */
+.chips{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;white-space:nowrap}
+.chips .chip{flex:0 0 auto;white-space:nowrap}
+
 /* ---------- category chips ---------- */
 .chips{display:flex;gap:9px;overflow-x:auto;padding:2px 0 12px;margin-bottom:14px;scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent}
 .chips::-webkit-scrollbar{height:6px}
@@ -324,7 +328,27 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
   .premium-banner-wrap{min-height:110px}
   .premium-placeholder{min-height:110px}
 }
+
+/* ===== ADSPPOOL HOMEPAGE VISUAL DEMO ===== */
+.discovery-kicker .spark{width:8px;height:8px;border-radius:50%;background:#ffd21f;box-shadow:0 0 0 4px rgba(255,210,31,.18)}
+.discovery-title .accent{color:#0baedc}
+.discovery-bubble strong{font-size:28px;color:#073d6d}.discovery-bubble span{font-size:12px;font-weight:700;color:#547084}
+.discovery-bubble:after{content:"";position:absolute;right:28px;bottom:-12px;width:24px;height:24px;background:#fff;border-right:1px solid #dceaf2;border-bottom:1px solid #dceaf2;transform:rotate(45deg)}
+.sticky-chips-row{background:rgba(255,255,255,.98)}
+.sticky-chips{padding:9px 5%;max-width:1240px;margin:auto;display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;scrollbar-width:auto;scrollbar-color:#b8c9d6 #eef4f8;white-space:nowrap;cursor:grab;-webkit-overflow-scrolling:touch}
+.sticky-chips:active{cursor:grabbing}.sticky-chips::-webkit-scrollbar{height:6px}.sticky-chips::-webkit-scrollbar-track{background:#eef4f8;border-radius:999px}.sticky-chips::-webkit-scrollbar-thumb{background:#b8c9d6;border-radius:999px}.sticky-chips::-webkit-scrollbar-thumb:hover{background:#8fa8b8}
+.sticky-chips .chip,.admin-sticky-chips .chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:9px 13px;border:1px solid #dce7ef;background:#fff;color:#29465a;font-weight:700;box-shadow:0 5px 14px rgba(7,61,109,.06);transition:.18s}
+.sticky-chips .chip:hover,.admin-sticky-chips .chip:hover{transform:translateY(-1px)}
+.sticky-chips .chip.active,.admin-sticky-chips .chip.active{background:#073d6d;color:#fff;border-color:#073d6d}
+.cat-icon{width:27px;height:27px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;background:#eef7ff;flex:none}
+.sticky-chips .chip.active .cat-icon,.admin-sticky-chips .chip.active .cat-icon{background:rgba(255,255,255,.18)}
+
+
 </style>
+
+<style>
+</style>
+
 </head>
 <body>
 
@@ -356,6 +380,7 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 </div>
 
 <div id="stickySpacer" style="height:112px"></div>
+
 
 <section class="section" id="ads">
   <div id="premiumSection" class="premium-section" style="display:block">
@@ -541,6 +566,29 @@ function renderHeroVideo(){
 function heroVideoNext(){const arr=heroVideos.filter(v=>v.status==='active'&&youtubeEmbedUrl(v.youtube_url));if(!arr.length)return;heroVideoIndex=(heroVideoIndex+1)%arr.length;renderHeroVideo();}
 function heroVideoPrev(){const arr=heroVideos.filter(v=>v.status==='active'&&youtubeEmbedUrl(v.youtube_url));if(!arr.length)return;heroVideoIndex=(heroVideoIndex-1+arr.length)%arr.length;renderHeroVideo();}
 
+function categoryIcon(name){
+  const n=(name||'').toLowerCase();
+  if(n.includes('restaurant')||n.includes('food')||n.includes('cafe'))return 'restaurant';
+  if(n.includes('shop')||n.includes('retail')||n.includes('store'))return 'storefront';
+  if(n.includes('service'))return 'build';
+  if(n.includes('health')||n.includes('medical')||n.includes('clinic')||n.includes('doctor'))return 'health_and_safety';
+  if(n.includes('education')||n.includes('school')||n.includes('training'))return 'school';
+  if(n.includes('real estate')||n.includes('property'))return 'home_work';
+  if(n.includes('auto')||n.includes('car')||n.includes('vehicle'))return 'directions_car';
+  if(n.includes('law')||n.includes('lawyer'))return 'gavel';
+  if(n.includes('salon')||n.includes('beauty'))return 'content_cut';
+  if(n.includes('hotel')||n.includes('travel'))return 'hotel';
+  if(n.includes('finance')||n.includes('insurance'))return 'account_balance';
+  if(n.includes('digital')||n.includes('it')||n.includes('software'))return 'computer';
+  if(n.includes('construction'))return 'construction';
+  if(n.includes('interior'))return 'chair';
+  if(n.includes('electrical')||n.includes('plumb'))return 'plumbing';
+  if(n.includes('wedding')||n.includes('event'))return 'celebration';
+  if(n.includes('manufact'))return 'factory';
+  if(n.includes('professional'))return 'business_center';
+  return 'category';
+}
+function categoryIconHtml(name){return `<span class="material-symbols-rounded">${categoryIcon(name)}</span>`;}
 function mapCategoryRow(r){
   return {id:r.id,name:r.name,active:r.active!==false};
 }
@@ -666,7 +714,17 @@ function updateStats(){
 
 function syncSearch(val){
   const main=document.getElementById('searchInput');
-  const sticky=document.getElementById('searchInputSticky');
+  const sticky=
+// Desktop mouse-wheel support for horizontal category tabs.
+document.addEventListener('DOMContentLoaded',()=>{
+  ['categoriesSticky'].forEach(id=>{
+    const el=document.getElementById(id); if(!el)return;
+    el.addEventListener('wheel',e=>{
+      if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){e.preventDefault();el.scrollLeft+=e.deltaY; }
+    },{passive:false});
+  });
+});
+document.getElementById('searchInputSticky');
   if(main)main.value=val;
   if(sticky)sticky.value=val;
   renderAds();
@@ -797,6 +855,7 @@ function premiumPrev(){
   renderPremiumBanner();
 }
 
+
 function renderCategories(){
   const cats=state.categories
     .filter(c=>c.active)
@@ -809,13 +868,21 @@ function renderCategories(){
       if(aRank!==bRank)return aRank-bRank;
       return(a.name||'').localeCompare(b.name||'',undefined,{sensitivity:'base'});
     });
-  const html=`<button class="chip ${selectedCategory==='all'?'active':''}" onclick="setCategory('all')">All Categories</button>`+
-    cats.map(c=>`<button class="chip ${String(selectedCategory)===String(c.id)?'active':''}" onclick="setCategory('${c.id}')">${esc(c.name)}</button>`).join('');
+  const html=`<button class="chip ${selectedCategory==='all'?'active':''}" data-category-id="all" onclick="setCategory('all')"><span class="cat-icon"><span class="material-symbols-rounded">apps</span></span>All Categories</button>`+
+    cats.map(c=>`<button class="chip ${String(selectedCategory)===String(c.id)?'active':''}" data-category-id="${String(c.id)}" onclick="setCategory('${c.id}')"><span class="cat-icon">${categoryIconHtml(c.name)}</span>${esc(c.name)}</button>`).join('');
   document.getElementById('categories').innerHTML=html;
   document.getElementById('categoriesSticky').innerHTML=html;
 }
 
-function setCategory(id){selectedCategory=id;premiumIndex=0;renderCategories();renderPremiumBanner();renderAds()}
+function scrollCategoryTabIntoView(id){
+  const key=String(id);
+  ['categoriesSticky','categories'].forEach(cid=>{
+    const wrap=document.getElementById(cid); if(!wrap)return;
+    const tab=wrap.querySelector(`[data-category-id="${CSS.escape(key)}"]`);
+    if(tab) tab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  });
+}
+function setCategory(id){selectedCategory=String(id);premiumIndex=0;renderCategories();renderPremiumBanner();renderAds();setTimeout(()=>scrollCategoryTabIntoView(selectedCategory),30)}
 
 function resetFilters(){
   selectedCategory='all';
@@ -826,6 +893,7 @@ function resetFilters(){
   renderCategories();renderPremiumBanner();renderAds();
   document.getElementById('categories').scrollLeft=0;
   document.getElementById('categoriesSticky').scrollLeft=0;
+  setTimeout(()=>scrollCategoryTabIntoView('all'),30);
 }
 
 function viewAllAds(e){
@@ -1021,7 +1089,7 @@ function viewAdByObject(a){
   document.getElementById('modalBackdrop').classList.add('show');
 }
 
-load().then(()=>openSharedAd());
+load().then(()=>{openSharedAd();});
 
 /* Search stays fixed directly below the white header. Categories remain directly below it. */
 (function initFixedSearch(){
