@@ -392,6 +392,7 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
   <button class="navbtn" data-view="drafts" onclick="setAdStatusFilter('draft')"><span class="ico">◌</span><span class="label">Drafts</span></button>
   <button class="navbtn" data-view="expired" onclick="setAdStatusFilter('expired')"><span class="ico">○</span><span class="label">Expired</span></button>
   <button class="navbtn" data-view="categories" onclick="showView('categories')"><span class="ico">☷</span><span class="label">Categories</span></button>
+  <button class="navbtn" data-view="engagement" onclick="showView('engagement')"><span class="ico">◉</span><span class="label">Engagement</span></button>
   <button class="navbtn" data-view="public" onclick="showView('public')"><span class="ico">↗</span><span class="label">Public Ads</span></button>
   <button class="navbtn" data-view="heroVideos" onclick="showView('heroVideos')"><span class="ico">▶</span><span class="label">Hero Videos</span></button>
 </aside>
@@ -744,6 +745,24 @@ input[readonly]{background:#f4f1e6;color:var(--muted)}
   </div>
 </section>
 
+
+<!-- ENGAGEMENT -->
+<section id="engagement" class="view">
+  <span class="eyebrow"><span class="dot"></span>Ad engagement</span>
+  <h1>Engagement</h1>
+  <p class="sub">See how visitors interact with your Adspool advertisements. WhatsApp opens directly to the business with an Adspool pre-filled message.</p>
+
+  <div id="eventSummary" class="event-summary"></div>
+
+  <div class="panel">
+    <div class="toolbar">
+      <h2 style="margin:0;flex:1">Ad Engagement by Advertisement</h2>
+      <button class="btn" onclick="loadAdEvents().then(renderEngagement)">Refresh</button>
+    </div>
+    <div id="engagementTable"></div>
+  </div>
+</section>
+
 <!-- PUBLIC -->
 <section id="public" class="view">
   <span class="eyebrow"><span class="dot"></span>Preview</span>
@@ -821,6 +840,7 @@ let state={
 
 let premiumBanners=[];
 let heroVideos=[];
+let adEvents=[];
 let editingHeroVideoId=null;
 let editingId=null;
 let editingPremiumId=null;
@@ -1087,6 +1107,7 @@ async function login(){
   document.getElementById('loginView').style.display='none';
   document.getElementById('app').style.display='block';
   await load();
+  await loadAdEvents();
 }
 
 async function logout(){
@@ -1111,6 +1132,7 @@ function showView(v){
   if(v==='categories')renderCategories();
   if(v==='public')renderPublic();
   if(v==='heroVideos')renderHeroVideosAdmin();
+  if(v==='engagement'){loadAdEvents().then(renderEngagement);}
 
   updateAdminStickyBar();
 }
@@ -1646,7 +1668,7 @@ function updatePreview(){
     const phone=(document.getElementById('fPhone').value||'').replace(/\s/g,'');
     const wa=(document.getElementById('fWhatsapp').value||'').replace(/\D/g,'');
     const instagram=instagramUrl(document.getElementById('fInstagram').value);
-    const actions=`<div class="ad-actions" style="margin-top:14px">${phone?`<a class="icon-action primary" href="tel:${esc(phone)}"><span class="material-symbols-rounded">call</span><span>Call</span></a>`:''}${wa?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="https://wa.me/${encodeURIComponent(wa)}"><span class="material-symbols-rounded">chat</span><span>WhatsApp</span></a>`:''}${instagram?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="${esc(instagram)}"><span class="material-symbols-rounded">photo_camera</span><span>Instagram</span></a>`:''}</div>`;
+    const actions=`<div class="ad-actions" style="margin-top:14px">${phone?`<a class="icon-action primary" href="tel:${esc(phone)}"><span class="material-symbols-rounded">call</span><span>Call</span></a>`:''}${wa?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="https://wa.me/${encodeURIComponent(wa)}"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.52 3.48A11.87 11.87 0 0 0 12.08 0C5.54 0 .22 5.32.22 11.86c0 2.09.55 4.13 1.59 5.93L.13 24l6.35-1.66a11.9 11.9 0 0 0 5.59 1.39h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.15-3.42-8.39ZM12.08 21.7h-.01a9.85 9.85 0 0 1-5.02-1.37l-.36-.21-3.77.99 1.01-3.67-.23-.38a9.83 9.83 0 0 1-1.51-5.2c0-5.42 4.41-9.83 9.84-9.83 2.62 0 5.08 1.02 6.93 2.87a9.77 9.77 0 0 1 2.88 6.96c0 5.42-4.41 9.84-9.83 9.84Zm5.4-7.37c-.3-.15-1.77-.87-2.05-.97-.28-.1-.48-.15-.69.15-.2.3-.79.97-.97 1.17-.18.2-.36.23-.66.08-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.14.3-.36.46-.54.15-.18.2-.31.3-.51.1-.2.05-.38-.03-.53-.08-.15-.69-1.66-.95-2.27-.25-.59-.51-.51-.69-.52h-.59c-.2 0-.53.08-.81.38-.28.3-1.06 1.04-1.06 2.54 0 1.5 1.09 2.94 1.24 3.14.15.2 2.14 3.27 5.18 4.58.72.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.18-1.4-.08-.13-.28-.2-.58-.35Z"/></svg><span>WhatsApp</span></a>`:''}${instagram?`<a class="icon-action" target="_blank" rel="noopener noreferrer" href="${esc(instagram)}"><span class="material-symbols-rounded">photo_camera</span><span>Instagram</span></a>`:''}</div>`;
     const watermark=document.getElementById('fAdspoolWatermark')?.checked!==false;
     const scrollBannerEnabled=document.getElementById('fScrollBannerEnabled')?.checked===true;
     const scrollBannerText=(document.getElementById('fScrollBannerText')?.value||'').trim();
@@ -1855,6 +1877,46 @@ async function deleteAd(id){
   await loadAdsFromSupabase();
   renderAll();
   showToast('Advertisement deleted.');
+}
+
+
+/* AD ENGAGEMENT */
+async function loadAdEvents(){
+  const {data,error}=await supabaseClient
+    .from('ad_events')
+    .select('ad_id,event_type,created_at')
+    .order('created_at',{ascending:false});
+  if(error){
+    console.error('Event load error:',error);
+    adEvents=[];
+    return adEvents;
+  }
+  adEvents=data||[];
+  return adEvents;
+}
+
+function renderEngagement(){
+  const counts={view:0,call_click:0,whatsapp_click:0,directions_click:0,instagram_click:0,share_click:0};
+  (adEvents||[]).forEach(e=>{if(counts[e.event_type]!=null)counts[e.event_type]++;});
+  const labels=[['view','Views'],['call_click','Calls'],['whatsapp_click','WhatsApp'],['directions_click','Directions'],['instagram_click','Instagram'],['share_click','Shares']];
+  document.getElementById('eventSummary').innerHTML=labels.map(([k,label])=>`<div class="event-pill"><b>${counts[k]}</b><span>${label}</span></div>`).join('');
+
+  const rows=(state.ads||[]).map(a=>{
+    const ev=(adEvents||[]).filter(e=>String(e.ad_id)===String(a.id));
+    const c={view:0,call_click:0,whatsapp_click:0,directions_click:0,instagram_click:0,share_click:0};
+    ev.forEach(e=>{if(c[e.event_type]!=null)c[e.event_type]++;});
+    return {a,c,total:ev.length};
+  }).filter(x=>x.total>0);
+
+  document.getElementById('engagementTable').innerHTML=rows.length?`<div class="tablewrap"><table class="table"><thead><tr>
+    <th>Ad</th><th>Business</th><th>Views</th><th>Calls</th><th>WhatsApp</th><th>Directions</th><th>Instagram</th><th>Shares</th>
+  </tr></thead><tbody>
+  ${rows.map(x=>`<tr>
+    <td class="mono">${esc(x.a.adId||'')}</td>
+    <td><strong>${esc(x.a.businessName||'')}</strong></td>
+    <td>${x.c.view}</td><td>${x.c.call_click}</td><td>${x.c.whatsapp_click}</td><td>${x.c.directions_click}</td><td>${x.c.instagram_click}</td><td>${x.c.share_click}</td>
+  </tr>`).join('')}
+  </tbody></table></div>`:'<div class="empty">No ad engagement recorded yet.</div>';
 }
 
 /* DASHBOARD */
