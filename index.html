@@ -930,7 +930,7 @@ function renderAds(){
     const waRaw=(a.whatsapp||'').replace(/\D/g,'');
   const wa=waRaw.length===10?'91'+waRaw:waRaw;
     const address=buildAddress(a);
-    return `<article class="ad-card">
+    return `<article class="ad-card" data-ad-id="${esc(a.id)}">
       <div class="ad-mini">${adMarkup(a)}</div>
       <div class="ad-perf"></div>
       <div class="ad-info">
@@ -945,8 +945,34 @@ function renderAds(){
       </div>
     </article>`;
   }).join('');
+  setupAdViewTracking();
 }
 
+
+let adViewObserver=null;
+const trackedViewIds=new Set();
+
+function trackAdView(adId){
+  if(!adId || trackedViewIds.has(String(adId))) return;
+  trackedViewIds.add(String(adId));
+  trackAdEvent(adId,'view');
+}
+
+function setupAdViewTracking(){
+  if(adViewObserver) adViewObserver.disconnect();
+  const cards=document.querySelectorAll('#adsGrid .ad-card[data-ad-id]');
+  if(!cards.length || !('IntersectionObserver' in window)) return;
+  adViewObserver=new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting && entry.intersectionRatio >= 0.5){
+        const id=entry.target.getAttribute('data-ad-id');
+        trackAdView(id);
+        if(trackedViewIds.has(String(id))) adViewObserver.unobserve(entry.target);
+      }
+    });
+  },{threshold:[0.5]});
+  cards.forEach(card=>adViewObserver.observe(card));
+}
 
 async function trackAdEvent(adId,eventType){
   if(!adId||!eventType)return;
@@ -1089,7 +1115,7 @@ async function openSharedAd(){
 
 function viewAdByObject(a){
   if(!a)return;
-  trackAdEvent(a.id,'view');
+  trackAdView(a.id);
   const cat=state.categories.find(c=>String(c.id)===String(a.categoryId))?.name||'Other';
   const phone=(a.phone||'').replace(/\s/g,'');
   const waRaw=(a.whatsapp||'').replace(/\D/g,'');
