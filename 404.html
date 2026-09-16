@@ -1,0 +1,1290 @@
+<!doctype html>
+<html lang="en">
+<!-- Category ordering: A-Z, with Other/Others always last. Category name edits are read from Supabase automatically. -->
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Adspool — Discover. Connect. Grow.</title>
+<meta name="description" content="Adspool is a local business directory across India. Browse active advertisements by category, or list your own business.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,440;0,9..144,600;0,9..144,700;1,9..144,500&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&family=Baloo+2:wght@600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Poppins:wght@500;600;700;800&family=Courier+Prime:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0a0a0a;
+  --forest:#073D6D;
+  --forest-dark:#052a4d;
+  --forest-deep:#031d35;
+  --gold:#02A9D6;
+  --gold-deep:#0286ab;
+  --gold-soft:#d9f2fa;
+  --paper:#f5f7f9;
+  --card:#ffffff;
+  --muted:#667080;
+  --border:#e3e7ec;
+  --border-strong:#c9d0d9;
+  --danger:#b23a2e;
+  --serif:'Fraunces',Georgia,serif;
+  --sans:'Public Sans',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --signage:'Baloo 2',system-ui,sans-serif;
+  --tpl2-font:'Playfair Display','Times New Roman',Georgia,serif;
+  --tpl3-font:'Poppins',system-ui,sans-serif;
+  --tpl4-font:'Courier Prime','Courier New',monospace;
+  --tpl5-font:'Bebas Neue',Impact,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--sans);background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
+button,input{font:inherit}
+button{cursor:pointer}
+a{text-decoration:none;color:inherit}
+img{max-width:100%}
+::selection{background:var(--gold-soft);color:var(--forest-dark)}
+
+/* ---------- utility ---------- */
+.wrap{max-width:1240px;margin:0 auto;padding:0 5%}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;font-size:11.5px;font-weight:600;color:var(--forest)}
+.eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--gold)}
+.btn{border:1.5px solid var(--border-strong);background:var(--card);border-radius:10px;padding:11px 18px;font-weight:700;font-size:14px;color:var(--ink);display:inline-flex;align-items:center;gap:6px;transition:transform .15s ease,box-shadow .15s ease}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(18,32,26,.08)}
+.btn.primary{background:var(--forest);border-color:var(--forest);color:#fff}
+.btn.primary:hover{background:var(--forest-dark)}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--forest-deep)}
+.btn.ghost{background:transparent;border-color:transparent;padding:11px 6px}
+
+/* ---------- brand mark ---------- */
+.brandmark{display:flex;align-items:center;gap:10px}
+.spool{height:34px;width:auto;flex:none;display:block}
+.brand{font-family:var(--serif);font-size:23px;font-weight:700;color:var(--forest-dark);letter-spacing:-.3px;display:flex;flex-direction:column;line-height:1}
+.header-location{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--forest);margin-left:18px;white-space:nowrap}
+.brand small{font-family:var(--mono);font-size:9.5px;color:var(--muted);font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-top:4px}
+
+/* ---------- topbar ---------- */
+.topbar{height:76px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;position:sticky;top:0;z-index:50}
+.nav{display:flex;align-items:center;gap:30px}
+.navlinks{display:flex;gap:26px;font-size:14px;font-weight:600;color:#4b5a4f}
+.navlinks a{position:relative;padding-bottom:3px}
+.navlinks a:hover{color:var(--forest)}
+
+/* ---------- sticky search bar (appears under topbar on scroll) ---------- */
+.sticky-searchbar{position:fixed;left:0;right:0;top:76px;z-index:49;background:#fff;border-bottom:1px solid var(--border);box-shadow:0 8px 24px rgba(18,32,26,.06)}
+.sticky-searchbar.show{display:block}
+.sticky-searchbar-inner{max-width:1240px;margin:auto;padding:10px 5%;display:flex;align-items:center;gap:24px}
+.sticky-searchbox{background:var(--card);border:1.5px solid var(--border-strong);border-radius:12px;padding:6px;display:flex;gap:6px;box-shadow:0 8px 20px rgba(18,32,26,.08);flex:1;max-width:none;width:100%}
+.sticky-searchbox input{flex:1;border:0;outline:0;padding:10px 12px;font-size:14px;min-width:0;background:transparent;color:var(--ink)}
+.sticky-searchbox input::placeholder{color:#93a097}
+.sticky-searchbox .btn{padding:9px 16px;font-size:13px}
+.sticky-stats{display:none}
+.sticky-stats div{font-family:var(--mono)}
+.sticky-stats b{display:block;font-size:17px;color:var(--forest-dark);font-weight:600}
+.sticky-stats span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.sticky-chips-row{max-width:1240px;margin:auto;padding:0 5% 10px}
+.sticky-chips{display:flex;gap:8px;overflow-x:auto;padding:0;margin:0;scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent}
+.sticky-chips::-webkit-scrollbar{height:5px}
+.sticky-chips::-webkit-scrollbar-track{background:transparent}
+.sticky-chips::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:999px}
+.sticky-chips .chip{padding:7px 14px;font-size:12px}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
+.hero::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(620px 380px at 88% -8%,rgba(226,166,58,.16),transparent 60%),
+  radial-gradient(720px 460px at -8% 12%,rgba(11,107,73,.10),transparent 60%);
+  pointer-events:none}
+.hero-inner{position:relative;max-width:1240px;margin:auto;padding:64px 5% 54px;display:grid;grid-template-columns:1.08fr .92fr;gap:48px;align-items:center}
+h1{font-family:var(--serif);font-size:clamp(38px,4.6vw,60px);line-height:1.03;letter-spacing:-1.6px;margin:14px 0 18px;font-weight:600}
+h1 em{font-style:italic;color:var(--forest);font-weight:500}
+.hero p.lede{font-size:17.5px;line-height:1.6;color:#4d5a51;max-width:540px;margin:0 0 26px}
+.searchbox{background:var(--card);border:1.5px solid var(--border-strong);border-radius:14px;padding:8px;display:flex;gap:8px;box-shadow:0 16px 40px rgba(18,32,26,.09);max-width:600px}
+.searchbox input{flex:1;border:0;outline:0;padding:13px 14px;font-size:15px;min-width:0;background:transparent;color:var(--ink)}
+.searchbox input::placeholder{color:#93a097}
+.hero-stats{display:flex;gap:26px;margin-top:28px}
+.hero-stats div{font-family:var(--mono)}
+.hero-stats b{display:block;font-size:20px;color:var(--forest-dark);font-weight:600}
+.hero-stats span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+
+/* hero card fan */
+.hero-visual{position:relative;min-height:400px;display:flex;align-items:center;justify-content:center}
+.hero-video{width:100%;max-width:520px;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:10px;box-shadow:0 20px 44px rgba(18,32,26,.14);overflow:hidden}
+.hero-video-frame{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#111}
+.hero-video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.hero-video-caption{display:flex;align-items:center;gap:8px;padding:10px 4px 2px;font-size:12px;color:var(--muted)}
+.hero-video-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex:none}
+.fan-card{position:absolute;width:270px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:0 20px 44px rgba(18,32,26,.14)}
+.fan-card .swatch-top{height:96px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--signage);font-weight:800;font-size:19px;text-align:center;padding:0 10px}
+.fan-card .swatch-tag{margin-top:12px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--muted);display:flex;justify-content:space-between}
+.fan-card .swatch-name{font-weight:700;font-size:14.5px;margin-top:9px;color:var(--ink)}
+.fan-1{top:8px;left:0;transform:rotate(-9deg);z-index:1}
+.fan-2{top:56px;left:150px;transform:rotate(7deg);z-index:2}
+.fan-3{top:190px;left:36px;transform:rotate(-3deg);z-index:3}
+.ring{position:absolute;width:190px;height:190px;border-radius:50%;border:2px dashed var(--gold);right:-30px;top:-30px;opacity:.55}
+
+/* ---------- section shell ---------- */
+.section{max-width:1240px;margin:auto;padding:56px 5%}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.section-head h2{font-family:var(--serif);margin:6px 0 0;font-size:30px;letter-spacing:-.6px;font-weight:600}
+.section-head p{margin:6px 0 0;color:var(--muted);font-size:13.5px}
+.link{color:var(--forest);font-weight:700;font-size:13.5px;white-space:nowrap}
+.link:hover{text-decoration:underline}
+
+/* Enforce horizontal category scrolling */
+.chips{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;white-space:nowrap}
+.chips .chip{flex:0 0 auto;white-space:nowrap}
+
+/* ---------- category chips ---------- */
+.chips{display:flex;gap:9px;overflow-x:auto;padding:2px 0 12px;margin-bottom:14px;scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent}
+.chips::-webkit-scrollbar{height:6px}
+.chips::-webkit-scrollbar-track{background:var(--border);border-radius:999px}
+.chips::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:999px}
+.chips::-webkit-scrollbar-thumb:hover{background:var(--gold-deep)}
+.chip{border:1.5px solid var(--border-strong);background:var(--card);padding:9px 16px;border-radius:999px;font-size:12.5px;font-weight:600;white-space:nowrap;color:#3f4c43;flex:none}
+.chip.active{background:var(--forest);color:#fff;border-color:var(--forest)}
+
+/* ---------- premium banner (ticket) ---------- */
+.premium-section{margin-bottom:30px}
+.premium-banner-wrap{position:relative;width:100%;overflow:hidden;border-radius:16px;background:var(--forest-deep);border:1px solid var(--border)}
+.premium-banner-img{display:block;width:100%;aspect-ratio:4.8/1;object-fit:cover}
+.premium-banner-link{display:block;line-height:0;cursor:pointer}.premium-banner-link:hover .premium-banner-img{filter:brightness(.96)}
+.premium-banner-label{position:absolute;left:14px;top:14px;background:var(--gold);color:#fff;padding:5px 10px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em}
+.premium-banner-business{display:none}
+.premium-banner-controls{display:flex;justify-content:space-between;align-items:center;margin-top:9px}
+.premium-banner-dots{display:flex;gap:5px}
+.premium-dot{width:7px;height:7px;border-radius:50%;background:var(--border-strong)}
+.premium-dot.active{background:var(--gold-deep)}
+.premium-banner-arrow{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(5,42,30,.55);border:1px solid rgba(255,255,255,.35);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:6;transition:background .15s ease,transform .15s ease;padding:0}
+.premium-banner-arrow:hover{background:rgba(5,42,30,.82);transform:translateY(-50%) scale(1.06)}
+.premium-banner-arrow:active{transform:translateY(-50%) scale(.96)}
+.premium-banner-arrow svg{width:18px;height:18px;display:block}
+.premium-banner-arrow.prev{left:14px}
+.premium-banner-arrow.next{right:14px}
+@media (max-width:640px){.premium-banner-arrow{width:34px;height:34px}.premium-banner-arrow svg{width:15px;height:15px}}
+
+/* ---------- ad ticket card ---------- */
+.ads-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.ad-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 3px 14px rgba(18,32,26,.05);position:relative;transition:transform .15s ease,box-shadow .15s ease}
+.ad-card{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.ad-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(18,32,26,.10)}
+.ad-mini{padding:14px}
+.ad-perf{position:relative;height:0;border-top:2px dashed var(--border-strong);margin:0 14px}
+.ad-perf::before,.ad-perf::after{content:"";position:absolute;top:-8px;width:16px;height:16px;border-radius:50%;background:var(--paper)}
+.ad-perf::before{left:-22px}
+.ad-perf::after{right:-22px}
+
+.ad{position:relative;width:100%;min-height:225px;border:2px solid currentColor;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;text-align:center;font-family:var(--signage)}
+.ad-frame{position:relative;width:100%}
+.creative-preview-img{display:block;width:100%;border-radius:16px;border:2px solid var(--border);object-fit:cover}
+.informational-public{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.informational-image-wrap{position:relative;overflow:hidden}
+.informational-image-wrap>img:first-child{display:block;width:100%;height:auto;max-height:360px;object-fit:cover}
+.informational-image-wrap .adspool-watermark{position:absolute;right:10px;bottom:10px;left:auto;top:auto;transform:none;width:110px !important;height:auto !important;max-width:110px !important;max-height:none !important;opacity:.32;filter:brightness(0) invert(1);pointer-events:none;user-select:none;z-index:2}
+.informational-public img{display:block;width:100%;height:auto;max-height:360px;object-fit:cover}
+.informational-public-body{padding:16px}
+.informational-public-title{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.2;margin-bottom:8px}
+.informational-public-description{font-size:14px;line-height:1.65;color:#4d5a51;white-space:pre-wrap;word-break:break-word}.informational-public-location{margin-top:12px;font-size:13px;line-height:1.5;color:#5b6673}
+.ad-scroll-banner{position:relative;width:100%;overflow:hidden;background:#073D6D;color:#fff;min-height:34px;display:flex;align-items:center;white-space:nowrap}
+.ad-scroll-track{display:inline-flex;align-items:center;min-width:max-content;animation:adspoolScroll 12s linear infinite;will-change:transform}
+.ad-scroll-text{display:inline-block;padding:8px 28px;font-size:12px;font-weight:800;letter-spacing:.02em}
+@keyframes adspoolScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ad-scroll-banner:hover .ad-scroll-track{animation-play-state:paused}
+.promo-badge{position:absolute;top:-10px;right:-10px;width:52px;height:52px;background:#ff0000;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--sans);font-weight:800;font-size:8.5px;line-height:1.12;letter-spacing:.01em;text-transform:uppercase;box-shadow:0 6px 14px rgba(0,0,0,.22);z-index:5;padding:4px;overflow:hidden;clip-path:polygon(50.00% 0.00%, 61.39% 7.50%, 75.00% 6.70%, 81.11% 18.89%, 93.30% 25.00%, 92.50% 38.61%, 100.00% 50.00%, 92.50% 61.39%, 93.30% 75.00%, 81.11% 81.11%, 75.00% 93.30%, 61.39% 92.50%, 50.00% 100.00%, 38.61% 92.50%, 25.00% 93.30%, 18.89% 81.11%, 6.70% 75.00%, 7.50% 61.39%, 0.00% 50.00%, 7.50% 38.61%, 6.70% 25.00%, 18.89% 18.89%, 25.00% 6.70%, 38.61% 7.50%)}
+.ad .adhead{flex:0 0 auto;padding:14px 12px 10px;border-bottom:2px solid currentColor;font-size:22px;font-weight:800;line-height:1.08;min-height:56px;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere}
+.ad .adbody{flex:1;padding:12px 16px 10px;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.servicesline{font-size:14.5px;font-weight:700;line-height:1.25;word-break:break-word;overflow-wrap:anywhere}
+.address{font-family:var(--sans);font-weight:500;font-size:12.5px;line-height:1.3;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}
+.ad .adphone{flex:0 0 auto;min-height:48px;border-top:2px solid currentColor;padding:8px;font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere;font-family:var(--mono)}
+
+/* ---------- ad templates (must mirror the admin panel exactly) ---------- */
+/* Template 1 — Classic Signage (default) uses the base .ad rules above */
+
+/* Template 2 — Editorial Serif */
+.ad.tpl-2{font-family:var(--tpl2-font);border-radius:6px}
+.ad.tpl-2 .adhead{font-style:italic;font-weight:700;letter-spacing:.01em;text-transform:none}
+.ad.tpl-2 .adbody,.ad.tpl-2 .servicesline{font-family:var(--tpl2-font)}
+.ad.tpl-2 .adphone{font-family:var(--tpl2-font);font-style:italic;font-weight:700}
+
+/* Template 3 — Modern Sans */
+.ad.tpl-3{font-family:var(--tpl3-font);border-radius:22px}
+.ad.tpl-3 .adhead{text-transform:uppercase;letter-spacing:.05em;font-weight:800}
+.ad.tpl-3 .adbody,.ad.tpl-3 .servicesline{font-family:var(--tpl3-font)}
+.ad.tpl-3 .adphone{font-family:var(--tpl3-font);letter-spacing:.04em;font-weight:700}
+
+/* Template 4 — Classified Typewriter */
+.ad.tpl-4{font-family:var(--tpl4-font);border-radius:2px}
+.ad.tpl-4 .adhead{text-transform:uppercase;letter-spacing:.08em;border-bottom-style:dashed;font-weight:700}
+.ad.tpl-4 .adbody,.ad.tpl-4 .servicesline{font-family:var(--tpl4-font)}
+.ad.tpl-4 .adphone{font-family:var(--tpl4-font);border-top-style:dashed;letter-spacing:.05em}
+
+/* Template 5 — Bold Billboard */
+.ad.tpl-5{font-family:var(--tpl5-font);border-radius:10px}
+.ad.tpl-5 .adhead{letter-spacing:.03em;text-transform:uppercase}
+.ad.tpl-5 .adbody,.ad.tpl-5 .servicesline{font-family:var(--tpl5-font);letter-spacing:.02em}
+.ad.tpl-5 .adphone{font-family:var(--tpl5-font);font-size:24px;letter-spacing:.04em}
+
+.ad-info{padding:12px 16px 16px}
+.ad-name{font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:3px}
+.ad-category{font-size:11.5px;color:var(--forest);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.ad-id{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:3px}
+.ad-actions{display:flex;gap:14px;margin-top:13px;flex-wrap:wrap;justify-content:flex-start;align-items:flex-start}
+.ad-actions .icon-action{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:58px;padding:4px 3px;border:0;background:transparent;color:var(--forest);font-size:11px;font-weight:700;line-height:1.15;cursor:pointer;text-decoration:none;transition:transform .15s ease,color .15s ease}
+.ad-actions .icon-action:hover{transform:translateY(-1px);color:var(--forest-dark)}
+.ad-actions .material-symbols-rounded{font-size:24px;line-height:1;font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24}
+.ad-actions .brand-icon{width:24px;height:24px;display:block;fill:currentColor}
+.ad-actions .icon-action.primary{color:var(--forest)}
+
+
+.empty{grid-column:1/-1;background:var(--card);border:1.5px dashed var(--border-strong);border-radius:16px;padding:60px 20px;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:var(--ink);font-family:var(--serif);font-size:19px;font-weight:600;margin-bottom:6px}
+
+/* ---------- features ---------- */
+.features{background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.feature-grid{max-width:1240px;margin:auto;padding:34px 5%;display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.feature{padding:6px 26px;border-right:1px solid var(--border)}
+.feature:first-child{padding-left:0}
+.feature:last-child{border-right:0}
+.feature-icon{width:40px;height:40px;border-radius:11px;background:var(--forest);color:var(--gold-soft);display:flex;align-items:center;justify-content:center;font-weight:800;margin-bottom:12px;font-family:var(--mono);font-size:15px}
+.feature h3{font-family:var(--serif);font-size:15.5px;margin:0 0 6px;font-weight:600}
+.feature p{font-size:12.5px;color:var(--muted);line-height:1.55;margin:0}
+
+/* ---------- about ---------- */
+.about{background:linear-gradient(180deg,#f2ede0,var(--paper))}
+.about-inner{max-width:820px;margin:auto;text-align:center}
+.about .eyebrow{justify-content:center;margin-bottom:14px}
+.about h2{font-family:var(--serif);font-size:32px;margin:0 0 14px;font-weight:600;letter-spacing:-.5px}
+.about p{color:#4d5a51;line-height:1.7;margin:0 auto 22px;max-width:640px;font-size:15.5px}
+
+/* ---------- footer ---------- */
+.footer{background:var(--forest-deep);color:#eaf1f7;padding:36px 5% 26px}
+.footer-inner{max-width:1240px;margin:auto;display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+.footer .brand{color:#fff}
+.footer .brand small{color:#9db8d1}
+.footer-tagline{font-size:12.5px;color:#9db8d1;margin-top:10px;max-width:260px;line-height:1.6}
+.footer-links{display:flex;gap:22px;font-size:13px;font-weight:600;color:#d8e6f0}
+.footer-links a:hover{color:var(--gold)}
+.ads-info-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--forest);text-decoration:none;white-space:nowrap}
+.ads-info-link:hover{color:var(--forest-deep);text-decoration:underline}
+.ads-info-link .info-dot{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:1px solid var(--forest);border-radius:50%;font-family:var(--mono);font-size:11px;font-weight:800;line-height:1}
+.ads-info-content{font-size:14px;line-height:1.7;color:var(--text)}
+.ads-info-content p{margin:0 0 12px}
+.ads-info-content p:last-child{margin-bottom:0}
+.footer-bottom{max-width:1240px;margin:26px auto 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);font-family:var(--mono);font-size:11px;color:#7d97b3}
+.footer-disclaimer{
+  flex:1 1 100%;
+  margin-top:2px;
+  padding-top:18px;
+  border-top:1px solid rgba(255,255,255,.12);
+  color:#9db8d1;
+  font-size:11.5px;
+  line-height:1.65;
+}
+.footer-disclaimer strong{color:#d8e6f0;font-weight:700}
+
+
+/* ---------- modal ---------- */
+.modal-backdrop{position:fixed;inset:0;background:rgba(5,20,14,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
+.modal-backdrop.show{display:flex}
+.modal{width:min(560px,100%);max-height:90vh;overflow:auto;background:var(--card);border-radius:20px;padding:22px;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.modal-head h2{margin:0;font-family:var(--serif);font-size:21px;font-weight:600}
+.close{border:0;background:var(--paper);border-radius:50%;width:34px;height:34px;font-size:19px;color:var(--muted)}
+.modal-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:14px}
+
+/* ---------- toast ---------- */
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(12px);background:var(--forest-deep);color:#fff;padding:12px 18px;border-radius:11px;font-size:13px;font-weight:600;box-shadow:0 14px 34px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:120}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:950px){
+  .hero-inner{grid-template-columns:1fr}
+  .hero-visual{min-height:auto;margin-top:12px}
+  .ads-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .feature-grid{grid-template-columns:repeat(2,1fr);gap:24px}
+  .feature{border-right:0;padding:0}
+}
+@media(max-width:700px){
+  .topbar{padding:0 5%}
+  .navlinks{display:none}
+  .hero-inner{padding:40px 5% 36px}
+  .searchbox{display:block}
+  .searchbox .btn{width:100%;margin-top:7px}
+  .sticky-searchbar-inner{flex-direction:column;align-items:stretch;gap:10px;padding:10px 5%}
+  .sticky-stats{justify-content:space-between;gap:14px}
+  .sticky-searchbox{max-width:none}
+  .section{padding:38px 5%}
+  .ads-grid{grid-template-columns:1fr}
+  .feature-grid{grid-template-columns:1fr}
+  .footer-inner{flex-direction:column}
+  .footer-links{flex-wrap:wrap}
+}
+
+.hero-video{background:#fff;border:1px solid var(--border);border-radius:22px;overflow:hidden;box-shadow:0 18px 45px rgba(7,61,109,.12)}
+.hero-video-frame{position:relative;aspect-ratio:16/9;background:#0b1724}
+.hero-video-frame iframe{display:block;width:100%;height:100%;border:0}
+.hero-video-caption{padding:11px 14px;font-size:12px;font-weight:700;color:var(--forest);display:flex;justify-content:space-between;gap:10px;align-items:center}
+.hero-video-nav{display:flex;gap:6px}
+.hero-video-nav button{border:1px solid var(--border-strong);background:#fff;color:var(--forest);border-radius:50%;width:30px;height:30px;line-height:1;font-weight:800}
+@media(max-width:760px){.hero-video{margin-top:6px}}
+
+
+/* ---------- revised public home layout ---------- */
+.header-brand{display:flex;align-items:center;min-width:0}
+.hero{background:var(--paper)}
+.hero-inner{display:block;max-width:1240px;padding:28px 5% 30px}
+.hero-copy{display:none}
+.hero-visual{min-height:0;width:100%}
+.hero-video{width:min(760px,100%);max-width:none;margin:0 auto}
+.hero-video-section{max-width:1240px;margin:auto;padding:26px 5% 42px}
+.hero-video-section .hero-video{margin:0 auto}
+.premium-section{margin:0 0 26px}
+.premium-banner-wrap{min-height:170px;display:flex;align-items:center;justify-content:center}
+.premium-placeholder{width:100%;min-height:170px;display:flex;align-items:center;justify-content:center;text-align:center;border:1.5px dashed var(--border-strong);border-radius:16px;background:#fff;color:var(--muted);font-family:var(--mono);font-size:12px;letter-spacing:.04em}
+@media(max-width:700px){
+  .header-location{font-size:8px;margin-left:8px}
+  .hero-inner{padding:20px 5% 24px}
+  .hero-video-section{padding:20px 5% 32px}
+  .premium-banner-wrap{min-height:110px}
+  .premium-placeholder{min-height:110px}
+}
+
+/* ===== ADSPPOOL HOMEPAGE VISUAL DEMO ===== */
+.discovery-kicker .spark{width:8px;height:8px;border-radius:50%;background:#ffd21f;box-shadow:0 0 0 4px rgba(255,210,31,.18)}
+.discovery-title .accent{color:#0baedc}
+.discovery-bubble strong{font-size:28px;color:#073d6d}.discovery-bubble span{font-size:12px;font-weight:700;color:#547084}
+.discovery-bubble:after{content:"";position:absolute;right:28px;bottom:-12px;width:24px;height:24px;background:#fff;border-right:1px solid #dceaf2;border-bottom:1px solid #dceaf2;transform:rotate(45deg)}
+.sticky-chips-row{background:rgba(255,255,255,.98)}
+.sticky-chips{padding:9px 5%;max-width:1240px;margin:auto;display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;scrollbar-width:auto;scrollbar-color:#b8c9d6 #eef4f8;white-space:nowrap;cursor:grab;-webkit-overflow-scrolling:touch}
+.sticky-chips:active{cursor:grabbing}.sticky-chips::-webkit-scrollbar{height:6px}.sticky-chips::-webkit-scrollbar-track{background:#eef4f8;border-radius:999px}.sticky-chips::-webkit-scrollbar-thumb{background:#b8c9d6;border-radius:999px}.sticky-chips::-webkit-scrollbar-thumb:hover{background:#8fa8b8}
+.sticky-chips .chip,.admin-sticky-chips .chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:9px 13px;border:1px solid #dce7ef;background:#fff;color:#29465a;font-weight:700;box-shadow:0 5px 14px rgba(7,61,109,.06);transition:.18s}
+.sticky-chips .chip:hover,.admin-sticky-chips .chip:hover{transform:translateY(-1px)}
+.sticky-chips .chip.active,.admin-sticky-chips .chip.active{background:#073d6d;color:#fff;border-color:#073d6d}
+.cat-icon{width:27px;height:27px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;background:#eef7ff;flex:none}
+.sticky-chips .chip.active .cat-icon,.admin-sticky-chips .chip.active .cat-icon{background:rgba(255,255,255,.18)}
+
+
+</style>
+
+<style>
+</style>
+
+</head>
+<body>
+
+<header class="topbar">
+  <a href="/" class="brandmark header-brand" aria-label="Adspool home" title="Go to Adspool home">
+    <img class="spool" src="data:image/png;base64,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" alt="Adspool">
+    
+  </a>
+  <nav class="nav">
+    <a href="tel:7353515663" style="font-weight:700; background:#073D6D; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none; display:inline-block;">7353515663</a>
+    <div class="navlinks">
+      <a href="#ads">Ads</a>
+      <a href="#categories">Categories</a>
+      <a href="#about">About</a>
+    </div>
+  </nav>
+</header>
+
+<div id="stickySearchbar" class="sticky-searchbar show">
+  <div class="sticky-searchbar-inner">
+    <div class="sticky-searchbox">
+      <input id="searchInputSticky" type="search" placeholder="Search business name, Ad ID, service or location…" autocomplete="off" oninput="syncSearch(this.value)">
+      <button class="btn primary" onclick="document.getElementById('ads').scrollIntoView({behavior:'smooth'})">Search</button>
+    </div>
+  </div>
+  <div class="sticky-chips-row">
+    <div id="categoriesSticky" class="chips sticky-chips"></div>
+  </div>
+</div>
+
+<div id="stickySpacer" style="height:112px"></div>
+
+
+<section class="section" id="ads">
+  <div id="premiumSection" class="premium-section" style="display:block">
+    <div id="premiumBannerWrap" class="premium-banner-wrap"></div>
+    <div class="premium-banner-controls">
+      <div id="premiumBannerDots" class="premium-banner-dots"></div>
+      <div id="premiumBannerMeta" style="font-family:var(--mono);font-size:11px;color:var(--muted)"></div>
+    </div>
+  </div>
+
+  <div class="hero-video-section">
+    <div id="heroVideoWrap" class="hero-video"></div>
+  </div>
+
+  <div class="section-head">
+    <div>
+      <span class="eyebrow"><span class="dot"></span>Live listings</span>
+      <h2>Featured ads</h2>
+      <p>Browse advertisements that are currently active.</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+      <button class="ads-info-link" type="button" onclick="showAdsInfo()" aria-label="About Adspool advertisements" title="About advertisements">
+        <span class="info-dot" aria-hidden="true">i</span> About ads
+      </button>
+      <a class="link" href="#ads" onclick="viewAllAds(event)">View all ads →</a>
+    </div>
+  </div>
+  <div id="categories" class="chips" style="display:none"></div>
+  <div id="adsGrid" class="ads-grid"></div>
+</section>
+
+<section class="features">
+  <div class="feature-grid">
+    <div class="feature"><div class="feature-icon">▣</div><h3>Top businesses</h3><p>Discover useful local businesses and services near you.</p></div>
+    <div class="feature"><div class="feature-icon">%</div><h3>Great offers</h3><p>Find promotions and advertisements in one place.</p></div>
+    <div class="feature"><div class="feature-icon">✓</div><h3>Easy to explore</h3><p>Search by business, category or location in seconds.</p></div>
+    <div class="feature"><div class="feature-icon">↗</div><h3>Easy to connect</h3><p>Call, WhatsApp or get directions directly from a listing.</p></div>
+  </div>
+</section>
+
+<section class="section about" id="about">
+  <div class="about-inner">
+    <span class="eyebrow"><span class="dot"></span>Why Adspool</span>
+    <h2>One place for local discovery.</h2>
+    <p>Adspool gives businesses a simple way to get discovered, and gives visitors a simple way to find businesses, services and offers around them — no clutter, just active listings.</p>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <span class="brandmark">
+        <img class="spool" src="data:image/png;base64,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" alt="Adspool" style="filter:brightness(0) invert(1)">
+      </span>
+      <div class="footer-tagline">A local business directory built for businesses across India.</div>
+    </div>
+    <div class="footer-links">
+      <a href="#about">About</a><a href="#ads">Ads</a><a href="#categories">Categories</a>
+    </div>
+    <div class="footer-disclaimer">
+      <strong>Disclaimer:</strong> Adspool is an advertising and discovery platform. Advertisements and information published on Adspool are provided by the respective advertisers, businesses, or individuals. Adspool does not independently verify or guarantee the accuracy, quality, legality, availability, pricing, offers, claims, products, or services mentioned in advertisements. Any communication, transaction, appointment, payment, or engagement with an advertiser is solely between the user and the respective advertiser. Adspool is not responsible for any loss, damage, dispute, or issue arising from such engagement.
+    </div>
+  </div>
+  <div class="footer-bottom wrap">© 2026 Adspool. All rights reserved.</div>
+</footer>
+
+<div id="modalBackdrop" class="modal-backdrop" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head"><h2 id="modalTitle">Advertisement</h2><button class="close" onclick="closeModal()">×</button></div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- GitHub Pages SPA fallback: this file intentionally mirrors index.html so clean category URLs such as /astrology continue to work after refresh. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://vezffgjnfsuhrbaqpepu.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_QyQhdXbm55VV1nRNlUuH2A_I2iyS56n';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+let state={ads:[],categories:[]};
+let selectedCategory='all';
+
+/* ---------- category URL routing ---------- */
+/* Category pages use clean paths such as /astrology and /automobile. */
+function categorySlug(name){
+  return String(name||'')
+    .trim()
+    .toLowerCase()
+    .replace(/&/g,' and ')
+    .replace(/[^a-z0-9]+/g,'-')
+    .replace(/^-+|-+$/g,'');
+}
+
+function categoryIdFromUrl(){
+  try{
+    const path=(window.location.pathname||'/').replace(/^\/+|\/+$/g,'');
+    if(!path || path==='index.html') return 'all';
+    const cat=state.categories.find(c=>categorySlug(c.name)===path);
+    return cat ? String(cat.id) : 'all';
+  }catch(e){
+    return 'all';
+  }
+}
+
+function syncCategoryUrl(id){
+  try{
+    const path=id==='all' ? '/' : '/'+categorySlug(state.categories.find(c=>String(c.id)===String(id))?.name||'');
+    if(path && window.location.pathname!==path){
+      window.history.pushState({category:id},'',path);
+    }
+  }catch(e){}
+}
+
+function applyCategoryFromUrl(){
+  const id=categoryIdFromUrl();
+  selectedCategory=String(id);
+  premiumIndex=0;
+}
+
+
+let premiumBanners=[];
+let heroVideos=[];
+let heroVideoIndex=0;let premiumIndex=0;let premiumTimer=null;
+
+async function load(){
+  // Keep each data source independent. A problem with Hero Videos or one
+  // optional table must never hide the existing advertisements.
+  const [catResult, adsResult, bannerResult] = await Promise.allSettled([
+    supabaseClient.from('categories').select('id,name,active').order('id',{ascending:true}),
+    supabaseClient.from('ads').select('id,ad_id,business_name,description,category_id,ad_type,services,address_line,area,city,state,pin,phone,whatsapp,instagram_id,badge,background_color,text_color,template_id,creative_image_url,add_adspool_watermark,scroll_banner_enabled,scroll_banner_text,status,start_at,end_at,created_at,updated_at').order('created_at',{ascending:false}),
+    supabaseClient.from('premium_banners').select('id,business_name,category_id,image_url,youtube_link,website_link,start_at,end_at,status,created_at,updated_at').order('created_at',{ascending:false})
+  ]);
+
+  if(catResult.status==='fulfilled' && !catResult.value.error){
+    state.categories=(catResult.value.data||[]).map(mapCategoryRow);
+  }else{
+    const err=catResult.status==='fulfilled'?catResult.value.error:catResult.reason;
+    console.error('Categories load error:',err);
+  }
+
+  if(adsResult.status==='fulfilled' && !adsResult.value.error){
+    state.ads=(adsResult.value.data||[]).map(mapAdRow);
+  }else{
+    const err=adsResult.status==='fulfilled'?adsResult.value.error:adsResult.reason;
+    console.error('Ads load error:',err);
+    showToast('Could not load advertisements: '+(err?.message||'Unknown error'));
+  }
+
+  if(bannerResult.status==='fulfilled' && !bannerResult.value.error){
+    premiumBanners=(bannerResult.value.data||[]).map(mapPremiumRow);
+  }else{
+    const err=bannerResult.status==='fulfilled'?bannerResult.value.error:bannerResult.reason;
+    console.error('Premium banners load error:',err);
+    premiumBanners=[];
+  }
+
+  // Hero videos are optional and isolated from the core ads load.
+  // IMPORTANT: this function re-runs on a timer and on window focus, so we
+  // must NOT blindly overwrite heroVideos / reset heroVideoIndex / re-render
+  // the iframe every time - that was restarting whatever video was playing
+  // and snapping the carousel back to video 1. We only touch the player if
+  // the list of active videos has actually changed.
+  try{
+    const heroVideoResult=await supabaseClient.from('hero_videos').select('id,youtube_url,title,sort_order,status,created_at').eq('status','active')
+      .order('sort_order',{ascending:true}).order('created_at',{ascending:true});
+    if(heroVideoResult.error){
+      console.warn('Hero videos unavailable; continuing without them:',heroVideoResult.error.message);
+    }else{
+      const freshVideos=heroVideoResult.data||[];
+      if(!heroVideosEqual(heroVideos,freshVideos)){
+        // Try to keep playing the same video (by id) at its new position;
+        // only fall back to index 0 if that video is gone or this is the
+        // very first load.
+        const currentId=(heroVideos[heroVideoIndex]||{}).id;
+        heroVideos=freshVideos;
+        const keepIndex=currentId!=null?heroVideos.findIndex(v=>v.id===currentId):-1;
+        heroVideoIndex=keepIndex>=0?keepIndex:0;
+        renderHeroVideo();
+      }
+      // else: nothing changed, leave the currently playing video alone.
+    }
+  }catch(e){
+    console.warn('Hero videos unavailable; continuing without them:',e);
+  }
+
+  state.ads.forEach(refreshStatus);
+  premiumBanners.forEach(refreshPremiumStatus);
+  /* Restore the selected category from the clean URL after categories load. */
+  applyCategoryFromUrl();
+  renderCategories();
+  renderPremiumBanner();
+  renderAds();
+  updateStats();
+}
+function heroVideosEqual(a,b){
+  const arrA=a||[],arrB=b||[];
+  if(arrA.length!==arrB.length)return false;
+  for(let i=0;i<arrA.length;i++){
+    const x=arrA[i],y=arrB[i];
+    if(x.id!==y.id||x.youtube_url!==y.youtube_url||x.title!==y.title||x.sort_order!==y.sort_order||x.status!==y.status)return false;
+  }
+  return true;
+}
+function youtubeVideoId(value){
+  try{
+    const u=new URL(String(value||'').trim());
+    if(u.hostname==='youtu.be') return u.pathname.replace(/^\//,'').split('/')[0]||null;
+    if(/(^|\.)youtube\.com$/i.test(u.hostname)){
+      if(u.pathname==='/watch') return u.searchParams.get('v')||null;
+      const m=u.pathname.match(/^\/(?:embed|shorts|live)\/([^/?]+)/i);
+      return m?m[1]:null;
+    }
+  }catch(e){}
+  return null;
+}
+function youtubeEmbedUrl(value){
+  const id=youtubeVideoId(value); if(!id)return'';
+  const origin=(typeof window!=='undefined'&&window.location&&window.location.origin)?window.location.origin:'';
+  return 'https://www.youtube.com/embed/'+encodeURIComponent(id)+(origin?'?origin='+encodeURIComponent(origin):'');
+}
+function renderHeroVideo(){
+  const wrap=document.getElementById('heroVideoWrap'); if(!wrap)return;
+  const arr=(heroVideos||[]).filter(v=>v.status==='active'&&youtubeEmbedUrl(v.youtube_url));
+  if(!arr.length){wrap.innerHTML='<div style="padding:30px;text-align:center;color:#667080">Hero video coming soon.</div>';return;}
+  if(heroVideoIndex>=arr.length)heroVideoIndex=0;
+  const v=arr[heroVideoIndex], embed=youtubeEmbedUrl(v.youtube_url);
+  const nav=arr.length>1?`<div class="hero-video-nav"><button type="button" onclick="heroVideoPrev()" aria-label="Previous video">‹</button><button type="button" onclick="heroVideoNext()" aria-label="Next video">›</button></div>`:'';
+  wrap.innerHTML=`<div class="hero-video-frame"><iframe src="${esc(embed)}" title="${esc(v.title||'Adspool hero video')}" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div><div class="hero-video-caption"><span>${esc(v.title||'Adspool')}</span><span>${nav}</span></div>`;
+}
+function heroVideoNext(){const arr=heroVideos.filter(v=>v.status==='active'&&youtubeEmbedUrl(v.youtube_url));if(!arr.length)return;heroVideoIndex=(heroVideoIndex+1)%arr.length;renderHeroVideo();}
+function heroVideoPrev(){const arr=heroVideos.filter(v=>v.status==='active'&&youtubeEmbedUrl(v.youtube_url));if(!arr.length)return;heroVideoIndex=(heroVideoIndex-1+arr.length)%arr.length;renderHeroVideo();}
+
+function categoryIcon(name){
+  const n=(name||'').toLowerCase();
+  if(n.includes('restaurant')||n.includes('food')||n.includes('cafe'))return 'restaurant';
+  if(n.includes('shop')||n.includes('retail')||n.includes('store'))return 'storefront';
+  if(n.includes('service'))return 'build';
+  if(n.includes('health')||n.includes('medical')||n.includes('clinic')||n.includes('doctor'))return 'health_and_safety';
+  if(n.includes('education')||n.includes('school')||n.includes('training'))return 'school';
+  if(n.includes('real estate')||n.includes('property'))return 'home_work';
+  if(n.includes('auto')||n.includes('car')||n.includes('vehicle'))return 'directions_car';
+  if(n.includes('law')||n.includes('lawyer'))return 'gavel';
+  if(n.includes('salon')||n.includes('beauty'))return 'content_cut';
+  if(n.includes('hotel')||n.includes('travel'))return 'hotel';
+  if(n.includes('finance')||n.includes('insurance'))return 'account_balance';
+  if(n.includes('digital')||n.includes('it')||n.includes('software'))return 'computer';
+  if(n.includes('construction'))return 'construction';
+  if(n.includes('interior'))return 'chair';
+  if(n.includes('electrical')||n.includes('plumb'))return 'plumbing';
+  if(n.includes('wedding')||n.includes('event'))return 'celebration';
+  if(n.includes('manufact'))return 'factory';
+  if(n.includes('professional'))return 'business_center';
+  return 'category';
+}
+function categoryIconHtml(name){return `<span class="material-symbols-rounded">${categoryIcon(name)}</span>`;}
+function mapCategoryRow(r){
+  return {id:r.id,name:r.name,active:r.active!==false};
+}
+
+function mapAdRow(r){
+  return {
+    id:r.id,adId:r.ad_id,businessName:r.business_name,description:r.description||'',categoryId:r.category_id,
+    adType:r.ad_type||'common',services:Array.isArray(r.services)?r.services:[],
+    addressLine:r.address_line,area:r.area,city:r.city,state:r.state,pin:r.pin,
+    phone:r.phone,whatsapp:r.whatsapp||'',instagramId:r.instagram_id||'',badge:r.badge||'',
+    backgroundColor:r.background_color||'#ffffff',textColor:r.text_color||contrast(r.background_color||'#ffffff'),
+    templateId:r.template_id||1,creativeImageUrl:r.creative_image_url||'',
+    addAdspoolWatermark:r.add_adspool_watermark!==false,
+    scrollBannerEnabled:r.scroll_banner_enabled===true,
+    scrollBannerText:r.scroll_banner_text||'',
+    creativeImageData:r.creative_image_url||'',status:r.status||'draft',
+    startAt:r.start_at,endAt:r.end_at,createdAt:r.created_at,updatedAt:r.updated_at
+  };
+}
+
+function mapPremiumRow(r){
+  return {id:r.id,businessName:r.business_name,categoryId:r.category_id,imageData:r.image_url,youtubeLink:r.youtube_link||'',websiteLink:r.website_link||'',
+    startAt:r.start_at,endAt:r.end_at,status:r.status||'scheduled',createdAt:r.created_at,updatedAt:r.updated_at};
+}
+
+function activePremiumBanners(){
+  const now=Date.now();
+  return premiumBanners.filter(b=>{
+    const start=Date.parse(b.startAt), end=Date.parse(b.endAt);
+    const active = b.status==='active' || (Number.isFinite(start) && Number.isFinite(end) && now>=start && now<=end);
+    if(active) b.status='active';
+    return active;
+  });
+}
+
+function currentPremiumArr(){
+  return activePremiumBanners().filter(b=>
+    selectedCategory==='all' || String(b.categoryId)===String(selectedCategory)
+  );
+}
+
+function renderPremiumBanner(){
+  const section=document.getElementById('premiumSection');
+  const wrap=document.getElementById('premiumBannerWrap');
+  const dots=document.getElementById('premiumBannerDots');
+  const meta=document.getElementById('premiumBannerMeta');
+  if(!section||!wrap)return;
+
+  const arr=currentPremiumArr();
+
+  if(!arr.length){
+    section.style.display='block';
+    wrap.innerHTML='<div class="premium-placeholder">Premium banner space · 1920 × 400</div>';
+    if(dots)dots.innerHTML='';
+    if(meta)meta.textContent='';
+    if(premiumTimer){clearInterval(premiumTimer);premiumTimer=null;}
+    return;
+  }
+
+  if(premiumIndex>=arr.length)premiumIndex=0;
+
+  const b=arr[premiumIndex];
+  section.style.display='block';
+
+  const arrows=arr.length>1?`
+    <button type="button" class="premium-banner-arrow prev" aria-label="Previous banner" onclick="premiumPrev()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <button type="button" class="premium-banner-arrow next" aria-label="Next banner" onclick="premiumNext()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>`:'';
+
+  // A premium banner may have ONE optional destination: YouTube or Website.
+  // The admin saves these in youtube_link / website_link. Make the whole banner clickable
+  // only when a valid http(s) destination exists; otherwise keep it as a plain image.
+  const rawPremiumUrl=(b.youtubeLink||b.websiteLink||'').trim();
+  let premiumUrl='';
+  try{
+    const u=new URL(rawPremiumUrl);
+    if(u.protocol==='http:'||u.protocol==='https:') premiumUrl=u.href;
+  }catch(e){}
+  const premiumImage=`<img class="premium-banner-img" src="${esc(b.imageData||'')}" alt="Premium banner">`;
+  const premiumLabel=b.youtubeLink?'Open YouTube advertisement':'Open website advertisement';
+  const premiumTarget=premiumUrl?`<a class="premium-banner-link" href="${esc(premiumUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${premiumLabel}" title="${premiumLabel}">${premiumImage}</a>`:premiumImage;
+  wrap.innerHTML=`
+    ${premiumTarget}
+    <span class="premium-banner-label">PREMIUM</span>
+    ${arrows}`;
+
+  if(dots)dots.innerHTML=arr.map((x,i)=>`<span class="premium-dot ${i===premiumIndex?'active':''}"></span>`).join('');
+  if(meta)meta.textContent=`${premiumIndex+1} of ${arr.length}`;
+
+  if(premiumTimer)clearInterval(premiumTimer);
+  premiumTimer=arr.length>1?setInterval(()=>{
+    const current=currentPremiumArr();
+    if(!current.length){renderPremiumBanner();return;}
+    premiumIndex=(premiumIndex+1)%current.length;
+    renderPremiumBanner();
+  },5000):null;
+}
+
+function premiumNext(){
+  const arr=currentPremiumArr();
+  if(!arr.length)return;
+  premiumIndex=(premiumIndex+1)%arr.length;
+  renderPremiumBanner();
+}
+
+function premiumPrev(){
+  const arr=currentPremiumArr();
+  if(!arr.length)return;
+  premiumIndex=(premiumIndex-1+arr.length)%arr.length;
+  renderPremiumBanner();
+}
+
+function updateStats(){
+  const total=activeAds().length;
+  const cats=state.categories.filter(c=>c.active).length;
+  ['statTotal','statCats','statTotalSticky','statCatsSticky'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.textContent=(id.toLowerCase().includes('cats')?'':'')+((id==='statTotal'||id==='statTotalSticky')?total:cats);
+  });
+}
+
+function syncSearch(val){
+  const main=document.getElementById('searchInput');
+  const sticky=
+// Desktop mouse-wheel support for horizontal category tabs.
+document.addEventListener('DOMContentLoaded',()=>{
+  ['categoriesSticky'].forEach(id=>{
+    const el=document.getElementById(id); if(!el)return;
+    el.addEventListener('wheel',e=>{
+      if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){e.preventDefault();el.scrollLeft+=e.deltaY; }
+    },{passive:false});
+  });
+});
+document.getElementById('searchInputSticky');
+  if(main)main.value=val;
+  if(sticky)sticky.value=val;
+  renderAds();
+}
+
+function refreshStatus(a){
+  if(a.status==='unpublished'||a.status==='draft')return a.status;
+  const start=Date.parse(a.startAt),end=Date.parse(a.endAt),now=Date.now();
+  if(Number.isNaN(start)||Number.isNaN(end))return a.status;
+  if(now<start)a.status='scheduled';
+  else if(now<=end)a.status='published';
+  else a.status='expired';
+  return a.status;
+}
+
+function activeAds(){
+  const now=Date.now();
+  return state.ads.filter(a=>{
+    const start=Date.parse(a.startAt), end=Date.parse(a.endAt);
+    if(Number.isFinite(start) && now<start)return false;
+    if(Number.isFinite(end) && now>end)return false;
+    const status=String(a.status||'').toLowerCase();
+    // Admin currently writes 'published'. Accept 'active' as well for
+    // compatibility with any older rows already in Supabase.
+    return status==='published' || status==='active';
+  });
+}
+function esc(s){
+  return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+function showToast(t){
+  const e=document.getElementById('toast');
+  e.textContent=t;
+  e.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t=setTimeout(()=>{ e.classList.remove('show') },2400);
+}
+
+function contrast(hex){
+  hex=(hex||'#fff').replace('#','');
+  const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
+  return (0.299*r+0.587*g+0.114*b)>155?'#111827':'#fff';
+}
+
+function buildAddress(a){
+  return[a.addressLine,a.area,a.city,a.state,a.pin].filter(Boolean).join(', ');
+}
+
+function mapsUrl(address){
+  return'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(address);
+}
+
+function getSizing(a,address){
+  const services=(a.services||[]).filter(Boolean);
+  const chars=services.reduce((n,x)=>n+x.length,0);
+  let serviceSize=14.5;
+  if(services.length>=4)serviceSize=13;
+  if(services.length>=8)serviceSize=12;
+  if(chars>120)serviceSize=12;
+  let addressSize=12.5;
+  if((address||'').length>90)addressSize=11.5;
+  let nameSize=22;
+  const name=(a.businessName||'Business').length;
+  if(name>24)nameSize=19;
+  if(name>38)nameSize=17;
+  return {serviceSize,addressSize,nameSize};
+}
+
+function instagramUrl(value){
+  const raw=String(value||'').trim();
+  if(!raw)return '';
+  if(/^https?:\/\/([a-z0-9-]+\.)?instagram\.com\//i.test(raw))return raw;
+  return 'https://www.instagram.com/'+raw.replace(/^@+/,'').replace(/^\/+|\/+$/g,'')+'/';
+}
+
+function scrollBannerMarkup(a){
+  const text=String(a.scrollBannerText||'').trim();
+  if(a.scrollBannerEnabled!==true||!text)return'';
+  const safe=esc(text);
+  return `<div class="ad-scroll-banner" aria-label="${safe}"><div class="ad-scroll-track"><span class="ad-scroll-text">${safe}</span><span class="ad-scroll-text">${safe}</span><span class="ad-scroll-text">${safe}</span><span class="ad-scroll-text">${safe}</span></div></div>`;
+}
+
+function adMarkup(a){
+  if(a.adType==='creative'){
+    const badge=(a.badge||'').trim();
+    if(!a.creativeImageData)return`<div class="ad-frame"><div class="empty" style="padding:24px"><strong>Creative not available</strong></div></div>`;
+    return`<div class="ad-frame">${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}<img class="creative-preview-img" src="${esc(a.creativeImageData)}" alt="${esc(a.businessName||'Business')}"></div>`;
+  }
+  if(a.adType==='informational'){
+    const location=buildAddress(a);
+    const phone=(a.phone||'').replace(/\s/g,'');
+    const waRaw=(a.whatsapp||'').replace(/\D/g,'');
+  const wa=waRaw.length===10?'91'+waRaw:waRaw;
+    const instagram=instagramUrl(a.instagramId);
+    const imageHtml=a.creativeImageData?`<div class="informational-image-wrap"><img src="${esc(a.creativeImageData)}" alt="${esc(a.businessName||'Informational Post')}">${a.addAdspoolWatermark!==false?`<img class="adspool-watermark" src="data:image/png;base64,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" alt="">`:''}</div>`:'';
+    return`<div class="informational-public">${imageHtml}${scrollBannerMarkup(a)}<div class="informational-public-body"><div class="informational-public-title">${esc(a.businessName||'Informational Post')}</div><div class="informational-public-description">${esc(a.description||'')}</div>${location?`<div class="informational-public-location">📍 ${esc(location)}</div>`:''}</div></div>`;
+  }
+  const bg=a.backgroundColor||'#fff',fg=a.textColor||contrast(bg),address=buildAddress(a),s=getSizing(a,address),services=(a.services||[]).filter(Boolean),serviceHtml=services.length?services.map(esc).join(' <span>•</span> '):'Local business services',tpl=a.templateId||1,badge=(a.badge||'').trim();
+  return `<div class="ad-frame">${badge?`<div class="promo-badge">${esc(badge)}</div>`:''}<div class="ad tpl-${tpl}" style="color:${fg};background:${bg}"><div class="adhead" style="font-size:${s.nameSize}px">${esc(a.businessName||'Business Name')}</div><div class="adbody"><div class="servicesline" style="font-size:${s.serviceSize}px">${serviceHtml}</div><div class="address" style="font-size:${s.addressSize}px">📍 ${esc(address||'')}</div></div><div class="adphone" style="font-size:20px">${esc(a.phone||'')}</div></div></div>`;
+}
+
+function loadPremiumBanners(){
+  premiumBanners.forEach(refreshPremiumStatus);
+}
+function refreshPremiumStatus(b){
+  const s=Date.parse(b.startAt),e=Date.parse(b.endAt),n=Date.now();
+  if(Number.isNaN(s)||Number.isNaN(e))return;
+  b.status=(n<s?'scheduled':n<=e?'active':'expired');
+}
+function activePremiumBanners(){
+  loadPremiumBanners();
+  return premiumBanners.filter(b=>b.status==='active');
+}
+
+function currentPremiumArr(){
+  return activePremiumBanners().filter(x=>selectedCategory==='all'||String(x.categoryId)===String(selectedCategory));
+}
+function premiumNext(){
+  const arr=currentPremiumArr();
+  if(!arr.length)return;
+  premiumIndex=(premiumIndex+1)%arr.length;
+  renderPremiumBanner();
+}
+function premiumPrev(){
+  const arr=currentPremiumArr();
+  if(!arr.length)return;
+  premiumIndex=(premiumIndex-1+arr.length)%arr.length;
+  renderPremiumBanner();
+}
+
+
+function renderCategories(){
+  const cats=state.categories
+    .filter(c=>c.active)
+    .slice()
+    .sort((a,b)=>{
+      const an=(a.name||'').trim().toLowerCase();
+      const bn=(b.name||'').trim().toLowerCase();
+      const aRank=an==='others'?2:(an==='other'?1:0);
+      const bRank=bn==='others'?2:(bn==='other'?1:0);
+      if(aRank!==bRank)return aRank-bRank;
+      return(a.name||'').localeCompare(b.name||'',undefined,{sensitivity:'base'});
+    });
+  const html=`<button class="chip ${selectedCategory==='all'?'active':''}" data-category-id="all" onclick="setCategory('all')"><span class="cat-icon"><span class="material-symbols-rounded">apps</span></span>All Categories</button>`+
+    cats.map(c=>`<button class="chip ${String(selectedCategory)===String(c.id)?'active':''}" data-category-id="${String(c.id)}" onclick="setCategory('${c.id}')"><span class="cat-icon">${categoryIconHtml(c.name)}</span>${esc(c.name)}</button>`).join('');
+  document.getElementById('categories').innerHTML=html;
+  document.getElementById('categoriesSticky').innerHTML=html;
+}
+
+function scrollCategoryTabIntoView(id){
+  const key=String(id);
+  ['categoriesSticky','categories'].forEach(cid=>{
+    const wrap=document.getElementById(cid); if(!wrap)return;
+    const tab=wrap.querySelector(`[data-category-id="${CSS.escape(key)}"]`);
+    if(tab) tab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  });
+}
+function setCategory(id){
+  selectedCategory=String(id);
+  premiumIndex=0;
+  syncCategoryUrl(selectedCategory);
+  renderCategories();
+  renderPremiumBanner();
+  renderAds();
+  setTimeout(()=>scrollCategoryTabIntoView(selectedCategory),30);
+}
+
+window.addEventListener('popstate',()=>{
+  applyCategoryFromUrl();
+  renderCategories();
+  renderPremiumBanner();
+  renderAds();
+  setTimeout(()=>scrollCategoryTabIntoView(selectedCategory),30);
+});
+
+function resetFilters(){
+  selectedCategory='all';
+  syncCategoryUrl('all');
+  const main=document.getElementById('searchInput');
+  const sticky=document.getElementById('searchInputSticky');
+  if(main)main.value='';
+  if(sticky)sticky.value='';
+  renderCategories();renderPremiumBanner();renderAds();
+  document.getElementById('categories').scrollLeft=0;
+  document.getElementById('categoriesSticky').scrollLeft=0;
+  setTimeout(()=>scrollCategoryTabIntoView('all'),30);
+}
+
+function viewAllAds(e){
+  if(e)e.preventDefault();
+  const hadFilter=selectedCategory!=='all'||(document.getElementById('searchInputSticky')?.value||'').trim()!=='';
+  resetFilters();
+  const bar=document.getElementById('stickySearchbar');
+  const topbarH=document.querySelector('.topbar')?.offsetHeight||0;
+  const stickyH=bar&&bar.classList.contains('show')?bar.offsetHeight:0;
+  const target=document.getElementById('ads');
+  const y=target.getBoundingClientRect().top+window.pageYOffset-(topbarH+stickyH+14);
+  window.scrollTo({top:y,behavior:'smooth'});
+  if(hadFilter)showToast('Filters cleared — showing all ads.');
+}
+
+function renderAds(){
+  const q=(document.getElementById('searchInputSticky')?.value||'').trim().toLowerCase();
+  const arr=activeAds().filter(a=>{
+    const category=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
+    const hay=[a.businessName,a.description,a.adId,buildAddress(a),(a.services||[]).join(' '),category].join(' ').toLowerCase();
+    return (!q||hay.includes(q)) && (selectedCategory==='all'||String(a.categoryId)===String(selectedCategory));
+  });
+
+  const grid=document.getElementById('adsGrid');
+  if(!arr.length){
+    grid.innerHTML=`<div class="empty"><strong>No active advertisements found.</strong>New or currently active business ads will appear here.</div>`;
+    return;
+  }
+
+  grid.innerHTML=arr.map(a=>{
+    const cat=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
+    const phone=(a.phone||'').replace(/\s/g,'');
+    const waRaw=(a.whatsapp||'').replace(/\D/g,'');
+  const wa=waRaw.length===10?'91'+waRaw:waRaw;
+    const address=buildAddress(a);
+    return `<article class="ad-card" data-ad-id="${esc(a.id)}">
+      <div class="ad-mini">${adMarkup(a)}</div>
+      <div class="ad-perf"></div>
+      <div class="ad-info">
+        <div class="ad-name">${esc(a.businessName)}</div>
+        <div class="ad-category">${esc(cat)}</div>
+        <div class="ad-id">${esc(a.adId||'Adspool Ad')}</div>
+        <div class="ad-actions">
+          ${a.adType==='informational'
+            ? `${phone?`<a class="icon-action primary" onclick="trackAndContinue('${esc(a.id)}','call_click')" href="tel:${esc(phone)}" aria-label="Call ${esc(a.businessName||'business')}" title="Call"><span class="material-symbols-rounded">call</span><span>Call</span></a>`:''}${wa?`<a class="icon-action" target="_blank" rel="noopener noreferrer" onclick="trackAndContinue('${esc(a.id)}','whatsapp_click')" href="${whatsappUrl(a)}" aria-label="WhatsApp" title="WhatsApp"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.52 3.48A11.87 11.87 0 0 0 12.08 0C5.54 0 .22 5.32.22 11.86c0 2.09.55 4.13 1.59 5.93L.13 24l6.35-1.66a11.9 11.9 0 0 0 5.59 1.39h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.15-3.42-8.39ZM12.08 21.7h-.01a9.85 9.85 0 0 1-5.02-1.37l-.36-.21-3.77.99 1.01-3.67-.23-.38a9.83 9.83 0 0 1-1.51-5.2c0-5.42 4.41-9.83 9.84-9.83 2.62 0 5.08 1.02 6.93 2.87a9.77 9.77 0 0 1 2.88 6.96c0 5.42-4.41 9.84-9.83 9.84Zm5.4-7.37c-.3-.15-1.77-.87-2.05-.97-.28-.1-.48-.15-.69.15-.2.3-.79.97-.97 1.17-.18.2-.36.23-.66.08-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.14.3-.36.46-.54.15-.18.2-.31.3-.51.1-.2.05-.38-.03-.53-.08-.15-.69-1.66-.95-2.27-.25-.59-.51-.51-.69-.52h-.59c-.2 0-.53.08-.81.38-.28.3-1.06 1.04-1.06 2.54 0 1.5 1.09 2.94 1.24 3.14.15.2 2.14 3.27 5.18 4.58.72.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.18-1.4-.08-.13-.28-.2-.58-.35Z"/></svg><span>WhatsApp</span></a>`:''}${address?`<a class="icon-action" target="_blank" rel="noopener noreferrer" onclick="trackAndContinue('${esc(a.id)}','directions_click')" href="${mapsUrl(address)}" aria-label="Directions" title="Directions"><span class="material-symbols-rounded">directions</span><span>Directions</span></a>`:''}${a.instagramId?`<a class="icon-action" target="_blank" rel="noopener noreferrer" onclick="trackAndContinue('${esc(a.id)}','instagram_click')" href="${instagramUrl(a.instagramId)}" aria-label="Instagram" title="Instagram"><span class="material-symbols-rounded">photo_camera</span><span>Instagram</span></a>`:''}<button class="icon-action" type="button" onclick="shareAd('${esc(a.id)}')" aria-label="Share" title="Share"><span class="material-symbols-rounded">share</span><span>Share</span></button>`
+            : `${phone?`<a class="icon-action primary" onclick="trackAndContinue('${esc(a.id)}','call_click')" href="tel:${esc(phone)}" aria-label="Call ${esc(a.businessName||'business')}" title="Call"><span class="material-symbols-rounded">call</span><span>Call</span></a>`:''}${wa?`<a class="icon-action" target="_blank" rel="noopener noreferrer" onclick="trackAndContinue('${esc(a.id)}','whatsapp_click')" href="${whatsappUrl(a)}" aria-label="WhatsApp" title="WhatsApp"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.52 3.48A11.87 11.87 0 0 0 12.08 0C5.54 0 .22 5.32.22 11.86c0 2.09.55 4.13 1.59 5.93L.13 24l6.35-1.66a11.9 11.9 0 0 0 5.59 1.39h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.15-3.42-8.39ZM12.08 21.7h-.01a9.85 9.85 0 0 1-5.02-1.37l-.36-.21-3.77.99 1.01-3.67-.23-.38a9.83 9.83 0 0 1-1.51-5.2c0-5.42 4.41-9.83 9.84-9.83 2.62 0 5.08 1.02 6.93 2.87a9.77 9.77 0 0 1 2.88 6.96c0 5.42-4.41 9.84-9.83 9.84Zm5.4-7.37c-.3-.15-1.77-.87-2.05-.97-.28-.1-.48-.15-.69.15-.2.3-.79.97-.97 1.17-.18.2-.36.23-.66.08-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.14.3-.36.46-.54.15-.18.2-.31.3-.51.1-.2.05-.38-.03-.53-.08-.15-.69-1.66-.95-2.27-.25-.59-.51-.51-.69-.52h-.59c-.2 0-.53.08-.81.38-.28.3-1.06 1.04-1.06 2.54 0 1.5 1.09 2.94 1.24 3.14.15.2 2.14 3.27 5.18 4.58.72.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.18-1.4-.08-.13-.28-.2-.58-.35Z"/></svg><span>WhatsApp</span></a>`:''}${address?`<a class="icon-action" target="_blank" rel="noopener noreferrer" onclick="trackAndContinue('${esc(a.id)}','directions_click')" href="${mapsUrl(address)}" aria-label="Directions" title="Directions"><span class="material-symbols-rounded">directions</span><span>Directions</span></a>`:''}${a.instagramId?`<a class="icon-action" target="_blank" rel="noopener noreferrer" onclick="trackAndContinue('${esc(a.id)}','instagram_click')" href="${instagramUrl(a.instagramId)}" aria-label="Instagram" title="Instagram"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Zm0 2A2.5 2.5 0 1 0 14.5 12 2.5 2.5 0 0 0 12 9.5ZM17.5 6A1.25 1.25 0 1 1 16.25 7.25 1.25 1.25 0 0 1 17.5 6Z"/></svg><span>Instagram</span></a>`:''}<button class="icon-action" type="button" onclick="shareAd('${esc(a.id)}')" aria-label="Share" title="Share"><span class="material-symbols-rounded">share</span><span>Share</span></button>`}
+        </div>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+
+/* Robust card interaction for desktop + mobile. Action buttons remain independent. */
+
+
+
+async function trackAdEvent(adId,eventType){
+  if(!adId||!eventType)return;
+  try{
+    await supabaseClient.from('ad_events').insert({
+      ad_id:adId,
+      event_type:eventType,
+      page_url:window.location.href
+    });
+  }catch(e){
+    // Analytics must never interrupt the visitor's action.
+    console.debug('Ad event tracking unavailable:',e?.message||e);
+  }
+}
+function trackAndContinue(adId,eventType){
+  trackAdEvent(adId,eventType);
+}
+function adspoolAdUrl(ad){
+  const id=ad?.id||ad?.adId||'';
+  if(!id)return 'https://adspool.in/';
+  // Canonical deep link. Opening this URL on desktop or mobile loads
+  // Adspool and automatically opens the matching advertisement popup.
+  return 'https://adspool.in/?ad='+encodeURIComponent(String(id))+'#categories';
+}
+function whatsappUrl(ad){
+  const raw=(ad?.whatsapp||'').replace(/\D/g,'');
+  if(!raw)return '';
+  const number=raw.length===10?'91'+raw:raw;
+  const link=adspoolAdUrl(ad);
+  const business=(ad?.businessName||'Business').trim();
+  const message=`Hi, I found your ad on Adspool.\n${business}\nAdspool Ad: ${link}\nI'm interested in your service. Please contact me.`;
+  return `https://wa.me/${encodeURIComponent(number)}?text=${encodeURIComponent(message)}`;
+}
+function shareAd(id){
+  trackAdEvent(id,'share_click');
+  const a=activeAds().find(x=>x.id===id);if(!a)return;
+  // Always share the production Adspool deep link, even when testing the HTML locally.
+  // This prevents a file:/// or localhost URL from being shared.
+  const link=adspoolAdUrl(a);
+  const message=`${a.businessName} on Adspool: ${link}`;
+  if(navigator.share)navigator.share({title:`${a.businessName} on Adspool`,text:message,url:link}).catch(()=>{});
+  else if(navigator.clipboard)navigator.clipboard.writeText(message).then(()=>showToast('Link copied to clipboard.')).catch(()=>prompt('Copy this Adspool link:',message));
+  else prompt('Copy this Adspool link:',message);
+}
+
+function viewAd(id){
+  const a=activeAds().find(x=>String(x.id)===String(id));
+  if(!a)return;
+  viewAdByObject(a);
+}
+
+// Open a specific advertisement object. This is the function used by
+// shared links such as https://adspool.in/?ad=<id>#categories.
+// It deliberately does not depend on the homepage card/list rendering.
+function viewAdByObject(a){
+  if(!a)return;
+  trackAdEvent(a.id,'view');
+
+  const cat=state.categories.find(c=>c.id===a.categoryId)?.name||'Other';
+  const phone=(a.phone||'').replace(/\s/g,'');
+  const waRaw=(a.whatsapp||'').replace(/\D/g,'');
+  const wa=waRaw.length===10?'91'+waRaw:waRaw;
+  document.getElementById('modalTitle').textContent=a.businessName||'Advertisement';
+  const modalMeta=a.adType==='informational'
+    ? `<div style="margin-top:15px;font-size:13px"><b>Category:</b> ${esc(cat)}</div>`
+    : `<div style="margin-top:15px;font-size:13px"><b>Category:</b> ${esc(cat)}<br><b>Business:</b> ${esc(a.businessName)}<br><b>Location:</b> ${esc(buildAddress(a))}</div>`;
+  document.getElementById('modalContent').innerHTML=`
+    ${adMarkup(a)}
+    ${modalMeta}
+    <div class="ad-actions" style="margin-top:15px">
+      ${phone?`<a class="icon-action primary" href="tel:${esc(phone)}" aria-label="Call business" title="Call"><span class="material-symbols-rounded">call</span><span>Call</span></a>`:''}
+      ${wa?`<a class="icon-action" target="_blank" rel="noopener noreferrer" onclick="trackAndContinue('${esc(a.id)}','whatsapp_click')" href="${whatsappUrl(a)}" aria-label="WhatsApp" title="WhatsApp"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.52 3.48A11.87 11.87 0 0 0 12.08 0C5.54 0 .22 5.32.22 11.86c0 2.09.55 4.13 1.59 5.93L.13 24l6.35-1.66a11.9 11.9 0 0 0 5.59 1.39h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.15-3.42-8.39ZM12.08 21.7h-.01a9.85 9.85 0 0 1-5.02-1.37l-.36-.21-3.77.99 1.01-3.67-.23-.38a9.83 9.83 0 0 1-1.51-5.2c0-5.42 4.41-9.83 9.84-9.83 2.62 0 5.08 1.02 6.93 2.87a9.77 9.77 0 0 1 2.88 6.96c0 5.42-4.41 9.84-9.83 9.84Zm5.4-7.37c-.3-.15-1.77-.87-2.05-.97-.28-.1-.48-.15-.69.15-.2.3-.79.97-.97 1.17-.18.2-.36.23-.66.08-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.14.3-.36.46-.54.15-.18.2-.31.3-.51.1-.2.05-.38-.03-.53-.08-.15-.69-1.66-.95-2.27-.25-.59-.51-.51-.69-.52h-.59c-.2 0-.53.08-.81.38-.28.3-1.06 1.04-1.06 2.54 0 1.5 1.09 2.94 1.24 3.14.15.2 2.14 3.27 5.18 4.58.72.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.18-1.4-.08-.13-.28-.2-.58-.35Z"/></svg><span>WhatsApp</span></a>`:''}
+      <a class="icon-action" target="_blank" rel="noopener noreferrer" onclick="trackAndContinue('${esc(a.id)}','directions_click')" href="${mapsUrl(buildAddress(a))}" aria-label="Directions" title="Directions"><span class="material-symbols-rounded">directions</span><span>Directions</span></a>
+      ${a.instagramId?`<a class="icon-action" target="_blank" rel="noopener noreferrer" onclick="trackAndContinue('${esc(a.id)}','instagram_click')" href="${instagramUrl(a.instagramId)}" aria-label="Instagram" title="Instagram"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Zm0 2A2.5 2.5 0 1 0 14.5 12 2.5 2.5 0 0 0 12 9.5ZM17.5 6A1.25 1.25 0 1 1 16.25 7.25 1.25 1.25 0 0 1 17.5 6Z"/></svg><span>Instagram</span></a>`:''}
+      <button class="icon-action" type="button" onclick="shareAd('${esc(a.id)}')" aria-label="Share" title="Share"><span class="material-symbols-rounded">share</span><span>Share</span></button>
+    </div>
+    <div class="modal-note">Adspool displays advertisements that are currently active in the Adspool system.</div>`;
+  document.getElementById('modalBackdrop').classList.add('show');
+}
+
+function showAdsInfo(){
+  document.getElementById('modalTitle').textContent='About advertisements';
+  document.getElementById('modalContent').innerHTML=`
+    <div class="ads-info-content">
+      <p>Advertisements on Adspool are submitted by the respective advertisers, businesses, or individuals.</p>
+      <p>Adspool provides the platform for advertising and discovery and does not independently verify every claim, offer, price, product, or service shown in an advertisement.</p>
+      <p>Please contact and verify details directly with the advertiser before making a payment, appointment, purchase, or other commitment.</p>
+    </div>`;
+  document.getElementById('modalBackdrop').classList.add('show');
+}
+
+function closeModal(){document.getElementById('modalBackdrop').classList.remove('show')}
+
+
+/* Cheap local re-render (no network) to keep countdowns/status fresh. */
+setInterval(()=>{
+  renderCategories();
+  renderAds();
+  updateStats();
+},30000);
+
+/* Network refresh: pulls fresh data from Supabase. This is what counts
+   against egress, so we poll far less often, only while the tab is
+   actually visible, and we never let two refreshes overlap or fire
+   back-to-back within a short window (e.g. focus right after a poll). */
+const LOAD_INTERVAL_MS = 3 * 60 * 1000; // 3 minutes instead of 30 seconds
+const MIN_GAP_MS = 30 * 1000; // don't reload more than once per 30s no matter the trigger
+let lastLoadAt = 0;
+let loadInFlight = false;
+
+async function safeReload(reason){
+  const now = Date.now();
+  if (loadInFlight) return;
+  if (now - lastLoadAt < MIN_GAP_MS) return;
+  if (document.visibilityState !== 'visible') return;
+  loadInFlight = true;
+  lastLoadAt = now;
+  try{
+    await load();
+  }finally{
+    loadInFlight = false;
+  }
+}
+
+setInterval(()=>safeReload('interval'), LOAD_INTERVAL_MS);
+window.addEventListener('focus', ()=>safeReload('focus'));
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState==='visible') safeReload('visibilitychange');
+});
+
+/* ================================================================
+   SHARED AD DEEP LINK
+   URL format: https://adspool.in/?ad=<SUPABASE-AD-UUID>#categories
+   This path intentionally fetches the exact ad FIRST instead of waiting
+   for the normal homepage listing load. That makes links from WhatsApp,
+   Windows Share, Android/iOS share and copied links reliably open the
+   exact advertisement popup.
+================================================================ */
+let sharedAdBootStarted=false;
+function getSharedAdId(){
+  try{
+    const u=new URL(window.location.href);
+    const fromQuery=u.searchParams.get('ad');
+    if(fromQuery)return fromQuery.trim();
+    // Also support links where a platform preserves only the hash.
+    const hash=(u.hash||'').replace(/^#/,'');
+    if(hash.startsWith('ad='))return decodeURIComponent(hash.slice(3)).trim();
+    const m=hash.match(/(?:^|&)ad=([^&]+)/);
+    return m?decodeURIComponent(m[1]).trim():'';
+  }catch(e){return '';}
+}
+
+const SHARED_AD_SELECT='id,ad_id,business_name,description,category_id,ad_type,services,address_line,area,city,state,pin,phone,whatsapp,instagram_id,badge,background_color,text_color,template_id,creative_image_url,add_adspool_watermark,scroll_banner_enabled,scroll_banner_text,status,start_at,end_at,created_at,updated_at';
+
+async function fetchSharedAd(id){
+  if(!id)return null;
+  // Normal links use the UUID primary key.
+  try{
+    const byId=await supabaseClient.from('ads').select(SHARED_AD_SELECT).eq('id',id).maybeSingle();
+    if(!byId.error && byId.data)return byId.data;
+  }catch(e){console.warn('Shared ad id lookup failed:',e?.message||e)}
+
+  // Compatibility: also accept an Adspool public ad_id if an older link
+  // was created using that identifier instead of the UUID.
+  try{
+    const byAdId=await supabaseClient.from('ads').select(SHARED_AD_SELECT).eq('ad_id',id).maybeSingle();
+    if(!byAdId.error && byAdId.data)return byAdId.data;
+  }catch(e){console.warn('Shared ad_id lookup failed:',e?.message||e)}
+  return null;
+}
+
+async function ensureSharedAdCategory(ad){
+  if(!ad)return;
+  if(state.categories.some(c=>String(c.id)===String(ad.categoryId)))return;
+  try{
+    const {data}=await supabaseClient.from('categories').select('id,name,active').eq('id',ad.categoryId).maybeSingle();
+    if(data)state.categories.push(mapCategoryRow(data));
+  }catch(e){console.warn('Shared ad category lookup failed:',e?.message||e)}
+}
+
+async function bootSharedAd(){
+  if(sharedAdBootStarted)return;
+  const id=getSharedAdId();
+  if(!id)return;
+  sharedAdBootStarted=true;
+
+  // Give the browser a chance to finish constructing the modal before
+  // inserting its content. This also works when the script is loaded in
+  // the <head> on a static host.
+  if(document.readyState==='loading'){
+    await new Promise(resolve=>document.addEventListener('DOMContentLoaded',resolve,{once:true}));
+  }
+
+  for(let attempt=0;attempt<10;attempt++){
+    try{
+      // 1) Exact database lookup first. Do NOT wait for the homepage load.
+      let row=await fetchSharedAd(id);
+
+      // 2) If RLS/network is temporarily unavailable, use the already
+      // loaded public listing as a fallback.
+      if(!row){
+        const found=state.ads.find(a=>String(a.id)===String(id)||String(a.adId)===String(id));
+        if(found){
+          await ensureSharedAdCategory(found);
+          viewAdByObject(found);
+          return;
+        }
+      }
+
+      if(row){
+        const ad=mapAdRow(row);
+        await ensureSharedAdCategory(ad);
+        viewAdByObject(ad);
+        return;
+      }
+    }catch(e){
+      console.warn('Shared ad boot retry:',e?.message||e);
+    }
+
+    // If the exact lookup did not succeed, let the normal page load finish
+    // and try the listing cache again on the next pass.
+    if(attempt===0){
+      try{ await load(); }catch(e){ console.warn('Homepage load during shared boot failed:',e?.message||e); }
+    }
+    await new Promise(r=>setTimeout(r,500));
+  }
+
+  console.warn('Could not open shared Adspool ad:',id);
+}
+
+// Start shared-ad opening immediately; it is independent of the normal
+// listing load. The normal load still runs for the rest of the homepage.
+bootSharedAd();
+load();
+window.addEventListener('load',()=>bootSharedAd());
+
+/* Search stays fixed directly below the white header. Categories remain directly below it. */
+(function initFixedSearch(){
+  const bar=document.getElementById('stickySearchbar');
+  const spacer=document.getElementById('stickySpacer');
+  const topbar=document.querySelector('.topbar');
+  if(!bar)return;
+  function sync(){
+    const headerH=topbar?topbar.offsetHeight:76;
+    bar.style.top=headerH+'px';
+    if(spacer)spacer.style.height=bar.offsetHeight+'px';
+  }
+  window.addEventListener('resize',sync);
+  sync();
+})();
+</script>
+</body>
+</html>
