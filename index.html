@@ -262,6 +262,12 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
 .footer-tagline{font-size:12.5px;color:#9db8d1;margin-top:10px;max-width:260px;line-height:1.6}
 .footer-links{display:flex;gap:22px;font-size:13px;font-weight:600;color:#d8e6f0}
 .footer-links a:hover{color:var(--gold)}
+.ads-info-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--forest);text-decoration:none;white-space:nowrap}
+.ads-info-link:hover{color:var(--forest-deep);text-decoration:underline}
+.ads-info-link .info-dot{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:1px solid var(--forest);border-radius:50%;font-family:var(--mono);font-size:11px;font-weight:800;line-height:1}
+.ads-info-content{font-size:14px;line-height:1.7;color:var(--text)}
+.ads-info-content p{margin:0 0 12px}
+.ads-info-content p:last-child{margin-bottom:0}
 .footer-bottom{max-width:1240px;margin:26px auto 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);font-family:var(--mono);font-size:11px;color:#7d97b3}
 .footer-disclaimer{
   flex:1 1 100%;
@@ -412,7 +418,12 @@ h1 em{font-style:italic;color:var(--forest);font-weight:500}
       <h2>Featured ads</h2>
       <p>Browse advertisements that are currently active.</p>
     </div>
-    <a class="link" href="#ads" onclick="viewAllAds(event)">View all ads →</a>
+    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+      <button class="ads-info-link" type="button" onclick="showAdsInfo()" aria-label="About Adspool advertisements" title="About advertisements">
+        <span class="info-dot" aria-hidden="true">i</span> About ads
+      </button>
+      <a class="link" href="#ads" onclick="viewAllAds(event)">View all ads →</a>
+    </div>
   </div>
   <div id="categories" class="chips" style="display:none"></div>
   <div id="adsGrid" class="ads-grid"></div>
@@ -1100,6 +1111,17 @@ function viewAdByObject(a){
       <button class="icon-action" type="button" onclick="shareAd('${esc(a.id)}')" aria-label="Share" title="Share"><span class="material-symbols-rounded">share</span><span>Share</span></button>
     </div>
     <div class="modal-note">Adspool displays advertisements that are currently active in the Adspool system.</div>`;
+  document.getElementById('modalBackdrop').classList.add('show');
+}
+
+function showAdsInfo(){
+  document.getElementById('modalTitle').textContent='About advertisements';
+  document.getElementById('modalContent').innerHTML=`
+    <div class="ads-info-content">
+      <p>Advertisements on Adspool are submitted by the respective advertisers, businesses, or individuals.</p>
+      <p>Adspool provides the platform for advertising and discovery and does not independently verify every claim, offer, price, product, or service shown in an advertisement.</p>
+      <p>Please contact and verify details directly with the advertiser before making a payment, appointment, purchase, or other commitment.</p>
+    </div>`;
   document.getElementById('modalBackdrop').classList.add('show');
 }
 
